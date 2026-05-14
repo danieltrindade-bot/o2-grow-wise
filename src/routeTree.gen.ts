@@ -14,6 +14,7 @@ import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculadoraOxyRouteImport } from './routes/calculadora.oxy'
+import { Route as CalculadoraCoordenadorRouteImport } from './routes/calculadora.coordenador'
 import { Route as CalculadoraCfoRouteImport } from './routes/calculadora.cfo'
 import { Route as CalculadoraBpoRouteImport } from './routes/calculadora.bpo'
 import { Route as CalculadoraAssessoriaRouteImport } from './routes/calculadora.assessoria'
@@ -43,6 +44,11 @@ const CalculadoraOxyRoute = CalculadoraOxyRouteImport.update({
   path: '/calculadora/oxy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalculadoraCoordenadorRoute = CalculadoraCoordenadorRouteImport.update({
+  id: '/calculadora/coordenador',
+  path: '/calculadora/coordenador',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalculadoraCfoRoute = CalculadoraCfoRouteImport.update({
   id: '/calculadora/cfo',
   path: '/calculadora/cfo',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
+  '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
+  '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
+  '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/calculadora/assessoria'
     | '/calculadora/bpo'
     | '/calculadora/cfo'
+    | '/calculadora/coordenador'
     | '/calculadora/oxy'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/calculadora/assessoria'
     | '/calculadora/bpo'
     | '/calculadora/cfo'
+    | '/calculadora/coordenador'
     | '/calculadora/oxy'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/calculadora/assessoria'
     | '/calculadora/bpo'
     | '/calculadora/cfo'
+    | '/calculadora/coordenador'
     | '/calculadora/oxy'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   CalculadoraAssessoriaRoute: typeof CalculadoraAssessoriaRoute
   CalculadoraBpoRoute: typeof CalculadoraBpoRoute
   CalculadoraCfoRoute: typeof CalculadoraCfoRoute
+  CalculadoraCoordenadorRoute: typeof CalculadoraCoordenadorRoute
   CalculadoraOxyRoute: typeof CalculadoraOxyRoute
 }
 
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalculadoraOxyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calculadora/coordenador': {
+      id: '/calculadora/coordenador'
+      path: '/calculadora/coordenador'
+      fullPath: '/calculadora/coordenador'
+      preLoaderRoute: typeof CalculadoraCoordenadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calculadora/cfo': {
       id: '/calculadora/cfo'
       path: '/calculadora/cfo'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalculadoraAssessoriaRoute: CalculadoraAssessoriaRoute,
   CalculadoraBpoRoute: CalculadoraBpoRoute,
   CalculadoraCfoRoute: CalculadoraCfoRoute,
+  CalculadoraCoordenadorRoute: CalculadoraCoordenadorRoute,
   CalculadoraOxyRoute: CalculadoraOxyRoute,
 }
 export const routeTree = rootRouteImport
