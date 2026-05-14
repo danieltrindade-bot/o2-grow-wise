@@ -13,6 +13,7 @@ import { Route as ServicosRouteImport } from './routes/servicos'
 import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CalculadoraBpoRouteImport } from './routes/calculadora.bpo'
 
 const ServicosRoute = ServicosRouteImport.update({
   id: '/servicos',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalculadoraBpoRoute = CalculadoraBpoRouteImport.update({
+  id: '/calculadora/bpo',
+  path: '/calculadora/bpo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
+  '/calculadora/bpo': typeof CalculadoraBpoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
+  '/calculadora/bpo': typeof CalculadoraBpoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,25 @@ export interface FileRoutesById {
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
+  '/calculadora/bpo': typeof CalculadoraBpoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/diagnostico' | '/resultados' | '/servicos'
+  fullPaths:
+    | '/'
+    | '/diagnostico'
+    | '/resultados'
+    | '/servicos'
+    | '/calculadora/bpo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/diagnostico' | '/resultados' | '/servicos'
-  id: '__root__' | '/' | '/diagnostico' | '/resultados' | '/servicos'
+  to: '/' | '/diagnostico' | '/resultados' | '/servicos' | '/calculadora/bpo'
+  id:
+    | '__root__'
+    | '/'
+    | '/diagnostico'
+    | '/resultados'
+    | '/servicos'
+    | '/calculadora/bpo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +87,7 @@ export interface RootRouteChildren {
   DiagnosticoRoute: typeof DiagnosticoRoute
   ResultadosRoute: typeof ResultadosRoute
   ServicosRoute: typeof ServicosRoute
+  CalculadoraBpoRoute: typeof CalculadoraBpoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calculadora/bpo': {
+      id: '/calculadora/bpo'
+      path: '/calculadora/bpo'
+      fullPath: '/calculadora/bpo'
+      preLoaderRoute: typeof CalculadoraBpoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +135,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiagnosticoRoute: DiagnosticoRoute,
   ResultadosRoute: ResultadosRoute,
   ServicosRoute: ServicosRoute,
+  CalculadoraBpoRoute: CalculadoraBpoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
