@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculadoraOxyRouteImport } from './routes/calculadora.oxy'
 import { Route as CalculadoraCfoRouteImport } from './routes/calculadora.cfo'
 import { Route as CalculadoraBpoRouteImport } from './routes/calculadora.bpo'
+import { Route as CalculadoraAssessoriaRouteImport } from './routes/calculadora.assessoria'
 
 const ServicosRoute = ServicosRouteImport.update({
   id: '/servicos',
@@ -52,12 +53,18 @@ const CalculadoraBpoRoute = CalculadoraBpoRouteImport.update({
   path: '/calculadora/bpo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalculadoraAssessoriaRoute = CalculadoraAssessoriaRouteImport.update({
+  id: '/calculadora/assessoria',
+  path: '/calculadora/assessoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
+  '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
+  '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
+  '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/resultados'
     | '/servicos'
+    | '/calculadora/assessoria'
     | '/calculadora/bpo'
     | '/calculadora/cfo'
     | '/calculadora/oxy'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/resultados'
     | '/servicos'
+    | '/calculadora/assessoria'
     | '/calculadora/bpo'
     | '/calculadora/cfo'
     | '/calculadora/oxy'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/resultados'
     | '/servicos'
+    | '/calculadora/assessoria'
     | '/calculadora/bpo'
     | '/calculadora/cfo'
     | '/calculadora/oxy'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   DiagnosticoRoute: typeof DiagnosticoRoute
   ResultadosRoute: typeof ResultadosRoute
   ServicosRoute: typeof ServicosRoute
+  CalculadoraAssessoriaRoute: typeof CalculadoraAssessoriaRoute
   CalculadoraBpoRoute: typeof CalculadoraBpoRoute
   CalculadoraCfoRoute: typeof CalculadoraCfoRoute
   CalculadoraOxyRoute: typeof CalculadoraOxyRoute
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalculadoraBpoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calculadora/assessoria': {
+      id: '/calculadora/assessoria'
+      path: '/calculadora/assessoria'
+      fullPath: '/calculadora/assessoria'
+      preLoaderRoute: typeof CalculadoraAssessoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiagnosticoRoute: DiagnosticoRoute,
   ResultadosRoute: ResultadosRoute,
   ServicosRoute: ServicosRoute,
+  CalculadoraAssessoriaRoute: CalculadoraAssessoriaRoute,
   CalculadoraBpoRoute: CalculadoraBpoRoute,
   CalculadoraCfoRoute: CalculadoraCfoRoute,
   CalculadoraOxyRoute: CalculadoraOxyRoute,
