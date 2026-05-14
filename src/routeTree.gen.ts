@@ -9,38 +9,193 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ServicosRouteImport } from './routes/servicos'
+import { Route as ResultadosRouteImport } from './routes/resultados'
+import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as CalculadoraOxyRouteImport } from './routes/calculadora.oxy'
+import { Route as CalculadoraCoordenadorRouteImport } from './routes/calculadora.coordenador'
+import { Route as CalculadoraCfoRouteImport } from './routes/calculadora.cfo'
+import { Route as CalculadoraBpoRouteImport } from './routes/calculadora.bpo'
+import { Route as CalculadoraAssessoriaRouteImport } from './routes/calculadora.assessoria'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
+const ServicosRoute = ServicosRouteImport.update({
+  id: '/servicos',
+  path: '/servicos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultadosRoute = ResultadosRouteImport.update({
+  id: '/resultados',
+  path: '/resultados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiagnosticoRoute = DiagnosticoRouteImport.update({
+  id: '/diagnostico',
+  path: '/diagnostico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculadoraOxyRoute = CalculadoraOxyRouteImport.update({
+  id: '/calculadora/oxy',
+  path: '/calculadora/oxy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculadoraCoordenadorRoute = CalculadoraCoordenadorRouteImport.update({
+  id: '/calculadora/coordenador',
+  path: '/calculadora/coordenador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculadoraCfoRoute = CalculadoraCfoRouteImport.update({
+  id: '/calculadora/cfo',
+  path: '/calculadora/cfo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculadoraBpoRoute = CalculadoraBpoRouteImport.update({
+  id: '/calculadora/bpo',
+  path: '/calculadora/bpo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculadoraAssessoriaRoute = CalculadoraAssessoriaRouteImport.update({
+  id: '/calculadora/assessoria',
+  path: '/calculadora/assessoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/resultados': typeof ResultadosRoute
+  '/servicos': typeof ServicosRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
+  '/calculadora/bpo': typeof CalculadoraBpoRoute
+  '/calculadora/cfo': typeof CalculadoraCfoRoute
+  '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
+  '/calculadora/oxy': typeof CalculadoraOxyRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/resultados': typeof ResultadosRoute
+  '/servicos': typeof ServicosRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
+  '/calculadora/bpo': typeof CalculadoraBpoRoute
+  '/calculadora/cfo': typeof CalculadoraCfoRoute
+  '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
+  '/calculadora/oxy': typeof CalculadoraOxyRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/resultados': typeof ResultadosRoute
+  '/servicos': typeof ServicosRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
+  '/calculadora/bpo': typeof CalculadoraBpoRoute
+  '/calculadora/cfo': typeof CalculadoraCfoRoute
+  '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
+  '/calculadora/oxy': typeof CalculadoraOxyRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/diagnostico'
+    | '/resultados'
+    | '/servicos'
+    | '/admin/login'
+    | '/calculadora/assessoria'
+    | '/calculadora/bpo'
+    | '/calculadora/cfo'
+    | '/calculadora/coordenador'
+    | '/calculadora/oxy'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/diagnostico'
+    | '/resultados'
+    | '/servicos'
+    | '/admin/login'
+    | '/calculadora/assessoria'
+    | '/calculadora/bpo'
+    | '/calculadora/cfo'
+    | '/calculadora/coordenador'
+    | '/calculadora/oxy'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/diagnostico'
+    | '/resultados'
+    | '/servicos'
+    | '/admin/login'
+    | '/calculadora/assessoria'
+    | '/calculadora/bpo'
+    | '/calculadora/cfo'
+    | '/calculadora/coordenador'
+    | '/calculadora/oxy'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DiagnosticoRoute: typeof DiagnosticoRoute
+  ResultadosRoute: typeof ResultadosRoute
+  ServicosRoute: typeof ServicosRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  CalculadoraAssessoriaRoute: typeof CalculadoraAssessoriaRoute
+  CalculadoraBpoRoute: typeof CalculadoraBpoRoute
+  CalculadoraCfoRoute: typeof CalculadoraCfoRoute
+  CalculadoraCoordenadorRoute: typeof CalculadoraCoordenadorRoute
+  CalculadoraOxyRoute: typeof CalculadoraOxyRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/servicos': {
+      id: '/servicos'
+      path: '/servicos'
+      fullPath: '/servicos'
+      preLoaderRoute: typeof ServicosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resultados': {
+      id: '/resultados'
+      path: '/resultados'
+      fullPath: '/resultados'
+      preLoaderRoute: typeof ResultadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diagnostico': {
+      id: '/diagnostico'
+      path: '/diagnostico'
+      fullPath: '/diagnostico'
+      preLoaderRoute: typeof DiagnosticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +203,71 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculadora/oxy': {
+      id: '/calculadora/oxy'
+      path: '/calculadora/oxy'
+      fullPath: '/calculadora/oxy'
+      preLoaderRoute: typeof CalculadoraOxyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculadora/coordenador': {
+      id: '/calculadora/coordenador'
+      path: '/calculadora/coordenador'
+      fullPath: '/calculadora/coordenador'
+      preLoaderRoute: typeof CalculadoraCoordenadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculadora/cfo': {
+      id: '/calculadora/cfo'
+      path: '/calculadora/cfo'
+      fullPath: '/calculadora/cfo'
+      preLoaderRoute: typeof CalculadoraCfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculadora/bpo': {
+      id: '/calculadora/bpo'
+      path: '/calculadora/bpo'
+      fullPath: '/calculadora/bpo'
+      preLoaderRoute: typeof CalculadoraBpoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculadora/assessoria': {
+      id: '/calculadora/assessoria'
+      path: '/calculadora/assessoria'
+      fullPath: '/calculadora/assessoria'
+      preLoaderRoute: typeof CalculadoraAssessoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DiagnosticoRoute: DiagnosticoRoute,
+  ResultadosRoute: ResultadosRoute,
+  ServicosRoute: ServicosRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  CalculadoraAssessoriaRoute: CalculadoraAssessoriaRoute,
+  CalculadoraBpoRoute: CalculadoraBpoRoute,
+  CalculadoraCfoRoute: CalculadoraCfoRoute,
+  CalculadoraCoordenadorRoute: CalculadoraCoordenadorRoute,
+  CalculadoraOxyRoute: CalculadoraOxyRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
