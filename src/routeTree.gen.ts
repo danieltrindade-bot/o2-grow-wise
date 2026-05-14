@@ -13,6 +13,7 @@ import { Route as ServicosRouteImport } from './routes/servicos'
 import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CalculadoraCfoRouteImport } from './routes/calculadora.cfo'
 import { Route as CalculadoraBpoRouteImport } from './routes/calculadora.bpo'
 
 const ServicosRoute = ServicosRouteImport.update({
@@ -35,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalculadoraCfoRoute = CalculadoraCfoRouteImport.update({
+  id: '/calculadora/cfo',
+  path: '/calculadora/cfo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalculadoraBpoRoute = CalculadoraBpoRouteImport.update({
   id: '/calculadora/bpo',
   path: '/calculadora/bpo',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
+  '/calculadora/cfo': typeof CalculadoraCfoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
+  '/calculadora/cfo': typeof CalculadoraCfoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,6 +70,7 @@ export interface FileRoutesById {
   '/resultados': typeof ResultadosRoute
   '/servicos': typeof ServicosRoute
   '/calculadora/bpo': typeof CalculadoraBpoRoute
+  '/calculadora/cfo': typeof CalculadoraCfoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,8 +80,15 @@ export interface FileRouteTypes {
     | '/resultados'
     | '/servicos'
     | '/calculadora/bpo'
+    | '/calculadora/cfo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/diagnostico' | '/resultados' | '/servicos' | '/calculadora/bpo'
+  to:
+    | '/'
+    | '/diagnostico'
+    | '/resultados'
+    | '/servicos'
+    | '/calculadora/bpo'
+    | '/calculadora/cfo'
   id:
     | '__root__'
     | '/'
@@ -80,6 +96,7 @@ export interface FileRouteTypes {
     | '/resultados'
     | '/servicos'
     | '/calculadora/bpo'
+    | '/calculadora/cfo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -88,6 +105,7 @@ export interface RootRouteChildren {
   ResultadosRoute: typeof ResultadosRoute
   ServicosRoute: typeof ServicosRoute
   CalculadoraBpoRoute: typeof CalculadoraBpoRoute
+  CalculadoraCfoRoute: typeof CalculadoraCfoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -120,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calculadora/cfo': {
+      id: '/calculadora/cfo'
+      path: '/calculadora/cfo'
+      fullPath: '/calculadora/cfo'
+      preLoaderRoute: typeof CalculadoraCfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calculadora/bpo': {
       id: '/calculadora/bpo'
       path: '/calculadora/bpo'
@@ -136,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResultadosRoute: ResultadosRoute,
   ServicosRoute: ServicosRoute,
   CalculadoraBpoRoute: CalculadoraBpoRoute,
+  CalculadoraCfoRoute: CalculadoraCfoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
