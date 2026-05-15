@@ -43,6 +43,7 @@ function formatDateBR(iso: string): string {
 function ResultadosPage() {
   const { state, goTo, reset } = useDiagnostic();
   const navigate = useNavigate();
+  const { data: config, isLoading, error, refetch } = useDiagnosticConfig();
 
   const hasData =
     state.companyName.trim().length > 0 &&
@@ -53,16 +54,25 @@ function ResultadosPage() {
   }, [hasData, navigate]);
 
   const grade = useMemo(() => calcGrade(state.overallScore), [state.overallScore]);
-  const maturity = useMemo(() => getMaturity(state.overallScore), [state.overallScore]);
-  const costRows = useMemo(
-    () => buildCostRows(state.answers, state.monthlyRevenue),
-    [state.answers, state.monthlyRevenue],
+  const maturity = useMemo(
+    () => getMaturity(state.overallScore, config?.maturity),
+    [state.overallScore, config],
   );
-  const alerts = useMemo(() => buildAlerts(state.answers), [state.answers]);
-  const outcomes = useMemo(() => buildOutcomeRows(state.answers), [state.answers]);
+  const costRows = useMemo(
+    () => buildCostRows(state.answers, state.monthlyRevenue, config?.costs),
+    [state.answers, state.monthlyRevenue, config],
+  );
+  const alerts = useMemo(
+    () => buildAlerts(state.answers, config?.questions),
+    [state.answers, config],
+  );
+  const outcomes = useMemo(
+    () => buildOutcomeRows(state.answers, config?.outcomes),
+    [state.answers, config],
+  );
   const recommendation = useMemo(
-    () => getRecommendation(state.overallScore, state.answers),
-    [state.overallScore, state.answers],
+    () => getRecommendation(state.overallScore, state.answers, config?.recommendations, config?.questions),
+    [state.overallScore, state.answers, config],
   );
 
   const handleEdit = () => {
@@ -72,6 +82,29 @@ function ResultadosPage() {
   const handleNew = () => {
     reset();
     navigate({ to: "/diagnostico" });
+  };
+
+  const handleExportPDF = () => {
+    const totalMin = costRows.reduce((s, r) => s + r.min, 0);
+    const totalMax = costRows.reduce((s, r) => s + r.max, 0);
+    const hasQuant = costRows.some((r) => !r.qualitative);
+    exportDiagnosticPDF({
+      companyName: state.companyName,
+      consultantName: state.consultantName,
+      date: formatDateBR(state.date),
+      grade,
+      maturityLabel: maturity.label,
+      maturityDescription: maturity.description,
+      costRows: costRows.map((r) => ({
+        label: r.label,
+        value: r.qualitative
+          ? "Estimar após diagnóstico completo"
+          : `${formatBRL(r.min)} — ${formatBRL(r.max)}`,
+      })),
+      costTotal: hasQuant ? `${formatBRL(totalMin)} — ${formatBRL(totalMax)}` : undefined,
+      outcomeRows: outcomes.map((o) => ({ current: o.current, future: o.future })),
+      recommendation: { service: recommendation.service, tagline: recommendation.tagline },
+    });
   };
 
   if (!hasData) return null;
