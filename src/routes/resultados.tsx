@@ -7,7 +7,11 @@ import {
   RefreshCw,
   Pencil,
   Sparkles,
+  Download,
 } from "lucide-react";
+import { exportDiagnosticPDF } from "@/lib/pdf-export";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { useCountUp } from "@/components/calc-ui";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import {
