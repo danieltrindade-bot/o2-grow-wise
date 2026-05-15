@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { exportCalculatorPDF } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/calculadora/cfo")({
   component: CalculadoraCFOPage,
