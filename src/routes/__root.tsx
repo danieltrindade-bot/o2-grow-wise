@@ -11,6 +11,8 @@ import {
 import appCss from "../styles.css?url";
 import { DiagnosticProvider } from "../context/DiagnosticContext";
 import { AuthProvider } from "../context/AuthContext";
+import { SiteHeader, ScrollToTop } from "../components/SiteHeader";
+import { useLocation } from "@tanstack/react-router";
 
 function NotFoundComponent() {
   return (
@@ -111,12 +113,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const loc = useLocation();
+  const hideHeader = loc.pathname.startsWith("/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <DiagnosticProvider>
-          <Outlet />
+          <ScrollToTop />
+          {!hideHeader && <SiteHeader />}
+          <div className="animate-fade-in">
+            <Outlet />
+          </div>
         </DiagnosticProvider>
       </AuthProvider>
     </QueryClientProvider>

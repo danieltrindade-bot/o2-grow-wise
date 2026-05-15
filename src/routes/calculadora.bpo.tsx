@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
+import { exportCalculatorPDF, formatBRL as fmtBRL } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/calculadora/bpo")({
   component: CalculadoraBPOPage,
@@ -303,8 +304,27 @@ function CalculadoraBPOPage() {
                 </p>
               </div>
 
-              <Button className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90">
-                <Download className="mr-2 h-4 w-4" /> Exportar Proposta
+              <Button
+                onClick={() =>
+                  exportCalculatorPDF({
+                    service: "BPO Financeiro",
+                    clientName: clientName || state.companyName,
+                    rows: [
+                      ["Pacote", pacote.name],
+                      ["Tier", tier.label],
+                      ["Lançamentos/mês", String(lancamentosMensais)],
+                      ["Valor mensal BPO", fmtBRL(valorMensalBPO)],
+                      ["Setup mensal (12x)", fmtBRL(valorMensalSetup)],
+                      ["Subtotal mensal", fmtBRL(valorMensalTotal)],
+                      ["Desconto", `${discount.percent}%`],
+                    ],
+                    finalLabel: "Valor final mensal",
+                    finalValue: fmtBRL(valorComDesconto),
+                  })
+                }
+                className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Download className="mr-2 h-4 w-4" /> Exportar PDF
               </Button>
             </div>
           </aside>
