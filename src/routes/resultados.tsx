@@ -13,6 +13,8 @@ import { exportDiagnosticPDF } from "@/lib/pdf-export";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useCountUp } from "@/components/calc-ui";
 import { useDiagnostic } from "@/context/DiagnosticContext";
+import { useDiagnosticConfig } from "@/hooks/use-pricing";
+import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Button } from "@/components/ui/button";
 import {
   buildAlerts,
