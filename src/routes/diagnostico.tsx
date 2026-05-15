@@ -219,23 +219,48 @@ const OPTION_META: Record<
   },
 };
 
+interface UIQuestion {
+  id: string;
+  text: string;
+  options: { key: OptionKey; label: string }[];
+}
+
+function toUIQuestion(q: DiagnosticQuestion): UIQuestion {
+  return {
+    id: `${q.dimension}:${q.question_key}`,
+    text: q.question_text,
+    options: [
+      { key: "green", label: q.option_green },
+      { key: "yellow", label: q.option_yellow },
+      { key: "red", label: q.option_red },
+    ],
+  };
+}
+
 function Screen3() {
   const { state, setState, goTo } = useDiagnostic();
   const navigate = useNavigate();
+  const { data, isLoading, error, refetch } = useDiagnosticConfig();
+
+  const questions: UIQuestion[] = useMemo(
+    () => (data?.questions ?? []).map(toUIQuestion),
+    [data],
+  );
 
   const answeredCount = useMemo(
-    () => QUESTIONS.filter((q) => state.answers[q.id]).length,
-    [state.answers],
+    () => questions.filter((q) => state.answers[q.id]).length,
+    [state.answers, questions],
   );
-  const allAnswered = answeredCount === QUESTIONS.length;
-  const progressPct = (answeredCount / QUESTIONS.length) * 100;
+  const total = questions.length;
+  const allAnswered = total > 0 && answeredCount === total;
+  const progressPct = total > 0 ? (answeredCount / total) * 100 : 0;
 
   const handleSelect = (questionId: string, key: TrafficLight) => {
     setState({ answers: { ...state.answers, [questionId]: key } });
   };
 
   const handleFinish = () => {
-    const overallScore = QUESTIONS.reduce((sum, q) => {
+    const overallScore = questions.reduce((sum, q) => {
       const ans = state.answers[q.id];
       return sum + (ans ? SCORE_MAP[ans as OptionKey] : 0);
     }, 0);
@@ -247,50 +272,57 @@ function Screen3() {
     <div>
       <ScreenHeader title="Diagnóstico Financeiro" step={3} />
 
-      <div className="sticky top-0 z-10 -mx-4 px-4 py-4 bg-background/90 backdrop-blur border-b border-border mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground">Progresso</span>
-          <span className="text-sm font-medium">
-            {answeredCount} de {QUESTIONS.length}
-          </span>
-        </div>
-        <Progress value={progressPct} />
-      </div>
+      {isLoading && <CalcLoadingSkeleton />}
+      {error && <ErrorState error={error} retry={() => refetch()} />}
 
-      <div className="space-y-6">
-        {QUESTIONS.map((q, idx) => (
-          <div key={q.id} className="rounded-2xl border border-border bg-card p-6">
-            <div className="flex items-start gap-3 mb-5">
-              <span className="text-xs font-semibold text-muted-foreground mt-1">
-                {String(idx + 1).padStart(2, "0")}
+      {!isLoading && !error && (
+        <>
+          <div className="sticky top-0 z-10 -mx-4 px-4 py-4 bg-background/90 backdrop-blur border-b border-border mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground">Progresso</span>
+              <span className="text-sm font-medium">
+                {answeredCount} de {total}
               </span>
-              <h3 className="text-base md:text-lg font-medium leading-snug">{q.text}</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {q.options.map((opt) => {
-                const meta = OPTION_META[opt.key];
-                const selected = state.answers[q.id] === opt.key;
-                const Icon = meta.Icon;
-                return (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    onClick={() => handleSelect(q.id, opt.key)}
-                    className={cn(
-                      "text-left rounded-xl border bg-[#111111] border-border border-l-4 p-4 transition-all hover:border-l-[5px]",
-                      meta.borderClass,
-                      selected && cn("border", meta.borderSelected, meta.bgSelected),
-                    )}
-                  >
-                    <Icon className={cn("h-5 w-5 mb-2", meta.iconClass)} />
-                    <span className="text-sm">{opt.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <Progress value={progressPct} />
           </div>
-        ))}
-      </div>
+
+          <div className="space-y-6">
+            {questions.map((q, idx) => (
+              <div key={q.id} className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-start gap-3 mb-5">
+                  <span className="text-xs font-semibold text-muted-foreground mt-1">
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="text-base md:text-lg font-medium leading-snug">{q.text}</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {q.options.map((opt) => {
+                    const meta = OPTION_META[opt.key];
+                    const selected = state.answers[q.id] === opt.key;
+                    const Icon = meta.Icon;
+                    return (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => handleSelect(q.id, opt.key)}
+                        className={cn(
+                          "text-left rounded-xl border bg-[#111111] border-border border-l-4 p-4 transition-all hover:border-l-[5px]",
+                          meta.borderClass,
+                          selected && cn("border", meta.borderSelected, meta.bgSelected),
+                        )}
+                      >
+                        <Icon className={cn("h-5 w-5 mb-2", meta.iconClass)} />
+                        <span className="text-sm">{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="mt-8 flex justify-between">
         <Button variant="outline" onClick={() => goTo(2)}>
