@@ -114,33 +114,45 @@ function ResultadosPage() {
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-10">
       <div className="mx-auto max-w-5xl space-y-8">
-        <ScoreSummary
-          companyName={state.companyName}
-          date={formatDateBR(state.date)}
-          grade={grade}
-          maturity={maturity}
-        />
-        <CostTable rows={costRows} />
-        <AlertPills items={alerts} />
-        <OutcomesTable rows={outcomes} />
-        <RecommendationCard rec={recommendation} />
+        <Breadcrumbs items={[{ label: "Diagnóstico", to: "/diagnostico" }, { label: "Resultados" }]} />
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-between pt-4">
-          <Button variant="outline" onClick={handleEdit}>
-            <Pencil className="mr-2 h-4 w-4" /> Editar Respostas
-          </Button>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleNew}>
-              <RefreshCw className="mr-2 h-4 w-4" /> Nova Reunião
-            </Button>
-            <Button
-              onClick={() => navigate({ to: "/servicos" })}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Ver Serviços e Precificar <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        {isLoading && <CalcLoadingSkeleton />}
+        {error && <ErrorState error={error} retry={() => refetch()} />}
+
+        {!isLoading && !error && (
+          <>
+            <ScoreSummary
+              companyName={state.companyName}
+              date={formatDateBR(state.date)}
+              grade={grade}
+              maturity={maturity}
+            />
+            <CostTable rows={costRows} />
+            <AlertPills items={alerts} />
+            <OutcomesTable rows={outcomes} />
+            <RecommendationCard rec={recommendation} />
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-between pt-4">
+              <Button variant="outline" onClick={handleEdit}>
+                <Pencil className="mr-2 h-4 w-4" /> Editar Respostas
+              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" onClick={handleNew}>
+                  <RefreshCw className="mr-2 h-4 w-4" /> Nova Reunião
+                </Button>
+                <Button variant="outline" onClick={handleExportPDF}>
+                  <Download className="mr-2 h-4 w-4" /> Exportar PDF
+                </Button>
+                <Button
+                  onClick={() => navigate({ to: "/servicos" })}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  Ver Serviços e Precificar <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
