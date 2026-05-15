@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
+import { exportCalculatorPDF, formatBRL as fmtBRL } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/calculadora/bpo")({
   component: CalculadoraBPOPage,
