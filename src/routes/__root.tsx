@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { DiagnosticProvider } from "../context/DiagnosticContext";
+import { AuthProvider } from "../context/AuthContext";
 
 function NotFoundComponent() {
   return (
@@ -113,9 +114,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DiagnosticProvider>
-        <Outlet />
-      </DiagnosticProvider>
+      <AuthProvider>
+        <DiagnosticProvider>
+          <Outlet />
+        </DiagnosticProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
