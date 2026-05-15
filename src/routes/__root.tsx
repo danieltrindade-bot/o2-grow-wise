@@ -80,9 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Inteligência financeira que transforma gestão em resultado. Descubra a maturidade financeira da sua empresa." },
       { name: "author", content: "O2 Inc" },
       { property: "og:title", content: "O2 Inc — Diagnóstico Financeiro" },
-      { property: "og:description", content: "Inteligência financeira que transforma gestão em resultado." },
+      { property: "og:description", content: "Inteligência financeira que transforma gestão em resultado. Descubra a maturidade financeira da sua empresa." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "O2 Inc — Diagnóstico Financeiro" },
+      { name: "twitter:description", content: "Inteligência financeira que transforma gestão em resultado. Descubra a maturidade financeira da sua empresa." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4546ee25-281a-4c9f-aa2c-3ee36465c19b/id-preview-8f8f95d3--4032e1a0-40fa-4cfb-a024-36b0464bd216.lovable.app-1778862921421.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4546ee25-281a-4c9f-aa2c-3ee36465c19b/id-preview-8f8f95d3--4032e1a0-40fa-4cfb-a024-36b0464bd216.lovable.app-1778862921421.png" },
     ],
     links: [
       {
