@@ -10,6 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { calcSetupPrice, formatBRL, type SegmentType } from "@/lib/pricing-shared";
+import { exportCalculatorPDF } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/calculadora/oxy")({
   component: OxyPage,
