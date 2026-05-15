@@ -219,7 +219,7 @@ function ScoreSummary({
           </svg>
           <div className="-mt-12 text-center">
             <p className="text-5xl font-bold" style={{ color: maturity.cssVar }}>
-              {grade}
+              {useCountUp(grade, 700).toFixed(0)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">Nota de 0 a 10</p>
           </div>
