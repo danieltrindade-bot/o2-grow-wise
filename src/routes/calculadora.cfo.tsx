@@ -320,8 +320,28 @@ function CalculadoraCFOPage() {
                     <span className="font-semibold">{formatBRL(setupTotal)}</span>
                   </div>
                 </div>
-                <Button className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Download className="mr-2 h-4 w-4" /> Exportar Proposta
+                <Button
+                  onClick={() =>
+                    exportCalculatorPDF({
+                      service: "CFO as a Service",
+                      clientName: state.companyName,
+                      monthlyRevenue,
+                      rows: [
+                        ["Preço base", formatBRL(basePrice)],
+                        ["Multiplicador CNPJ", `×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`],
+                        ["Complexidade", `${cf.label} ×${cf.factor} (${complexityScore})`],
+                        ["Ajuste segmento", cnpjCount > 1 ? `+${segmentAdj}%` : "—"],
+                        ["Taxa governança", formatBRL(governanceFee)],
+                        ["Mensalidade", formatBRL(finalRecorrencia)],
+                        ["Setup", formatBRL(setupTotal)],
+                      ],
+                      finalLabel: "Investimento mensal",
+                      finalValue: formatBRL(finalRecorrencia),
+                    })
+                  }
+                  className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  <Download className="mr-2 h-4 w-4" /> Exportar PDF
                 </Button>
               </div>
             </div>
