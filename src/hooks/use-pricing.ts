@@ -123,6 +123,10 @@ export function useSetupPricing() {
   });
 }
 
+// Oxy + Gênio and Coordenador share setup pricing rules
+export const useOxyPricing = useSetupPricing;
+export const useCoordenadorPricing = useSetupPricing;
+
 export interface AssessoriaRule {
   id: string;
   label: string;
