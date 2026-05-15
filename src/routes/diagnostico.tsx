@@ -14,9 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SCORE_MAP, type OptionKey } from "@/lib/diagnostic-questions";
+import { SCORE_MAP, QUESTIONS as FALLBACK_QUESTIONS, type OptionKey } from "@/lib/diagnostic-questions";
 import { useDiagnosticConfig, type DiagnosticQuestion } from "@/hooks/use-pricing";
-import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
+import { CalcLoadingSkeleton } from "@/components/calc-ui";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/diagnostico")({
