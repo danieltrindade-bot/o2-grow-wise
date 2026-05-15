@@ -288,7 +288,6 @@ function Screen3() {
 
       {!showLoading && (
 
-      {!isLoading && !error && (
         <>
           <div className="sticky top-0 z-10 -mx-4 px-4 py-4 bg-background/90 backdrop-blur border-b border-border mb-6">
             <div className="flex items-center justify-between mb-2">
