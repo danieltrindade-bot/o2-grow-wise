@@ -11,6 +11,8 @@ import {
 import appCss from "../styles.css?url";
 import { DiagnosticProvider } from "../context/DiagnosticContext";
 import { AuthProvider } from "../context/AuthContext";
+import { SiteHeader, ScrollToTop } from "../components/SiteHeader";
+import { useLocation } from "@tanstack/react-router";
 
 function NotFoundComponent() {
   return (
