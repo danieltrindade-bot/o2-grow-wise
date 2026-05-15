@@ -14,9 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SCORE_MAP, type OptionKey } from "@/lib/diagnostic-questions";
+import { SCORE_MAP, QUESTIONS as FALLBACK_QUESTIONS, type OptionKey } from "@/lib/diagnostic-questions";
 import { useDiagnosticConfig, type DiagnosticQuestion } from "@/hooks/use-pricing";
-import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
+import { CalcLoadingSkeleton } from "@/components/calc-ui";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/diagnostico")({
@@ -240,12 +240,22 @@ function toUIQuestion(q: DiagnosticQuestion): UIQuestion {
 function Screen3() {
   const { state, setState, goTo } = useDiagnostic();
   const navigate = useNavigate();
-  const { data, isLoading, error, refetch } = useDiagnosticConfig();
+  const { data, isLoading, error } = useDiagnosticConfig();
 
-  const questions: UIQuestion[] = useMemo(
-    () => (data?.questions ?? []).map(toUIQuestion),
-    [data],
+  const fallbackUI: UIQuestion[] = useMemo(
+    () =>
+      FALLBACK_QUESTIONS.map((q) => ({
+        id: q.id,
+        text: q.text,
+        options: q.options.map((o) => ({ key: o.key, label: o.label })),
+      })),
+    [],
   );
+
+  const questions: UIQuestion[] = useMemo(() => {
+    const fromDb = (data?.questions ?? []).map(toUIQuestion);
+    return fromDb.length > 0 ? fromDb : fallbackUI;
+  }, [data, fallbackUI]);
 
   const answeredCount = useMemo(
     () => questions.filter((q) => state.answers[q.id]).length,
@@ -268,14 +278,16 @@ function Screen3() {
     navigate({ to: "/resultados" });
   };
 
+  const showLoading = isLoading && !error;
+
   return (
     <div>
       <ScreenHeader title="Diagnóstico Financeiro" step={3} />
 
-      {isLoading && <CalcLoadingSkeleton />}
-      {error && <ErrorState error={error} retry={() => refetch()} />}
+      {showLoading && <CalcLoadingSkeleton />}
 
-      {!isLoading && !error && (
+      {!showLoading && (
+
         <>
           <div className="sticky top-0 z-10 -mx-4 px-4 py-4 bg-background/90 backdrop-blur border-b border-border mb-6">
             <div className="flex items-center justify-between mb-2">
