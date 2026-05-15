@@ -1,5 +1,12 @@
 import { QUESTIONS, type OptionKey } from "./diagnostic-questions";
 import type { TrafficLight } from "@/context/DiagnosticContext";
+import type {
+  CostParameter,
+  MaturityLevel,
+  OutcomeText,
+  ProductRecommendation,
+  DiagnosticQuestion,
+} from "@/hooks/use-pricing";
 
 export function calcGrade(overallScore: number): number {
   return Math.round(((20 - overallScore) / 20) * 10);
@@ -12,34 +19,39 @@ export interface Maturity {
   cssVar: string;
 }
 
-export function getMaturity(score: number): Maturity {
+const MATURITY_CSS: Record<string, string> = {
+  structured: "var(--color-success)",
+  developing: "var(--color-warning)",
+  incipient: "var(--color-alert)",
+  critical: "var(--color-critical)",
+};
+
+function maturityCssFromColor(color: string): string {
+  const c = color.toUpperCase();
+  if (c === "#22C55E") return "var(--color-success)";
+  if (c === "#EAB308") return "var(--color-warning)";
+  if (c === "#F97316") return "var(--color-alert)";
+  if (c === "#EF4444") return "var(--color-critical)";
+  return color;
+}
+
+export function getMaturity(score: number, levels?: MaturityLevel[]): Maturity {
+  if (levels && levels.length) {
+    const m = levels.find((l) => score >= l.score_min && score <= l.score_max) ?? levels[levels.length - 1];
+    return {
+      label: m.label,
+      description: m.description,
+      color: m.color,
+      cssVar: MATURITY_CSS[m.level_key] ?? maturityCssFromColor(m.color),
+    };
+  }
   if (score <= 3)
-    return {
-      label: "Estruturado",
-      description: "A empresa possui processos financeiros bem definidos",
-      color: "#22C55E",
-      cssVar: "var(--color-success)",
-    };
+    return { label: "Estruturado", description: "A empresa possui processos financeiros bem definidos", color: "#22C55E", cssVar: "var(--color-success)" };
   if (score <= 7)
-    return {
-      label: "Em desenvolvimento",
-      description: "Existem processos, mas precisam de consolidação",
-      color: "#EAB308",
-      cssVar: "var(--color-warning)",
-    };
+    return { label: "Em desenvolvimento", description: "Existem processos, mas precisam de consolidação", color: "#EAB308", cssVar: "var(--color-warning)" };
   if (score <= 11)
-    return {
-      label: "Incipiente",
-      description: "Processos financeiros ainda informais e frágeis",
-      color: "#F97316",
-      cssVar: "var(--color-alert)",
-    };
-  return {
-    label: "Crítico",
-    description: "Ausência de controles financeiros básicos",
-    color: "#EF4444",
-    cssVar: "var(--color-critical)",
-  };
+    return { label: "Incipiente", description: "Processos financeiros ainda informais e frágeis", color: "#F97316", cssVar: "var(--color-alert)" };
+  return { label: "Crítico", description: "Ausência de controles financeiros básicos", color: "#EF4444", cssVar: "var(--color-critical)" };
 }
 
 export interface CostRow {
@@ -74,14 +86,27 @@ const COST_RULES: CostRule[] = [
 export function buildCostRows(
   answers: Record<string, TrafficLight>,
   monthlyRevenue: number,
+  costParams?: CostParameter[],
 ): CostRow[] {
-  return COST_RULES.filter((r) => answers[r.qid] === r.when).map((r) => ({
-    questionId: r.qid,
-    label: r.label,
-    min: r.qualitative ? 0 : (r.min ?? 0) * monthlyRevenue,
-    max: r.qualitative ? 0 : (r.max ?? 0) * monthlyRevenue,
-    qualitative: r.qualitative,
-  }));
+  const rules: CostRule[] = costParams
+    ? costParams.map((c) => ({
+        qid: `${c.dimension}:${c.question_key}`,
+        when: c.trigger_color,
+        label: c.label,
+        min: c.pct_min ?? undefined,
+        max: c.pct_max ?? undefined,
+        qualitative: c.qualitative,
+      }))
+    : COST_RULES;
+  return rules
+    .filter((r) => answers[r.qid] === r.when)
+    .map((r) => ({
+      questionId: r.qid,
+      label: r.label,
+      min: r.qualitative ? 0 : (r.min ?? 0) * monthlyRevenue,
+      max: r.qualitative ? 0 : (r.max ?? 0) * monthlyRevenue,
+      qualitative: r.qualitative,
+    }));
 }
 
 export interface OutcomeRow {
@@ -108,12 +133,25 @@ const OUTCOME_RULES: OutcomeRule[] = [
   { qid: "commercial:q5", current: "Vende muito, caixa aperta", future: "Ciclo financeiro de vendas mapeado e gerenciado" },
 ];
 
-export function buildOutcomeRows(answers: Record<string, TrafficLight>): OutcomeRow[] {
-  return OUTCOME_RULES.filter((r) => {
-    const a = answers[r.qid];
-    if (r.redOnly) return a === "red";
-    return a === "red" || a === "yellow";
-  }).map((r) => ({ questionId: r.qid, current: r.current, future: r.future }));
+export function buildOutcomeRows(
+  answers: Record<string, TrafficLight>,
+  outcomes?: OutcomeText[],
+): OutcomeRow[] {
+  const rules: OutcomeRule[] = outcomes
+    ? outcomes.map((o) => ({
+        qid: `${o.dimension}:${o.question_key}`,
+        current: o.current_text,
+        future: o.future_text,
+        redOnly: o.check_red,
+      }))
+    : OUTCOME_RULES;
+  return rules
+    .filter((r) => {
+      const a = answers[r.qid];
+      if (r.redOnly) return a === "red";
+      return a === "red" || a === "yellow";
+    })
+    .map((r) => ({ questionId: r.qid, current: r.current, future: r.future }));
 }
 
 const SHORT_LABELS: Record<string, string> = {
@@ -135,11 +173,29 @@ export interface AlertItem {
   text: string;
 }
 
-export function buildAlerts(answers: Record<string, TrafficLight>): AlertItem[] {
+function shortify(text: string): string {
+  const words = text.split(/\s+/).slice(0, 6).join(" ");
+  return words.length < text.length ? `${words}…` : words;
+}
+
+export function buildAlerts(
+  answers: Record<string, TrafficLight>,
+  questions?: DiagnosticQuestion[],
+): AlertItem[] {
+  if (questions && questions.length) {
+    return questions.flatMap((q) => {
+      const qid = `${q.dimension}:${q.question_key}`;
+      const a = answers[qid];
+      if (a === "red" || a === "yellow") {
+        return [{ questionId: qid, level: a, text: SHORT_LABELS[qid] ?? shortify(q.question_text) }];
+      }
+      return [];
+    });
+  }
   return QUESTIONS.flatMap((q) => {
     const a = answers[q.id];
     if (a === "red" || a === "yellow") {
-      return [{ questionId: q.id, level: a, text: SHORT_LABELS[q.id] ?? q.text }];
+      return [{ questionId: q.id, level: a, text: SHORT_LABELS[q.id] ?? shortify(q.text) }];
     }
     return [];
   });
@@ -154,27 +210,19 @@ export interface Recommendation {
 export function getRecommendation(
   overallScore: number,
   answers: Record<string, TrafficLight>,
+  recommendations?: ProductRecommendation[],
+  questions?: DiagnosticQuestion[],
 ): Recommendation {
-  const gaps = buildAlerts(answers).map((a) => a.text);
-  if (overallScore <= 4) {
-    return {
-      service: "O2 Processos",
-      tagline: "Estruture os processos financeiros que sustentam o crescimento",
-      gaps,
-    };
+  const gaps = buildAlerts(answers, questions).map((a) => a.text);
+  if (recommendations && recommendations.length) {
+    const r =
+      recommendations.find((x) => overallScore >= x.score_min && overallScore <= x.score_max) ??
+      recommendations[recommendations.length - 1];
+    return { service: r.name, tagline: r.tagline, gaps };
   }
-  if (overallScore <= 9) {
-    return {
-      service: "O2 Processos + O2 Receita",
-      tagline: "Transformação financeira e comercial completa",
-      gaps,
-    };
-  }
-  return {
-    service: "CFO as a Service",
-    tagline: "Inteligência financeira executiva sob demanda",
-    gaps,
-  };
+  if (overallScore <= 4) return { service: "O2 Processos", tagline: "Estruture os processos financeiros que sustentam o crescimento", gaps };
+  if (overallScore <= 9) return { service: "O2 Processos + O2 Receita", tagline: "Transformação financeira e comercial completa", gaps };
+  return { service: "CFO as a Service", tagline: "Inteligência financeira executiva sob demanda", gaps };
 }
 
 export function formatBRL(value: number): string {
