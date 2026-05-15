@@ -13,6 +13,8 @@ import { exportDiagnosticPDF } from "@/lib/pdf-export";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useCountUp } from "@/components/calc-ui";
 import { useDiagnostic } from "@/context/DiagnosticContext";
+import { useDiagnosticConfig } from "@/hooks/use-pricing";
+import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Button } from "@/components/ui/button";
 import {
   buildAlerts,
@@ -43,6 +45,7 @@ function formatDateBR(iso: string): string {
 function ResultadosPage() {
   const { state, goTo, reset } = useDiagnostic();
   const navigate = useNavigate();
+  const { data: config, isLoading, error, refetch } = useDiagnosticConfig();
 
   const hasData =
     state.companyName.trim().length > 0 &&
@@ -53,16 +56,25 @@ function ResultadosPage() {
   }, [hasData, navigate]);
 
   const grade = useMemo(() => calcGrade(state.overallScore), [state.overallScore]);
-  const maturity = useMemo(() => getMaturity(state.overallScore), [state.overallScore]);
-  const costRows = useMemo(
-    () => buildCostRows(state.answers, state.monthlyRevenue),
-    [state.answers, state.monthlyRevenue],
+  const maturity = useMemo(
+    () => getMaturity(state.overallScore, config?.maturity),
+    [state.overallScore, config],
   );
-  const alerts = useMemo(() => buildAlerts(state.answers), [state.answers]);
-  const outcomes = useMemo(() => buildOutcomeRows(state.answers), [state.answers]);
+  const costRows = useMemo(
+    () => buildCostRows(state.answers, state.monthlyRevenue, config?.costs),
+    [state.answers, state.monthlyRevenue, config],
+  );
+  const alerts = useMemo(
+    () => buildAlerts(state.answers, config?.questions),
+    [state.answers, config],
+  );
+  const outcomes = useMemo(
+    () => buildOutcomeRows(state.answers, config?.outcomes),
+    [state.answers, config],
+  );
   const recommendation = useMemo(
-    () => getRecommendation(state.overallScore, state.answers),
-    [state.overallScore, state.answers],
+    () => getRecommendation(state.overallScore, state.answers, config?.recommendations, config?.questions),
+    [state.overallScore, state.answers, config],
   );
 
   const handleEdit = () => {
@@ -74,38 +86,73 @@ function ResultadosPage() {
     navigate({ to: "/diagnostico" });
   };
 
+  const handleExportPDF = () => {
+    const totalMin = costRows.reduce((s, r) => s + r.min, 0);
+    const totalMax = costRows.reduce((s, r) => s + r.max, 0);
+    const hasQuant = costRows.some((r) => !r.qualitative);
+    exportDiagnosticPDF({
+      companyName: state.companyName,
+      consultantName: state.consultantName,
+      date: formatDateBR(state.date),
+      grade,
+      maturityLabel: maturity.label,
+      maturityDescription: maturity.description,
+      costRows: costRows.map((r) => ({
+        label: r.label,
+        value: r.qualitative
+          ? "Estimar após diagnóstico completo"
+          : `${formatBRL(r.min)} — ${formatBRL(r.max)}`,
+      })),
+      costTotal: hasQuant ? `${formatBRL(totalMin)} — ${formatBRL(totalMax)}` : undefined,
+      outcomeRows: outcomes.map((o) => ({ current: o.current, future: o.future })),
+      recommendation: { service: recommendation.service, tagline: recommendation.tagline },
+    });
+  };
+
   if (!hasData) return null;
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-10">
       <div className="mx-auto max-w-5xl space-y-8">
-        <ScoreSummary
-          companyName={state.companyName}
-          date={formatDateBR(state.date)}
-          grade={grade}
-          maturity={maturity}
-        />
-        <CostTable rows={costRows} />
-        <AlertPills items={alerts} />
-        <OutcomesTable rows={outcomes} />
-        <RecommendationCard rec={recommendation} />
+        <Breadcrumbs items={[{ label: "Diagnóstico", to: "/diagnostico" }, { label: "Resultados" }]} />
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-between pt-4">
-          <Button variant="outline" onClick={handleEdit}>
-            <Pencil className="mr-2 h-4 w-4" /> Editar Respostas
-          </Button>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleNew}>
-              <RefreshCw className="mr-2 h-4 w-4" /> Nova Reunião
-            </Button>
-            <Button
-              onClick={() => navigate({ to: "/servicos" })}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Ver Serviços e Precificar <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        {isLoading && <CalcLoadingSkeleton />}
+        {error && <ErrorState error={error} retry={() => refetch()} />}
+
+        {!isLoading && !error && (
+          <>
+            <ScoreSummary
+              companyName={state.companyName}
+              date={formatDateBR(state.date)}
+              grade={grade}
+              maturity={maturity}
+            />
+            <CostTable rows={costRows} />
+            <AlertPills items={alerts} />
+            <OutcomesTable rows={outcomes} />
+            <RecommendationCard rec={recommendation} />
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-between pt-4">
+              <Button variant="outline" onClick={handleEdit}>
+                <Pencil className="mr-2 h-4 w-4" /> Editar Respostas
+              </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" onClick={handleNew}>
+                  <RefreshCw className="mr-2 h-4 w-4" /> Nova Reunião
+                </Button>
+                <Button variant="outline" onClick={handleExportPDF}>
+                  <Download className="mr-2 h-4 w-4" /> Exportar PDF
+                </Button>
+                <Button
+                  onClick={() => navigate({ to: "/servicos" })}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  Ver Serviços e Precificar <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -172,7 +219,7 @@ function ScoreSummary({
           </svg>
           <div className="-mt-12 text-center">
             <p className="text-5xl font-bold" style={{ color: maturity.cssVar }}>
-              {grade}
+              {useCountUp(grade, 700).toFixed(0)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">Nota de 0 a 10</p>
           </div>
