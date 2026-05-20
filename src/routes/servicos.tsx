@@ -21,7 +21,6 @@ interface ServiceCard {
   id: string;
   name: string;
   description: string;
-  startingAt: string;
   to: "/calculadora/bpo" | "/calculadora/cfo" | "/calculadora/oxy" | "/calculadora/assessoria" | "/calculadora/coordenador";
   Icon: typeof Briefcase;
 }
@@ -31,7 +30,6 @@ const SERVICES: ServiceCard[] = [
     id: "bpo",
     name: "BPO Financeiro",
     description: "Operação financeira completa: contas a pagar, contas a receber, conciliação, relatórios",
-    startingAt: "R$ 1.500/mês",
     to: "/calculadora/bpo",
     Icon: Briefcase,
   },
@@ -39,7 +37,6 @@ const SERVICES: ServiceCard[] = [
     id: "cfo",
     name: "CFO as a Service",
     description: "Inteligência financeira executiva: planejamento, análise, governança, indicadores",
-    startingAt: "Sob consulta",
     to: "/calculadora/cfo",
     Icon: LineChart,
   },
@@ -47,7 +44,6 @@ const SERVICES: ServiceCard[] = [
     id: "oxy",
     name: "Oxy + Gênio",
     description: "Plataforma de dados em tempo real + Agente IA para automação financeira",
-    startingAt: "12x de R$ 833,33",
     to: "/calculadora/oxy",
     Icon: Bot,
   },
@@ -55,7 +51,6 @@ const SERVICES: ServiceCard[] = [
     id: "assessoria",
     name: "Assessoria Estratégica",
     description: "Jornada de maturidade financeira com acompanhamento especializado",
-    startingAt: "R$ 4.170/mês",
     to: "/calculadora/assessoria",
     Icon: Compass,
   },
@@ -63,7 +58,6 @@ const SERVICES: ServiceCard[] = [
     id: "coordenador",
     name: "Coordenador as a Service",
     description: "Coordenação financeira dedicada para estruturar e gerir sua operação",
-    startingAt: "R$ 10.000",
     to: "/calculadora/coordenador",
     Icon: Users,
   },
@@ -131,10 +125,6 @@ function ServicosPage() {
                 </div>
                 <h3 className="text-lg font-semibold">{s.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1.5 flex-1">{s.description}</p>
-                <div className="mt-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">A partir de</p>
-                  <p className="text-base font-semibold mt-0.5">{s.startingAt}</p>
-                </div>
                 <Link to={s.to} className="mt-5">
                   <Button
                     className={cn(
