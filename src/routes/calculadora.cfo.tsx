@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
-import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -25,7 +24,6 @@ export const Route = createFileRoute("/calculadora/cfo")({
   component: CalculadoraCFOPage,
 });
 
-const COMPLEXITY_LABELS = ["Segmento", "Operação", "ERP", "Governança", "Estrutura Societária", "Consolidação"];
 
 function lookupCFOBase(rules: CFOBaseRule[], annualRevenue: number): number {
   if (!rules.length) return 0;
@@ -53,7 +51,7 @@ function CalculadoraCFOPage() {
   const [cnpjCount, setCnpjCount] = useState<number>(1);
   const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
   const [governanceType, setGovernanceType] = useState<string>("simples");
-  const [complexity, setComplexity] = useState<number[]>([2, 2, 2, 2, 2, 2]);
+  const complexity = [2, 2, 2, 2, 2, 2];
 
   useEffect(() => {
     if (monthlyRevenue === 0 && state.monthlyRevenue > 0) setMonthlyRevenue(state.monthlyRevenue);
@@ -165,30 +163,6 @@ function CalculadoraCFOPage() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-6">
-                <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-                  <h2 className="text-lg font-semibold flex items-center gap-2">
-                    Complexidade <InfoTooltip text={TOOLTIPS.complexidade} />
-                  </h2>
-                  <span className="rounded-full bg-secondary px-3 py-1 text-xs">
-                    Score: <span className="font-semibold text-foreground">{complexityScore}</span> · {cf.label} (×{cf.factor})
-                  </span>
-                </div>
-                <div className="space-y-5">
-                  {COMPLEXITY_LABELS.map((label, i) => (
-                    <ComplexityRow
-                      key={label}
-                      label={label}
-                      value={complexity[i]}
-                      onChange={(v) => {
-                        const next = [...complexity];
-                        next[i] = v;
-                        setComplexity(next);
-                      }}
-                    />
-                  ))}
-                </div>
-              </section>
             </div>
 
             <aside className="lg:col-span-1">
@@ -284,19 +258,4 @@ function CalculadoraCFOPage() {
   );
 }
 
-function ComplexityRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  const levelLabel = value === 1 ? "Baixa" : value === 2 ? "Média" : "Alta";
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium">{label}</span>
-        <span className="text-xs text-muted-foreground">{levelLabel}</span>
-      </div>
-      <Slider value={[value]} min={1} max={3} step={1} onValueChange={(v) => onChange(v[0])} />
-      <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5 px-0.5">
-        <span>Baixa</span><span>Média</span><span>Alta</span>
-      </div>
-    </div>
-  );
-}
 
