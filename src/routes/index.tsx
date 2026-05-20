@@ -183,9 +183,9 @@ function LandingPage() {
             <img
               src="/mapa-brasil.png"
               alt="Mapa de atuação O2 no Brasil"
-              className="absolute inset-0 w-full h-full object-cover object-[70%_60%] scale-110"
+              className="absolute inset-0 w-full h-full object-cover object-[85%_60%] scale-125"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/20" />
           </div>
         </div>
       </section>
@@ -208,17 +208,16 @@ function LandingPage() {
           </AnimatedSection>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { end: 1.09, prefix: "+", suffix: " BI", label: "Em passivos renegociados", display: "+1,09" },
-              { end: 1.55, prefix: "+", suffix: " BI", label: "Em operações financeiras", display: "+1,55" },
-              { end: 2000, prefix: "+", suffix: "", label: "Empresas atendidas", display: "+2.000" },
-              { end: 88, prefix: "", suffix: " NPS", label: "Dado pelos nossos clientes", display: "88" },
+              { display: "+1,09", unit: "BI", label: "Em passivos renegociados" },
+              { display: "+1,55", unit: "BI", label: "Em operações financeiras" },
+              { display: "+2.000", unit: "", label: "Empresas atendidas" },
+              { display: "88", unit: "NPS", label: "Dado pelos nossos clientes" },
             ].map((m, i) => (
               <AnimatedSection key={m.label} delay={i * 100}>
                 <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/40 transition-colors">
                   <p className="text-3xl md:text-4xl font-bold text-primary">
-                    <CountUp end={m.end < 10 ? Math.round(m.end * 100) : m.end} prefix={m.prefix} suffix={m.end < 10 ? "" : m.suffix} />
-                    {m.end < 10 && <span className="text-lg md:text-xl ml-0 text-muted-foreground font-semibold"> BI</span>}
-                    {m.end >= 10 && m.suffix === " NPS" && <span className="text-lg md:text-xl ml-1 text-muted-foreground font-semibold">NPS</span>}
+                    {m.display}
+                    {m.unit && <span className="text-lg md:text-xl ml-1 text-muted-foreground font-semibold">{m.unit}</span>}
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground uppercase tracking-wider">{m.label}</p>
                 </div>
@@ -308,7 +307,7 @@ function LandingPage() {
       {/* ── Dado é organismo vivo ── */}
       <section className="py-24 px-6 border-t border-border">
         <div className="mx-auto max-w-5xl">
-          <AnimatedSection className="text-center mb-16">
+          <AnimatedSection className="text-center mb-24">
             <p className="text-xs text-muted-foreground uppercase tracking-widest font-mono mb-4">Princípio fundamental</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
               Dado é um <span className="text-primary">organismo vivo</span>
@@ -317,7 +316,7 @@ function LandingPage() {
               Esses dados vêm dos cinco processos essenciais no financeiro de qualquer empresa.
             </p>
           </AnimatedSection>
-          <div className="relative flex items-center justify-center py-8">
+          <div className="relative flex items-center justify-center py-16 min-h-[420px]">
             <div className="absolute w-64 h-64 md:w-80 md:h-80 rounded-full border-2 border-dashed border-primary/20 animate-[spin_30s_linear_infinite]" />
             <div className="absolute w-44 h-44 md:w-56 md:h-56 rounded-full border border-primary/10" />
             <div className="relative z-10 h-20 w-20 md:h-24 md:w-24 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center animate-[pulse_3s_ease-in-out_infinite]">
