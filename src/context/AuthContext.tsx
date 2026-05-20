@@ -1,12 +1,16 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  signIn as localSignIn,
+  signUp as localSignUp,
+  signOut as localSignOut,
+  getCurrentUser,
+  type LocalUser,
+} from "@/lib/local-auth";
 
 export type Role = "admin" | "user" | null;
 
 interface AuthCtx {
-  user: User | null;
-  session: Session | null;
+  user: LocalUser | null;
   role: Role;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -16,82 +20,36 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
-const ADMIN_DOMAIN = "@o2inc.com.br";
-
-async function fetchRole(userId: string): Promise<Role> {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (error || !data) return null;
-  return data.role === "admin" ? "admin" : "user";
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<Role>(null);
+  const [user, setUser] = useState<LocalUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up listener BEFORE getSession (per docs)
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        // Defer Supabase calls outside the callback
-        setTimeout(() => {
-          fetchRole(s.user.id).then(setRole);
-        }, 0);
-      } else {
-        setRole(null);
-      }
-    });
-
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) fetchRole(s.user.id).then(setRole);
-      setLoading(false);
-    });
-
-    return () => sub.subscription.unsubscribe();
+    setUser(getCurrentUser());
+    setLoading(false);
   }, []);
 
+  const role: Role = user?.role ?? null;
+
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    const { user: u, error } = await localSignIn(email, password);
+    if (u) setUser(u);
+    return { error: error ?? null };
   };
 
   const signUp = async (email: string, password: string) => {
-    if (!email.toLowerCase().endsWith(ADMIN_DOMAIN)) {
-      return { error: `Apenas emails ${ADMIN_DOMAIN} podem se registrar como admin.` };
-    }
-    const { error: signUpErr } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/admin` },
-    });
-    if (signUpErr) return { error: signUpErr.message };
-
-    // Auto-confirm is enabled, so the user is logged in immediately.
-    // Assign the role using the security-definer RPC.
-    const { error: rpcErr } = await supabase.rpc("assign_role_on_signup");
-    if (rpcErr) return { error: rpcErr.message };
-
-    // Refresh role in state
-    const { data } = await supabase.auth.getUser();
-    if (data.user) setRole(await fetchRole(data.user.id));
-    return { error: null };
+    const { user: u, error } = await localSignUp(email, password);
+    if (u) setUser(u);
+    return { error: error ?? null };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localSignOut();
+    setUser(null);
   };
 
   return (
-    <Ctx.Provider value={{ user, session, role, loading, signIn, signUp, signOut }}>
+    <Ctx.Provider value={{ user, role, loading, signIn, signUp, signOut }}>
       {children}
     </Ctx.Provider>
   );

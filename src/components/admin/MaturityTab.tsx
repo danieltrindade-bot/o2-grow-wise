@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { selectAll } from "@/lib/local-store";
 import { useAuth } from "@/context/AuthContext";
-import { logAudit } from "@/lib/admin-audit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { persistTable, type DraftBase } from "./crud-helpers";
 
-type Row = {
-  id: string;
+type Draft = DraftBase & {
   sort_order: number;
   level_key: string;
   label: string;
@@ -18,31 +18,28 @@ type Row = {
   score_min: number;
   score_max: number;
 };
-type Draft = Row & { _new?: boolean; _dirty?: boolean };
 
 export function MaturityTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [rows, setRows] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deleted, setDeleted] = useState<Row[]>([]);
-  const original = useMemo(() => new Map<string, Row>(), []);
+  const [deleted, setDeleted] = useState<Draft[]>([]);
+  const original = useMemo(() => new Map<string, Draft>(), []);
 
-  const load = async () => {
+  const load = () => {
     setLoading(true);
-    const { data, error } = await supabase.from("maturity_levels").select("*").order("sort_order");
-    if (error) toast.error(error.message);
-    else {
-      original.clear();
-      (data ?? []).forEach((r) => original.set(r.id, r as Row));
-      setRows((data ?? []) as Draft[]);
-      setDeleted([]);
-    }
+    const data = selectAll<Draft>("maturity_levels", "sort_order");
+    original.clear();
+    data.forEach((r) => original.set(r.id, r));
+    setRows(data);
+    setDeleted([]);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
-  const update = (id: string, patch: Partial<Row>) =>
+  const update = (id: string, patch: Partial<Draft>) =>
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch, _dirty: true } : r)));
 
   const add = () => {
@@ -65,26 +62,10 @@ export function MaturityTab() {
     if (!user) return;
     setSaving(true);
     try {
-      const inserts = rows.filter((r) => r._new).map(({ id, _new, _dirty, ...r }) => r);
-      const updates = rows.filter((r) => !r._new && r._dirty);
-      if (inserts.length) {
-        const { error } = await supabase.from("maturity_levels").insert(inserts);
-        if (error) throw error;
-        await logAudit(user.id, "maturity_levels", "insert", inserts);
-      }
-      for (const u of updates) {
-        const { id, _new, _dirty, ...payload } = u;
-        const { error } = await supabase.from("maturity_levels").update(payload).eq("id", id);
-        if (error) throw error;
-        await logAudit(user.id, "maturity_levels", "update", payload, original.get(id));
-      }
-      for (const d of deleted) {
-        const { error } = await supabase.from("maturity_levels").delete().eq("id", d.id);
-        if (error) throw error;
-        await logAudit(user.id, "maturity_levels", "delete", null, d);
-      }
+      await persistTable("maturity_levels", rows, deleted, original, user.id);
+      queryClient.invalidateQueries();
       toast.success("Alterações salvas");
-      await load();
+      load();
     } catch (e) { toast.error((e as Error).message); }
     setSaving(false);
   };

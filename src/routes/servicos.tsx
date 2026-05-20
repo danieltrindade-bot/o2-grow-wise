@@ -9,7 +9,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useDiagnostic } from "@/context/DiagnosticContext";
-import { getRecommendation } from "@/lib/results-logic";
+import { getRecommendation, type Recommendation } from "@/lib/results-logic";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -24,8 +24,6 @@ interface ServiceCard {
   startingAt: string;
   to: "/calculadora/bpo" | "/calculadora/cfo" | "/calculadora/oxy" | "/calculadora/assessoria" | "/calculadora/coordenador";
   Icon: typeof Briefcase;
-  // Names that may appear in recommendation.service for highlighting
-  matchTokens: string[];
 }
 
 const SERVICES: ServiceCard[] = [
@@ -36,7 +34,6 @@ const SERVICES: ServiceCard[] = [
     startingAt: "R$ 1.500/mês",
     to: "/calculadora/bpo",
     Icon: Briefcase,
-    matchTokens: ["O2 Processos"],
   },
   {
     id: "cfo",
@@ -45,7 +42,6 @@ const SERVICES: ServiceCard[] = [
     startingAt: "Sob consulta",
     to: "/calculadora/cfo",
     Icon: LineChart,
-    matchTokens: ["CFO as a Service"],
   },
   {
     id: "oxy",
@@ -54,7 +50,6 @@ const SERVICES: ServiceCard[] = [
     startingAt: "12x de R$ 833,33",
     to: "/calculadora/oxy",
     Icon: Bot,
-    matchTokens: [],
   },
   {
     id: "assessoria",
@@ -63,7 +58,6 @@ const SERVICES: ServiceCard[] = [
     startingAt: "R$ 4.170/mês",
     to: "/calculadora/assessoria",
     Icon: Compass,
-    matchTokens: ["O2 Receita"],
   },
   {
     id: "coordenador",
@@ -72,7 +66,6 @@ const SERVICES: ServiceCard[] = [
     startingAt: "R$ 10.000",
     to: "/calculadora/coordenador",
     Icon: Users,
-    matchTokens: [],
   },
 ];
 
@@ -81,19 +74,31 @@ function ServicosPage() {
   const hasDiagnostic =
     state.companyName.trim().length > 0 && Object.keys(state.answers).length > 0;
 
-  const recommended = hasDiagnostic
-    ? getRecommendation(state.overallScore, state.answers).service
+  const rec: Recommendation | null = hasDiagnostic
+    ? getRecommendation(state.overallScore, state.answers)
     : null;
 
-  const isRecommended = (s: ServiceCard) =>
-    !!recommended && s.matchTokens.some((t) => recommended.includes(t));
+  const isPrimary = (s: ServiceCard) => rec?.service === s.name;
+  const isComplementary = (s: ServiceCard) => rec?.complementary?.service === s.name;
+  const isRecommended = (s: ServiceCard) => isPrimary(s) || isComplementary(s);
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-10">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10">
-          <h1 className="text-4xl font-bold tracking-tight">Serviços Recomendados</h1>
+          <h1 className="text-4xl font-bold tracking-tight">
+            {hasDiagnostic ? "Serviços Recomendados" : "Nossos Serviços"}
+          </h1>
           <p className="text-muted-foreground mt-2">Selecione um serviço para precificar</p>
+          {!hasDiagnostic && (
+            <p className="text-sm text-muted-foreground/80 mt-3">
+              Faça o{" "}
+              <Link to="/diagnostico" className="text-primary underline underline-offset-4 hover:text-primary/80">
+                diagnóstico financeiro
+              </Link>{" "}
+              para receber recomendações personalizadas de serviços.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -113,9 +118,14 @@ function ServicosPage() {
                   <div className="rounded-lg bg-primary/15 p-2.5">
                     <s.Icon className="h-5 w-5 text-primary" />
                   </div>
-                  {recommended && (
+                  {isPrimary(s) && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 text-primary px-2.5 py-0.5 text-xs font-semibold">
                       <Sparkles className="h-3 w-3" /> Recomendado
+                    </span>
+                  )}
+                  {isComplementary(s) && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-secondary text-muted-foreground px-2.5 py-0.5 text-xs font-medium">
+                      Complementar
                     </span>
                   )}
                 </div>

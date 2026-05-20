@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -19,28 +19,21 @@ import { Button } from "@/components/ui/button";
 import {
   buildAlerts,
   buildCostRows,
-  buildOutcomeRows,
   calcGrade,
   formatBRL,
   getMaturity,
   getRecommendation,
   type CostRow,
   type AlertItem,
-  type OutcomeRow,
   type Recommendation,
   type Maturity,
+  type ProfileContext,
 } from "@/lib/results-logic";
-import { cn } from "@/lib/utils";
+import { formatDateBR } from "@/lib/format";
 
 export const Route = createFileRoute("/resultados")({
   component: ResultadosPage,
 });
-
-function formatDateBR(iso: string): string {
-  if (!iso) return "";
-  const [y, m, d] = iso.split("-");
-  return `${d}/${m}/${y}`;
-}
 
 function ResultadosPage() {
   const { state, goTo, reset } = useDiagnostic();
@@ -50,10 +43,6 @@ function ResultadosPage() {
   const hasData =
     state.companyName.trim().length > 0 &&
     Object.keys(state.answers).length > 0;
-
-  useEffect(() => {
-    if (!hasData) navigate({ to: "/diagnostico" });
-  }, [hasData, navigate]);
 
   const grade = useMemo(() => calcGrade(state.overallScore), [state.overallScore]);
   const maturity = useMemo(
@@ -68,14 +57,16 @@ function ResultadosPage() {
     () => buildAlerts(state.answers, config?.questions),
     [state.answers, config],
   );
-  const outcomes = useMemo(
-    () => buildOutcomeRows(state.answers, config?.outcomes),
-    [state.answers, config],
-  );
+  const profile: ProfileContext = useMemo(() => ({
+    monthlyRevenue: state.monthlyRevenue,
+    growth: state.growth,
+    mainChallenges: state.mainChallenges,
+  }), [state.monthlyRevenue, state.growth, state.mainChallenges]);
   const recommendation = useMemo(
-    () => getRecommendation(state.overallScore, state.answers, config?.recommendations, config?.questions),
-    [state.overallScore, state.answers, config],
+    () => getRecommendation(state.overallScore, state.answers, config?.recommendations, config?.questions, profile),
+    [state.overallScore, state.answers, config, profile],
   );
+  const [showRec, setShowRec] = useState(false);
 
   const handleEdit = () => {
     goTo(3);
@@ -104,12 +95,25 @@ function ResultadosPage() {
           : `${formatBRL(r.min)} — ${formatBRL(r.max)}`,
       })),
       costTotal: hasQuant ? `${formatBRL(totalMin)} — ${formatBRL(totalMax)}` : undefined,
-      outcomeRows: outcomes.map((o) => ({ current: o.current, future: o.future })),
+      outcomeRows: [],
       recommendation: { service: recommendation.service, tagline: recommendation.tagline },
     });
   };
 
-  if (!hasData) return null;
+  if (!hasData) {
+    return (
+      <div className="min-h-screen bg-background text-foreground px-4 py-10">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+          <h2 className="text-xl font-semibold">Nenhum diagnóstico em andamento</h2>
+          <p className="text-muted-foreground">Inicie um novo diagnóstico ou acesse o histórico de reuniões.</p>
+          <div className="flex gap-3">
+            <Link to="/diagnostico"><Button>Novo Diagnóstico</Button></Link>
+            <Link to="/reunioes"><Button variant="outline">Histórico de Reuniões</Button></Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-10">
@@ -123,14 +127,28 @@ function ResultadosPage() {
           <>
             <ScoreSummary
               companyName={state.companyName}
+              monthlyRevenue={state.monthlyRevenue}
               date={formatDateBR(state.date)}
               grade={grade}
               maturity={maturity}
             />
             <CostTable rows={costRows} />
             <AlertPills items={alerts} />
-            <OutcomesTable rows={outcomes} />
-            <RecommendationCard rec={recommendation} />
+
+            {!showRec ? (
+              <div className="flex justify-center">
+                <Button
+                  onClick={() => setShowRec(true)}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 text-base"
+                >
+                  <Sparkles className="mr-2 h-5 w-5" /> Apresentar {recommendation.service}
+                </Button>
+              </div>
+            ) : (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <RecommendationCard rec={recommendation} />
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-3 justify-between pt-4">
               <Button variant="outline" onClick={handleEdit}>
@@ -160,11 +178,13 @@ function ResultadosPage() {
 
 function ScoreSummary({
   companyName,
+  monthlyRevenue,
   date,
   grade,
   maturity,
 }: {
   companyName: string;
+  monthlyRevenue: number;
   date: string;
   grade: number;
   maturity: Maturity;
@@ -181,6 +201,11 @@ function ScoreSummary({
         <div>
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Empresa</p>
           <h1 className="text-3xl font-bold mt-1">{companyName}</h1>
+          {monthlyRevenue > 0 && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Faturamento: {formatBRL(monthlyRevenue)}/mês
+            </p>
+          )}
           <p className="text-sm text-muted-foreground mt-1">Diagnóstico de {date}</p>
 
           <div className="mt-6 inline-flex items-center gap-3 rounded-xl border px-4 py-3"
@@ -247,36 +272,46 @@ function CostTable({ rows }: { rows: CostRow[] }) {
           Nenhuma perda significativa identificada nas respostas atuais.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-muted-foreground border-b border-border">
-                <th className="py-2 font-medium">Gap Identificado</th>
-                <th className="py-2 font-medium text-right">Estimativa Mensal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.questionId + r.label} className="border-b border-border/60">
-                  <td className="py-3 pr-4">{r.label}</td>
-                  <td className="py-3 text-right font-medium">
-                    {r.qualitative
-                      ? "Estimar após diagnóstico completo"
-                      : `${formatBRL(r.min)} — ${formatBRL(r.max)}`}
-                  </td>
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-muted-foreground border-b border-border">
+                  <th className="py-2 font-medium">Problema identificado</th>
+                  <th className="py-2 font-medium text-right">Estimativa mensal</th>
                 </tr>
-              ))}
-              {hasQuantitative && (
-                <tr>
-                  <td className="pt-4 font-semibold">Total estimado</td>
-                  <td className="pt-4 text-right font-bold text-[var(--color-critical)]">
-                    {formatBRL(totalMin)} — {formatBRL(totalMax)}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.questionId + r.label} className="border-b border-border/60">
+                    <td className="py-3 pr-4">{r.label}</td>
+                    <td className="py-3 text-right font-medium">
+                      {r.qualitative
+                        ? "Estimar após diagnóstico completo"
+                        : `${formatBRL(r.min)} — ${formatBRL(r.max)}`}
+                    </td>
+                  </tr>
+                ))}
+                {hasQuantitative && (
+                  <tr className="border-t border-border">
+                    <td className="pt-4 font-semibold">Estimativa total de perdas mensais</td>
+                    <td className="pt-4 text-right font-bold text-[var(--color-critical)]">
+                      {formatBRL(totalMin)} — {formatBRL(totalMax)}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 space-y-0.5 text-[10px] leading-relaxed text-muted-foreground/70">
+            <p>Estimativas baseadas em benchmarks de PMEs com faturamento entre R$ 300 mil e R$ 3 milhões/mês.</p>
+            <p><sup>1</sup> Considerando 3% a 6% do faturamento mensal em recebíveis sem acompanhamento adequado.</p>
+            <p><sup>2</sup> Pesquisas de procurement indicam economia média de 10% a 15% com processo de cotação estruturado.</p>
+            <p><sup>3</sup> Estimativa de retrabalho (2 a 4 horas por NF com erro) + risco de autuação fiscal por emissão incorreta.</p>
+            <p><sup>4</sup> Calculado com base em 8 a 15 horas/mês do gestor dedicadas à operação financeira, com custo-hora de R$ 800 a R$ 2.000.</p>
+            <p><sup>5</sup> Fonte: ACFE — Association of Certified Fraud Examiners, Report to the Nations 2022.</p>
+          </div>
+        </>
       )}
     </div>
   );
@@ -312,73 +347,73 @@ function AlertPills({ items }: { items: AlertItem[] }) {
     </div>
   );
 }
-
-function OutcomesTable({ rows }: { rows: OutcomeRow[] }) {
-  if (rows.length === 0) return null;
-  return (
-    <div className="rounded-2xl border border-border bg-card p-6">
-      <h2 className="text-xl font-semibold mb-4">O que muda em 90 dias</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-muted-foreground border-b border-border">
-              <th className="py-2 font-medium w-[45%]">Situação Atual</th>
-              <th className="py-2 font-medium w-[10%]"></th>
-              <th className="py-2 font-medium w-[45%]">Em 90 dias com a O2</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.questionId} className="border-b border-border/60 align-top">
-                <td className="py-3 pr-4 text-muted-foreground">{r.current}</td>
-                <td className="py-3 text-center">
-                  <ArrowRight className="h-4 w-4 mx-auto text-primary" />
-                </td>
-                <td className="py-3 pl-4">{r.future}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
 function RecommendationCard({ rec }: { rec: Recommendation }) {
+  const navigate = useNavigate();
   return (
-    <div
-      className={cn(
-        "rounded-2xl border-2 p-6 bg-card",
-        "border-[var(--color-primary)]",
-      )}
-      style={{
-        backgroundColor: "color-mix(in oklab, var(--color-primary) 8%, var(--card))",
-      }}
-    >
-      <div className="flex items-start gap-3 mb-4">
-        <div className="rounded-lg bg-primary/15 p-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+    <div className="space-y-4">
+      <div
+        className="rounded-2xl border-2 p-6 bg-card border-[var(--color-primary)]"
+        style={{
+          backgroundColor: "color-mix(in oklab, var(--color-primary) 8%, var(--card))",
+        }}
+      >
+        <div className="flex items-start gap-3 mb-4">
+          <div className="rounded-lg bg-primary/15 p-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider text-primary">Recomendação principal</p>
+            <h2 className="text-2xl font-bold mt-1">{rec.service}</h2>
+            <p className="text-sm text-muted-foreground mt-1">{rec.tagline}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-xs uppercase tracking-wider text-primary">Recomendação</p>
-          <h2 className="text-2xl font-bold mt-1">{rec.service}</h2>
-          <p className="text-sm text-muted-foreground mt-1">{rec.tagline}</p>
+
+        <div className="rounded-xl bg-background/50 border border-border p-4 mb-4">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Por que este serviço?</p>
+          <p className="text-sm">{rec.reason}</p>
         </div>
+
+        {rec.gaps.length > 0 && (
+          <div>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+              Resolve os seguintes gaps
+            </p>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {rec.gaps.map((g) => (
+                <li key={g} className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>{g}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <Button
+          onClick={() => navigate({ to: rec.calculatorPath as any })}
+          className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          Calcular preço — {rec.service} <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
 
-      {rec.gaps.length > 0 && (
-        <div className="mt-4">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-            Resolve os seguintes gaps
-          </p>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {rec.gaps.map((g) => (
-              <li key={g} className="flex items-start gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <span>{g}</span>
-              </li>
-            ))}
-          </ul>
+      {rec.complementary && (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Serviço complementar</p>
+              <h3 className="text-lg font-semibold mt-1">{rec.complementary.service}</h3>
+              <p className="text-sm text-muted-foreground mt-1">{rec.complementary.reason}</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate({ to: rec.complementary!.calculatorPath as any })}
+              className="shrink-0"
+            >
+              Ver preço <ArrowRight className="ml-1 h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

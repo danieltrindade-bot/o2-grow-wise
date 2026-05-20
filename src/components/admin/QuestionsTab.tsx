@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { selectAll } from "@/lib/local-store";
 import { useAuth } from "@/context/AuthContext";
-import { logAudit } from "@/lib/admin-audit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { persistTable, type DraftBase } from "./crud-helpers";
 
-type Row = {
-  id: string;
+type Draft = DraftBase & {
   global_order: number;
   dimension: string;
   question_key: string;
@@ -18,36 +18,27 @@ type Row = {
   option_red: string;
 };
 
-type Draft = Row & { _new?: boolean; _dirty?: boolean };
-
 export function QuestionsTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [rows, setRows] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deleted, setDeleted] = useState<Row[]>([]);
-  const original = useMemo(() => new Map<string, Row>(), []);
+  const [deleted, setDeleted] = useState<Draft[]>([]);
+  const original = useMemo(() => new Map<string, Draft>(), []);
 
-  const load = async () => {
+  const load = () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("diagnostic_questions")
-      .select("*")
-      .order("global_order");
-    if (error) toast.error(error.message);
-    else {
-      original.clear();
-      (data ?? []).forEach((r) => original.set(r.id, r as Row));
-      setRows((data ?? []) as Draft[]);
-      setDeleted([]);
-    }
+    const data = selectAll<Draft>("diagnostic_questions", "global_order");
+    original.clear();
+    data.forEach((r) => original.set(r.id, r));
+    setRows(data);
+    setDeleted([]);
     setLoading(false);
   };
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
-  const update = (id: string, patch: Partial<Row>) => {
+  const update = (id: string, patch: Partial<Draft>) => {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch, _dirty: true } : r)));
   };
 
@@ -81,32 +72,10 @@ export function QuestionsTab() {
     if (!user) return;
     setSaving(true);
     try {
-      const inserts = rows.filter((r) => r._new).map(({ id, _new, _dirty, ...r }) => r);
-      const updates = rows.filter((r) => !r._new && r._dirty);
-      if (inserts.length) {
-        const { error } = await supabase.from("diagnostic_questions").insert(inserts);
-        if (error) throw error;
-        await logAudit(user.id, "diagnostic_questions", "insert", inserts);
-      }
-      for (const u of updates) {
-        const { id, _new, _dirty, ...payload } = u;
-        const { error } = await supabase
-          .from("diagnostic_questions")
-          .update(payload)
-          .eq("id", id);
-        if (error) throw error;
-        await logAudit(user.id, "diagnostic_questions", "update", payload, original.get(id));
-      }
-      for (const d of deleted) {
-        const { error } = await supabase
-          .from("diagnostic_questions")
-          .delete()
-          .eq("id", d.id);
-        if (error) throw error;
-        await logAudit(user.id, "diagnostic_questions", "delete", null, d);
-      }
+      await persistTable("diagnostic_questions", rows, deleted, original, user.id);
+      queryClient.invalidateQueries();
       toast.success("Alterações salvas");
-      await load();
+      load();
     } catch (e) {
       toast.error((e as Error).message);
     }

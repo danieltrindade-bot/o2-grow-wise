@@ -25,26 +25,9 @@ const services = [
 function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Nav */}
-      <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/80 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="inline-block h-3 w-3 rounded-full bg-primary" />
-            <span className="font-bold tracking-tight">O2 Inc</span>
-          </Link>
-          <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/servicos" className="hover:text-foreground">Serviços</Link>
-            <Link to="/admin/login" className="hover:text-foreground">Admin</Link>
-            <Link to="/diagnostico">
-              <Button size="sm" className="rounded-md">Diagnóstico</Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
-
       {/* Hero */}
       <section
-        className="relative min-h-screen flex items-center justify-center px-6 pt-16"
+        className="relative min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-6"
         style={{ background: "linear-gradient(180deg, #0A0A0A 0%, #111111 100%)" }}
       >
         <div className="absolute inset-0 pointer-events-none opacity-30"
@@ -72,6 +55,61 @@ function LandingPage() {
                 Ver serviços
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Authority — Map */}
+      <section className="border-t border-border overflow-hidden">
+        <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 min-h-[420px]">
+          <div className="flex flex-col justify-end px-6 py-16 md:py-24 md:pr-12">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-mono mb-4">Mapa de atuação</p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+              Estamos presentes em <span className="text-primary">todo o Brasil</span>
+            </h2>
+            <div className="w-16 h-px bg-border mt-6 mb-4" />
+            <p className="text-sm text-muted-foreground">Temos franquias espalhadas por todo país.</p>
+          </div>
+          <div className="relative h-64 md:h-auto overflow-hidden">
+            <img
+              src="/mapa-brasil.png"
+              alt="Mapa de atuação O2 no Brasil"
+              className="absolute inset-0 w-full h-full object-cover object-[70%_60%] scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+          </div>
+        </div>
+      </section>
+
+      {/* Authority — Numbers */}
+      <section className="py-24 px-6 border-t border-border">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-12 items-end mb-16">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-widest font-mono mb-4">Resultados acumulados</p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
+                13 anos de <span className="text-primary">experiência</span>
+              </h2>
+            </div>
+            <p className="text-muted-foreground max-w-sm text-sm md:text-right">
+              Atendemos empresas de todos os portes e segmentos, da indústria ao serviço.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { value: "+1,09", unit: "BI", label: "Em passivos renegociados" },
+              { value: "+1,55", unit: "BI", label: "Em operações financeiras" },
+              { value: "+2.000", unit: "", label: "Empresas atendidas" },
+              { value: "88", unit: "NPS", label: "Dado pelos nossos clientes" },
+            ].map((m) => (
+              <div key={m.label} className="bg-card border border-border rounded-xl p-6">
+                <p className="text-3xl md:text-4xl font-bold text-primary">
+                  {m.value}
+                  {m.unit && <span className="text-lg md:text-xl ml-1 text-muted-foreground font-semibold">{m.unit}</span>}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground uppercase tracking-wider">{m.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

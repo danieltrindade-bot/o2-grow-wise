@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2, Info } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { selectAll, updateRow } from "@/lib/local-store";
 import { useAuth } from "@/context/AuthContext";
 import { logAudit } from "@/lib/admin-audit";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ type AssSettings = { id: string; cnpj_adjustment: number; min_price: number; max
 
 export function OthersTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -29,24 +31,22 @@ export function OthersTab() {
   const [settingsOriginal, setSettingsOriginal] = useState<AssSettings | null>(null);
   const [settingsDirty, setSettingsDirty] = useState(false);
 
-  const load = async () => {
+  const load = () => {
     setLoading(true);
-    const [s, a, st] = await Promise.all([
-      supabase.from("setup_pricing_rules").select("*").order("sort_order"),
-      supabase.from("assessoria_pricing_rules").select("*").order("sort_order"),
-      supabase.from("assessoria_settings").select("*").limit(1).maybeSingle(),
-    ]);
-    if (s.error || a.error || st.error) toast.error((s.error || a.error || st.error)!.message);
+    const sData = selectAll<Setup>("setup_pricing_rules", "sort_order");
     setupOriginal.clear();
-    (s.data ?? []).forEach((r) => setupOriginal.set(r.id, r as Setup));
-    setSetups((s.data ?? []) as Setup[]);
+    sData.forEach((r) => setupOriginal.set(r.id, r));
+    setSetups(sData);
     setSetupDeleted([]);
+    const aData = selectAll<AssRow>("assessoria_pricing_rules", "sort_order");
     assOriginal.clear();
-    (a.data ?? []).forEach((r) => assOriginal.set(r.id, r as AssRow));
-    setAss((a.data ?? []) as AssRow[]);
+    aData.forEach((r) => assOriginal.set(r.id, r));
+    setAss(aData);
     setAssDeleted([]);
-    setSettings((st.data ?? null) as AssSettings | null);
-    setSettingsOriginal((st.data ?? null) as AssSettings | null);
+    const stData = selectAll<AssSettings>("assessoria_settings");
+    const stFirst = stData[0] ?? null;
+    setSettings(stFirst);
+    setSettingsOriginal(stFirst);
     setSettingsDirty(false);
     setLoading(false);
   };
@@ -91,10 +91,10 @@ export function OthersTab() {
       await persistTable("assessoria_pricing_rules", ass, assDeleted, assOriginal, user.id);
       if (settingsDirty && settings) {
         const { id, ...payload } = settings;
-        const { error } = await supabase.from("assessoria_settings").update(payload).eq("id", id);
-        if (error) throw error;
+        updateRow("assessoria_settings", id, payload);
         await logAudit(user.id, "assessoria_settings", "update", payload, settingsOriginal);
       }
+      queryClient.invalidateQueries();
       toast.success("Configurações salvas");
       await load();
     } catch (e) { toast.error((e as Error).message); }

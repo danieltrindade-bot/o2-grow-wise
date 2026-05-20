@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { selectAll } from "@/lib/local-store";
 import { useAuth } from "@/context/AuthContext";
-import { logAudit } from "@/lib/admin-audit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { persistTable, type DraftBase } from "./crud-helpers";
 
-type Row = {
-  id: string;
+type Draft = DraftBase & {
   dimension: string;
   question_key: string;
   trigger_color: string;
@@ -18,31 +18,28 @@ type Row = {
   pct_max: number | null;
   qualitative: boolean;
 };
-type Draft = Row & { _new?: boolean; _dirty?: boolean };
 
 export function CostsTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [rows, setRows] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deleted, setDeleted] = useState<Row[]>([]);
-  const original = useMemo(() => new Map<string, Row>(), []);
+  const [deleted, setDeleted] = useState<Draft[]>([]);
+  const original = useMemo(() => new Map<string, Draft>(), []);
 
-  const load = async () => {
+  const load = () => {
     setLoading(true);
-    const { data, error } = await supabase.from("cost_parameters").select("*").order("dimension");
-    if (error) toast.error(error.message);
-    else {
-      original.clear();
-      (data ?? []).forEach((r) => original.set(r.id, r as Row));
-      setRows((data ?? []) as Draft[]);
-      setDeleted([]);
-    }
+    const data = selectAll<Draft>("cost_parameters", "dimension");
+    original.clear();
+    data.forEach((r) => original.set(r.id, r));
+    setRows(data);
+    setDeleted([]);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
-  const update = (id: string, patch: Partial<Row>) =>
+  const update = (id: string, patch: Partial<Draft>) =>
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch, _dirty: true } : r)));
 
   const add = () => {
@@ -65,26 +62,10 @@ export function CostsTab() {
     if (!user) return;
     setSaving(true);
     try {
-      const inserts = rows.filter((r) => r._new).map(({ id, _new, _dirty, ...r }) => r);
-      const updates = rows.filter((r) => !r._new && r._dirty);
-      if (inserts.length) {
-        const { error } = await supabase.from("cost_parameters").insert(inserts);
-        if (error) throw error;
-        await logAudit(user.id, "cost_parameters", "insert", inserts);
-      }
-      for (const u of updates) {
-        const { id, _new, _dirty, ...payload } = u;
-        const { error } = await supabase.from("cost_parameters").update(payload).eq("id", id);
-        if (error) throw error;
-        await logAudit(user.id, "cost_parameters", "update", payload, original.get(id));
-      }
-      for (const d of deleted) {
-        const { error } = await supabase.from("cost_parameters").delete().eq("id", d.id);
-        if (error) throw error;
-        await logAudit(user.id, "cost_parameters", "delete", null, d);
-      }
+      await persistTable("cost_parameters", rows, deleted, original, user.id);
+      queryClient.invalidateQueries();
       toast.success("Alterações salvas");
-      await load();
+      load();
     } catch (e) {
       toast.error((e as Error).message);
     }

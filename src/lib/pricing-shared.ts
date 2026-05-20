@@ -54,6 +54,4 @@ export function calcSetupPriceFromRules(
   return { classification, base, surcharge, total: base + surcharge };
 }
 
-export function formatBRL(v: number): string {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
+export { formatBRL } from "./format";

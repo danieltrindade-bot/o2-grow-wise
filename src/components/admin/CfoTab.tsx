@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { selectAll } from "@/lib/local-store";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,16 +20,12 @@ function useTable<T extends DraftBase>(table: string, orderBy?: string) {
   const [deleted, setDeleted] = useState<T[]>([]);
   const original = useMemo(() => new Map<string, T>(), []);
   const [loading, setLoading] = useState(true);
-  const load = async () => {
+  const load = () => {
     setLoading(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let q = (supabase.from(table as any) as any).select("*");
-    if (orderBy) q = q.order(orderBy);
-    const { data, error } = await q;
-    if (error) toast.error(error.message);
+    const data = selectAll<T>(table, orderBy);
     original.clear();
-    (data ?? []).forEach((r: T) => original.set(r.id, r));
-    setRows((data ?? []) as T[]);
+    data.forEach((r) => original.set(r.id, r));
+    setRows(data);
     setDeleted([]);
     setLoading(false);
   };
@@ -57,6 +54,7 @@ function NumInput({ value, onChange, nullable = false }: { value: number | null;
 
 export function CfoTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const base = useTable<Base>("cfo_base_rules", "sort_order");
   const cnpj = useTable<Cnpj>("cfo_cnpj_rules", "cnpj_count");
   const cmplx = useTable<Cmplx>("cfo_complexity_rules", "min_score");
@@ -78,6 +76,7 @@ export function CfoTab() {
       await persistTable("cfo_segment_rules", seg.rows, seg.deleted, seg.original, user.id);
       await persistTable("cfo_governance_rules", gov.rows, gov.deleted, gov.original, user.id);
       await persistTable("setup_pricing_rules", setup.rows, setup.deleted, setup.original, user.id);
+      queryClient.invalidateQueries();
       toast.success("Regras CFO salvas");
       await Promise.all([base.load(), cnpj.load(), cmplx.load(), seg.load(), gov.load(), setup.load()]);
     } catch (e) { toast.error((e as Error).message); }

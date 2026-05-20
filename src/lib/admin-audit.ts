@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { insertRows } from "@/lib/local-store";
 
 export type AuditAction = "insert" | "update" | "delete";
 
@@ -10,13 +10,16 @@ export async function logAudit(
   oldValues?: unknown,
 ) {
   try {
-    await supabase.from("admin_audit_logs").insert({
-      admin_id: adminId,
-      table_name: tableName,
-      action,
-      new_values: newValues as never,
-      old_values: (oldValues ?? null) as never,
-    });
+    insertRows("admin_audit_logs", [
+      {
+        admin_id: adminId,
+        table_name: tableName,
+        action,
+        new_values: newValues,
+        old_values: oldValues ?? null,
+        created_at: new Date().toISOString(),
+      },
+    ]);
   } catch (e) {
     console.error("audit log failed", e);
   }

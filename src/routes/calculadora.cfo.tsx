@@ -11,19 +11,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
+import { formatBRL } from "@/lib/format";
 import { useCFOPricing, type CFOBaseRule, type CFOComplexityRule, type SetupPricingRule } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
+import { MobilePriceSummary } from "@/components/MobilePriceSummary";
+import { ProductPresentation } from "@/components/ProductPresentation";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
 
 export const Route = createFileRoute("/calculadora/cfo")({
   component: CalculadoraCFOPage,
 });
-
-function formatBRL(v: number): string {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
 
 const COMPLEXITY_LABELS = ["Segmento", "Operação", "ERP", "Governança", "Estrutura Societária", "Consolidação"];
 
@@ -89,11 +89,14 @@ function CalculadoraCFOPage() {
     ? calcSetupPriceFromRules(data.setup as SetupPricingRule[], monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
 
+  const setupParcela = setupResult.total / 12;
+  const totalMensal = finalRecorrencia + setupParcela;
   const animatedRecorrencia = useCountUp(finalRecorrencia);
-  const animatedSetup = useCountUp(setupResult.total);
+  const animatedTotal = useCountUp(totalMensal);
+  const [showPrices, setShowPrices] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground px-4 py-8">
+    <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
       <div className="mx-auto max-w-6xl">
         <Link to="/servicos" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-2">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar aos Serviços
@@ -104,6 +107,8 @@ function CalculadoraCFOPage() {
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Calculadora — CFO as a Service</h1>
           <p className="text-muted-foreground mt-2">Configure os parâmetros para precificar mensalidade e setup.</p>
         </div>
+
+        <ProductPresentation serviceKey="cfo" title="CFO as a Service" />
 
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
@@ -151,7 +156,7 @@ function CalculadoraCFOPage() {
                         {data.governance.map((g) => (
                           <SelectItem key={g.governance_type} value={g.governance_type}>
                             {g.governance_type.charAt(0).toUpperCase() + g.governance_type.slice(1)}
-                            {Number(g.fee) > 0 ? ` (+ ${formatBRL(Number(g.fee))})` : ""}
+                            {Number(g.fee) > 0 ? " (+ taxa)" : ""}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -189,79 +194,92 @@ function CalculadoraCFOPage() {
             <aside className="lg:col-span-1">
               <div className="lg:sticky lg:top-6 rounded-2xl border-2 border-primary bg-card overflow-hidden"
                    style={{ backgroundColor: "color-mix(in oklab, var(--color-primary) 6%, var(--card))" }}>
-                <Tabs defaultValue="recorrencia" className="w-full">
-                  <div className="px-5 pt-5">
-                    <TabsList className="grid grid-cols-2 w-full">
-                      <TabsTrigger value="recorrencia">Recorrência</TabsTrigger>
-                      <TabsTrigger value="setup">Setup</TabsTrigger>
-                    </TabsList>
+                {showPrices ? (
+                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <Tabs defaultValue="recorrencia" className="w-full">
+                      <div className="px-5 pt-5">
+                        <TabsList className="grid grid-cols-2 w-full">
+                          <TabsTrigger value="recorrencia">Recorrência</TabsTrigger>
+                          <TabsTrigger value="setup">Setup</TabsTrigger>
+                        </TabsList>
+                      </div>
+
+                      <TabsContent value="recorrencia" className="p-5 space-y-4 mt-0">
+                        <Row label="Preço base" value={formatBRL(basePrice)} />
+                        <Row label="Multiplicador CNPJ" value={`×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`} />
+                        <Row label="Complexidade" value={`${cf.label} ×${cf.factor} (${complexityScore})`} />
+                        <Row label="Ajuste segmento" value={cnpjCount > 1 ? `+${segmentAdj}%` : "—"} />
+                        <Row label="Taxa governança" value={formatBRL(governanceFee)} />
+
+                        <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
+                          <p className="text-xs uppercase tracking-wider text-primary">Valor mensal</p>
+                          <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(animatedRecorrencia)}</p>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="setup" className="p-5 space-y-4 mt-0">
+                        <Row label="Classificação" value={setupResult.classification === "padrao" ? "Padrão" : "Complexo"} />
+                        <Row label="Setup base" value={formatBRL(setupResult.base)} />
+                        <Row label="Adicional por segmento" value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"} />
+                        <Row label="Valor total setup" value={formatBRL(setupResult.total)} bold />
+
+                        <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
+                          <p className="text-xs uppercase tracking-wider text-primary">Setup em 12x</p>
+                          <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(setupParcela)}<span className="text-sm font-normal text-primary/70">/mês</span></p>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+
+                    <div className="px-5 pb-5">
+                      <div className="rounded-xl bg-primary/15 border border-primary p-4">
+                        <p className="text-xs uppercase tracking-wider text-primary">Investimento mensal total</p>
+                        <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(animatedTotal)}</p>
+                        <div className="mt-2 text-xs text-primary/70 space-y-0.5">
+                          <p>Recorrência: {formatBRL(finalRecorrencia)} + Setup 12x: {formatBRL(setupParcela)}</p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() =>
+                          exportCalculatorPDF({
+                            service: "CFO as a Service",
+                            clientName: state.companyName,
+                            monthlyRevenue,
+                            rows: [
+                              ["Preço base", formatBRL(basePrice)],
+                              ["Multiplicador CNPJ", `×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`],
+                              ["Complexidade", `${cf.label} ×${cf.factor} (${complexityScore})`],
+                              ["Ajuste segmento", cnpjCount > 1 ? `+${segmentAdj}%` : "—"],
+                              ["Taxa governança", formatBRL(governanceFee)],
+                              ["Mensalidade", formatBRL(finalRecorrencia)],
+                              ["Setup (12x)", formatBRL(setupParcela)],
+                            ],
+                            finalLabel: "Investimento mensal total",
+                            finalValue: formatBRL(totalMensal),
+                          })
+                        }
+                        className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        <Download className="mr-2 h-4 w-4" /> Exportar PDF
+                      </Button>
+                    </div>
                   </div>
-
-                  <TabsContent value="recorrencia" className="p-5 space-y-4 mt-0">
-                    <Row label="Preço base" value={formatBRL(basePrice)} />
-                    <Row label="Multiplicador CNPJ" value={`×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`} />
-                    <Row label="Complexidade" value={`${cf.label} ×${cf.factor} (${complexityScore})`} />
-                    <Row label="Ajuste segmento" value={cnpjCount > 1 ? `+${segmentAdj}%` : "—"} />
-                    <Row label="Taxa governança" value={formatBRL(governanceFee)} />
-
-                    <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
-                      <p className="text-xs uppercase tracking-wider text-primary">Valor mensal</p>
-                      <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(animatedRecorrencia)}</p>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="setup" className="p-5 space-y-4 mt-0">
-                    <Row label="Classificação" value={setupResult.classification === "padrao" ? "Padrão" : "Complexo"} />
-                    <Row label="Setup base" value={formatBRL(setupResult.base)} />
-                    <Row label="Adicional por segmento" value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"} />
-
-                    <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
-                      <p className="text-xs uppercase tracking-wider text-primary">Valor do setup</p>
-                      <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(animatedSetup)}</p>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-
-                <div className="px-5 pb-5">
-                  <div className="rounded-xl border border-border bg-background/40 p-4 text-sm space-y-1.5">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Investimento mensal</span>
-                      <span className="font-semibold tabular-nums">{formatBRL(finalRecorrencia)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Implantação (setup)</span>
-                      <span className="font-semibold tabular-nums">{formatBRL(setupResult.total)}</span>
-                    </div>
+                ) : (
+                  <div className="p-5">
+                    <Button
+                      onClick={() => setShowPrices(true)}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Investimento
+                    </Button>
                   </div>
-                  <Button
-                    onClick={() =>
-                      exportCalculatorPDF({
-                        service: "CFO as a Service",
-                        clientName: state.companyName,
-                        monthlyRevenue,
-                        rows: [
-                          ["Preço base", formatBRL(basePrice)],
-                          ["Multiplicador CNPJ", `×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`],
-                          ["Complexidade", `${cf.label} ×${cf.factor} (${complexityScore})`],
-                          ["Ajuste segmento", cnpjCount > 1 ? `+${segmentAdj}%` : "—"],
-                          ["Taxa governança", formatBRL(governanceFee)],
-                          ["Mensalidade", formatBRL(finalRecorrencia)],
-                          ["Setup", formatBRL(setupResult.total)],
-                        ],
-                        finalLabel: "Investimento mensal",
-                        finalValue: formatBRL(finalRecorrencia),
-                      })
-                    }
-                    className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Download className="mr-2 h-4 w-4" /> Exportar PDF
-                  </Button>
-                </div>
+                )}
               </div>
             </aside>
           </div>
         )}
       </div>
+
+      <MobilePriceSummary label="Investimento mensal total" value={formatBRL(totalMensal)} visible={showPrices} onReveal={() => setShowPrices(true)} />
     </div>
   );
 }
@@ -282,11 +300,3 @@ function ComplexityRow({ label, value, onChange }: { label: string; value: numbe
   );
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
-  return (
-    <div className="flex items-center justify-between gap-3 text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={cn(bold && "font-semibold", "tabular-nums")}>{value}</span>
-    </div>
-  );
-}

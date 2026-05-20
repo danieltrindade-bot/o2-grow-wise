@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ServicosRouteImport } from './routes/servicos'
+import { Route as ReunioesRouteImport } from './routes/reunioes'
 import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,6 +25,11 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 const ServicosRoute = ServicosRouteImport.update({
   id: '/servicos',
   path: '/servicos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReunioesRoute = ReunioesRouteImport.update({
+  id: '/reunioes',
+  path: '/reunioes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultadosRoute = ResultadosRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
+  '/reunioes': typeof ReunioesRoute
   '/servicos': typeof ServicosRoute
   '/admin/login': typeof AdminLoginRoute
   '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
+  '/reunioes': typeof ReunioesRoute
   '/servicos': typeof ServicosRoute
   '/admin/login': typeof AdminLoginRoute
   '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/diagnostico': typeof DiagnosticoRoute
   '/resultados': typeof ResultadosRoute
+  '/reunioes': typeof ReunioesRoute
   '/servicos': typeof ServicosRoute
   '/admin/login': typeof AdminLoginRoute
   '/calculadora/assessoria': typeof CalculadoraAssessoriaRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/diagnostico'
     | '/resultados'
+    | '/reunioes'
     | '/servicos'
     | '/admin/login'
     | '/calculadora/assessoria'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/'
     | '/diagnostico'
     | '/resultados'
+    | '/reunioes'
     | '/servicos'
     | '/admin/login'
     | '/calculadora/assessoria'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/'
     | '/diagnostico'
     | '/resultados'
+    | '/reunioes'
     | '/servicos'
     | '/admin/login'
     | '/calculadora/assessoria'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiagnosticoRoute: typeof DiagnosticoRoute
   ResultadosRoute: typeof ResultadosRoute
+  ReunioesRoute: typeof ReunioesRoute
   ServicosRoute: typeof ServicosRoute
   AdminLoginRoute: typeof AdminLoginRoute
   CalculadoraAssessoriaRoute: typeof CalculadoraAssessoriaRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/servicos'
       fullPath: '/servicos'
       preLoaderRoute: typeof ServicosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reunioes': {
+      id: '/reunioes'
+      path: '/reunioes'
+      fullPath: '/reunioes'
+      preLoaderRoute: typeof ReunioesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resultados': {
@@ -259,6 +279,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiagnosticoRoute: DiagnosticoRoute,
   ResultadosRoute: ResultadosRoute,
+  ReunioesRoute: ReunioesRoute,
   ServicosRoute: ServicosRoute,
   AdminLoginRoute: AdminLoginRoute,
   CalculadoraAssessoriaRoute: CalculadoraAssessoriaRoute,
@@ -271,13 +292,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

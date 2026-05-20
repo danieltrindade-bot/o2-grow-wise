@@ -1,14 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { selectAll, resetTable } from "@/lib/local-store";
 
 const FIVE_MIN = 5 * 60 * 1000;
-
-async function selectAll<T = any>(table: string, orderBy?: string): Promise<T[]> {
-  const q = supabase.from(table as any).select("*");
-  const { data, error } = orderBy ? await q.order(orderBy as any) : await q;
-  if (error) throw error;
-  return (data ?? []) as T[];
-}
 
 export interface BPOPackage {
   id: string;
@@ -30,7 +23,6 @@ export interface BPOSetupModule {
 }
 export interface BPOSettings {
   dias_uteis: number;
-  markup_percent: number;
   tier_1_limit: number;
   tier_2_limit: number;
 }
@@ -39,15 +31,12 @@ export function useBPOPricing() {
   return useQuery({
     queryKey: ["bpo-pricing"],
     staleTime: FIVE_MIN,
-    queryFn: async () => {
-      const [packages, setupRows, settingsRows] = await Promise.all([
-        selectAll<BPOPackage>("bpo_packages", "display_order"),
-        selectAll<BPOSetupModule>("bpo_setup_module"),
-        selectAll<{ key: string; value: any }>("bpo_settings"),
-      ]);
+    queryFn: () => {
+      const packages = selectAll<BPOPackage>("bpo_packages", "display_order");
+      const setupRows = selectAll<BPOSetupModule>("bpo_setup_module");
+      const settingsRows = selectAll<{ key: string; value: any }>("bpo_settings");
       const settings: BPOSettings = {
         dias_uteis: 22,
-        markup_percent: 20,
         tier_1_limit: 200,
         tier_2_limit: 500,
       };
@@ -101,17 +90,14 @@ export function useCFOPricing() {
   return useQuery({
     queryKey: ["cfo-pricing"],
     staleTime: FIVE_MIN,
-    queryFn: async () => {
-      const [base, cnpj, complexity, segment, governance, setup] = await Promise.all([
-        selectAll<CFOBaseRule>("cfo_base_rules", "sort_order"),
-        selectAll<CFOCnpjRule>("cfo_cnpj_rules", "cnpj_count"),
-        selectAll<CFOComplexityRule>("cfo_complexity_rules", "min_score"),
-        selectAll<CFOSegmentRule>("cfo_segment_rules"),
-        selectAll<CFOGovernanceRule>("cfo_governance_rules"),
-        selectAll<SetupPricingRule>("setup_pricing_rules", "sort_order"),
-      ]);
-      return { base, cnpj, complexity, segment, governance, setup };
-    },
+    queryFn: () => ({
+      base: selectAll<CFOBaseRule>("cfo_base_rules", "sort_order"),
+      cnpj: selectAll<CFOCnpjRule>("cfo_cnpj_rules", "cnpj_count"),
+      complexity: selectAll<CFOComplexityRule>("cfo_complexity_rules", "min_score"),
+      segment: selectAll<CFOSegmentRule>("cfo_segment_rules"),
+      governance: selectAll<CFOGovernanceRule>("cfo_governance_rules"),
+      setup: selectAll<SetupPricingRule>("setup_pricing_rules", "sort_order"),
+    }),
   });
 }
 
@@ -123,7 +109,7 @@ export function useSetupPricing() {
   });
 }
 
-// Oxy + Gênio and Coordenador share setup pricing rules
+// Oxy + Genio and Coordenador share setup pricing rules
 export const useOxyPricing = useSetupPricing;
 export const useCoordenadorPricing = useSetupPricing;
 
@@ -146,16 +132,19 @@ export function useAssessoriaPricing() {
   return useQuery({
     queryKey: ["assessoria-pricing"],
     staleTime: FIVE_MIN,
-    queryFn: async () => {
-      const [rules, settingsArr] = await Promise.all([
-        selectAll<AssessoriaRule>("assessoria_pricing_rules", "sort_order"),
-        selectAll<AssessoriaSettings>("assessoria_settings"),
-      ]);
+    queryFn: () => {
+      let rules = selectAll<AssessoriaRule>("assessoria_pricing_rules", "sort_order");
+      if (rules.length && rules[0].base_price === 4170) {
+        resetTable("assessoria_pricing_rules");
+        resetTable("assessoria_settings");
+        rules = selectAll<AssessoriaRule>("assessoria_pricing_rules", "sort_order");
+      }
+      const settingsArr = selectAll<AssessoriaSettings>("assessoria_settings");
       const settings = settingsArr[0] ?? {
         id: "",
         cnpj_adjustment: 500,
-        min_price: 4170,
-        max_price: 8570,
+        min_price: 4000,
+        max_price: 6000,
       };
       return { rules, settings };
     },
@@ -215,15 +204,12 @@ export function useDiagnosticConfig() {
   return useQuery({
     queryKey: ["diagnostic-config"],
     staleTime: FIVE_MIN,
-    queryFn: async () => {
-      const [questions, costs, maturity, outcomes, recommendations] = await Promise.all([
-        selectAll<DiagnosticQuestion>("diagnostic_questions", "global_order"),
-        selectAll<CostParameter>("cost_parameters"),
-        selectAll<MaturityLevel>("maturity_levels", "sort_order"),
-        selectAll<OutcomeText>("outcome_texts"),
-        selectAll<ProductRecommendation>("product_recommendations", "score_min"),
-      ]);
-      return { questions, costs, maturity, outcomes, recommendations };
-    },
+    queryFn: () => ({
+      questions: selectAll<DiagnosticQuestion>("diagnostic_questions", "global_order"),
+      costs: selectAll<CostParameter>("cost_parameters"),
+      maturity: selectAll<MaturityLevel>("maturity_levels", "sort_order"),
+      outcomes: selectAll<OutcomeText>("outcome_texts"),
+      recommendations: selectAll<ProductRecommendation>("product_recommendations", "score_min"),
+    }),
   });
 }

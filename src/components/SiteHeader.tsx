@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/diagnostico", label: "Diagnóstico" },
+  { to: "/reunioes", label: "Reuniões" },
   { to: "/servicos", label: "Serviços" },
 ] as const;
 
@@ -87,26 +88,7 @@ export function SiteHeader() {
 export function ScrollToTop() {
   const loc = useLocation();
   useEffect(() => {
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [loc.pathname]);
   return null;
-}
-
-export function Breadcrumbs({ items }: { items: Array<{ label: string; to?: string }> }) {
-  return (
-    <nav className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5 flex-wrap">
-      {items.map((it, i) => (
-        <span key={i} className="flex items-center gap-1.5">
-          {it.to ? (
-            <Link to={it.to as any} className="hover:text-foreground transition-colors">
-              {it.label}
-            </Link>
-          ) : (
-            <span className="text-foreground">{it.label}</span>
-          )}
-          {i < items.length - 1 && <span>/</span>}
-        </span>
-      ))}
-    </nav>
-  );
 }

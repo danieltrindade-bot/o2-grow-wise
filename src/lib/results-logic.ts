@@ -204,31 +204,204 @@ export function buildAlerts(
 export interface Recommendation {
   service: string;
   tagline: string;
+  reason: string;
   gaps: string[];
+  calculatorPath: string;
+  complementary?: {
+    service: string;
+    reason: string;
+    calculatorPath: string;
+  };
+}
+
+const FINANCIAL_KEYS = ["financial:q1", "financial:q2", "financial:q3", "financial:q4", "financial:q5"];
+const COMMERCIAL_KEYS = ["commercial:q1", "commercial:q2", "commercial:q3", "commercial:q4", "commercial:q5"];
+
+interface DimensionAnalysis {
+  score: number;
+  reds: number;
+  yellows: number;
+  painPoints: string[];
+}
+
+function analyzeDimension(answers: Record<string, TrafficLight>, keys: string[]): DimensionAnalysis {
+  let reds = 0, yellows = 0, score = 0;
+  const painPoints: string[] = [];
+  for (const k of keys) {
+    const a = answers[k];
+    if (a === "red") { reds++; score += 2; painPoints.push(k); }
+    else if (a === "yellow") { yellows++; score += 1; painPoints.push(k); }
+  }
+  return { score, reds, yellows, painPoints };
+}
+
+const PAIN_LABELS: Record<string, string> = {
+  "financial:q1": "sem visibilidade de recebíveis",
+  "financial:q2": "cobrança sem régua definida",
+  "financial:q3": "compras sem processo de aprovação",
+  "financial:q4": "multas e juros recorrentes",
+  "financial:q5": "conciliação bancária fraca",
+  "commercial:q1": "lucratividade por cliente não medida",
+  "commercial:q2": "descontos concedidos sem critério",
+  "commercial:q3": "condições comerciais ditadas pelo cliente",
+  "commercial:q4": "sem previsibilidade de caixa",
+  "commercial:q5": "vendas e caixa descasados",
+};
+
+type ProductKey = "bpo" | "assessoria" | "cfo" | "oxy" | "coordenador";
+
+interface ProductInfo {
+  service: string;
+  path: string;
+  resolves: string[];
+}
+
+const PRODUCTS: Record<ProductKey, ProductInfo> = {
+  bpo: {
+    service: "BPO Financeiro",
+    path: "/calculadora/bpo",
+    resolves: FINANCIAL_KEYS,
+  },
+  assessoria: {
+    service: "Assessoria Estratégica",
+    path: "/calculadora/assessoria",
+    resolves: COMMERCIAL_KEYS,
+  },
+  cfo: {
+    service: "CFO as a Service",
+    path: "/calculadora/cfo",
+    resolves: [...FINANCIAL_KEYS, ...COMMERCIAL_KEYS],
+  },
+  oxy: {
+    service: "Oxy + Gênio",
+    path: "/calculadora/oxy",
+    resolves: ["financial:q1", "financial:q5", "commercial:q4"],
+  },
+  coordenador: {
+    service: "Coordenador as a Service",
+    path: "/calculadora/coordenador",
+    resolves: ["financial:q3", "financial:q4", "financial:q5"],
+  },
+};
+
+function buildReason(answers: Record<string, TrafficLight>, resolves: string[]): string {
+  const pains = resolves
+    .filter((qid) => answers[qid] === "red" || answers[qid] === "yellow")
+    .map((qid) => PAIN_LABELS[qid])
+    .filter(Boolean);
+  if (pains.length === 0) return "Indicado para empresas que buscam evolução contínua";
+  if (pains.length <= 2) return `Identificamos: ${pains.join(" e ")}`;
+  return `Identificamos: ${pains.slice(0, -1).join(", ")} e ${pains[pains.length - 1]}`;
+}
+
+function pickTagline(key: ProductKey, fin: DimensionAnalysis, com: DimensionAnalysis): string {
+  switch (key) {
+    case "bpo":
+      return fin.score >= 7
+        ? "Sua operação financeira precisa de estrutura urgente"
+        : "Estruture a operação financeira e elimine perdas evitáveis";
+    case "assessoria":
+      return com.score >= 7
+        ? "Sua estratégia comercial precisa de direção imediata"
+        : "Transforme a gestão comercial em vantagem competitiva";
+    case "cfo":
+      return "Gestão financeira executiva para transformação completa da empresa";
+    case "oxy":
+      return "Dados em tempo real e IA para decisões mais rápidas e precisas";
+    case "coordenador":
+      return "Coordenação dedicada para organizar seus processos financeiros";
+  }
+}
+
+export interface ProfileContext {
+  monthlyRevenue?: number;
+  growth?: string;
+  mainChallenges?: string[];
+}
+
+function prefersCoordenador(
+  fin: DimensionAnalysis,
+  answers: Record<string, TrafficLight>,
+  ctx: ProfileContext,
+): boolean {
+  if (fin.score < 3 || fin.score > 4) return false;
+  const processIssues = (answers["financial:q3"] === "red" || answers["financial:q3"] === "yellow")
+    || (answers["financial:q4"] === "red" || answers["financial:q4"] === "yellow");
+  if (!processIssues) return false;
+  const hasTeamChallenge = ctx.mainChallenges?.includes("Equipe júnior / falta braço") ?? false;
+  const isGrowing = ctx.growth === "strong" || ctx.growth === "moderate";
+  return hasTeamChallenge || isGrowing;
 }
 
 export function getRecommendation(
   overallScore: number,
   answers: Record<string, TrafficLight>,
-  recommendations?: ProductRecommendation[],
+  _recommendations?: ProductRecommendation[],
   questions?: DiagnosticQuestion[],
+  profile?: ProfileContext,
 ): Recommendation {
   const gaps = buildAlerts(answers, questions).map((a) => a.text);
-  if (recommendations && recommendations.length) {
-    const r =
-      recommendations.find((x) => overallScore >= x.score_min && overallScore <= x.score_max) ??
-      recommendations[recommendations.length - 1];
-    return { service: r.name, tagline: r.tagline, gaps };
+  const fin = analyzeDimension(answers, FINANCIAL_KEYS);
+  const com = analyzeDimension(answers, COMMERCIAL_KEYS);
+
+  const ctx = profile ?? {};
+  const cfoAllowed = !ctx.monthlyRevenue || ctx.monthlyRevenue >= 700_000;
+
+  let primary: ProductKey;
+  let secondary: ProductKey | null = null;
+
+  if (fin.score >= 5 && com.score >= 5) {
+    if (cfoAllowed) {
+      primary = "cfo";
+      secondary = "coordenador";
+    } else {
+      primary = "bpo";
+      secondary = "assessoria";
+    }
+  } else if (fin.score >= 5) {
+    primary = "bpo";
+    secondary = com.score >= 3 ? "assessoria" : null;
+  } else if (com.score >= 5) {
+    primary = "assessoria";
+    secondary = fin.score >= 3 ? "bpo" : null;
+  } else if (fin.score >= 3 && com.score >= 3) {
+    if (prefersCoordenador(fin, answers, ctx)) {
+      primary = "coordenador";
+      secondary = "assessoria";
+    } else if (fin.score >= com.score) {
+      primary = "bpo";
+      secondary = "assessoria";
+    } else {
+      primary = "assessoria";
+      secondary = "bpo";
+    }
+  } else if (fin.score >= 3) {
+    primary = prefersCoordenador(fin, answers, ctx) ? "coordenador" : "bpo";
+  } else if (com.score >= 3) {
+    primary = "assessoria";
+  } else {
+    primary = "oxy";
   }
-  if (overallScore <= 4) return { service: "O2 Processos", tagline: "Estruture os processos financeiros que sustentam o crescimento", gaps };
-  if (overallScore <= 9) return { service: "O2 Processos + O2 Receita", tagline: "Transformação financeira e comercial completa", gaps };
-  return { service: "CFO as a Service", tagline: "Inteligência financeira executiva sob demanda", gaps };
+
+  const p = PRODUCTS[primary];
+  const result: Recommendation = {
+    service: p.service,
+    tagline: pickTagline(primary, fin, com),
+    reason: buildReason(answers, p.resolves),
+    gaps,
+    calculatorPath: p.path,
+  };
+
+  if (secondary) {
+    const s = PRODUCTS[secondary];
+    result.complementary = {
+      service: s.service,
+      reason: buildReason(answers, s.resolves),
+      calculatorPath: s.path,
+    };
+  }
+
+  return result;
 }
 
-export function formatBRL(value: number): string {
-  return value.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: 0,
-  });
-}
+export { formatBRL } from "./format";

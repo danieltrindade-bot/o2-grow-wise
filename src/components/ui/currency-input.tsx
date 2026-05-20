@@ -7,7 +7,7 @@ export interface CurrencyInputProps
   onValueChange: (value: number) => void;
 }
 
-function formatBRL(cents: number): string {
+function formatCents(cents: number): string {
   const reais = cents / 100;
   return reais.toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
@@ -18,7 +18,7 @@ function formatBRL(cents: number): string {
 export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   ({ className, value, onValueChange, ...props }, ref) => {
     const cents = Math.round((value || 0) * 100);
-    const display = `R$ ${formatBRL(cents)}`;
+    const display = `R$ ${formatCents(cents)}`;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const digits = e.target.value.replace(/\D/g, "");

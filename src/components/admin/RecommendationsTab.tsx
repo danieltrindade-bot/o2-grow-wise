@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { selectAll } from "@/lib/local-store";
 import { useAuth } from "@/context/AuthContext";
-import { logAudit } from "@/lib/admin-audit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { persistTable, type DraftBase } from "./crud-helpers";
 
-type Rec = {
-  id: string;
+type RecDraft = DraftBase & {
   rule_key: string;
   name: string;
   tagline: string;
@@ -18,57 +18,48 @@ type Rec = {
   score_max: number;
   price: number | null;
 };
-type RecDraft = Rec & { _new?: boolean; _dirty?: boolean };
 
-type Outcome = {
-  id: string;
+type OutDraft = DraftBase & {
   dimension: string;
   question_key: string;
   current_text: string;
   future_text: string;
   check_red: boolean;
 };
-type OutDraft = Outcome & { _new?: boolean; _dirty?: boolean };
 
 export function RecommendationsTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  // Recommendations
   const [recs, setRecs] = useState<RecDraft[]>([]);
-  const [recDeleted, setRecDeleted] = useState<Rec[]>([]);
-  const recOriginal = useMemo(() => new Map<string, Rec>(), []);
+  const [recDeleted, setRecDeleted] = useState<RecDraft[]>([]);
+  const recOriginal = useMemo(() => new Map<string, RecDraft>(), []);
 
-  // Outcomes
   const [outs, setOuts] = useState<OutDraft[]>([]);
-  const [outDeleted, setOutDeleted] = useState<Outcome[]>([]);
-  const outOriginal = useMemo(() => new Map<string, Outcome>(), []);
+  const [outDeleted, setOutDeleted] = useState<OutDraft[]>([]);
+  const outOriginal = useMemo(() => new Map<string, OutDraft>(), []);
 
   const [loading, setLoading] = useState(true);
   const [savingRec, setSavingRec] = useState(false);
   const [savingOut, setSavingOut] = useState(false);
 
-  const load = async () => {
+  const load = () => {
     setLoading(true);
-    const [r, o] = await Promise.all([
-      supabase.from("product_recommendations").select("*").order("score_min"),
-      supabase.from("outcome_texts").select("*").order("dimension"),
-    ]);
-    if (r.error) toast.error(r.error.message);
-    if (o.error) toast.error(o.error.message);
+    const r = selectAll<RecDraft>("product_recommendations", "score_min");
     recOriginal.clear();
-    (r.data ?? []).forEach((x) => recOriginal.set(x.id, x as Rec));
-    setRecs((r.data ?? []) as RecDraft[]);
+    r.forEach((x) => recOriginal.set(x.id, x));
+    setRecs(r);
     setRecDeleted([]);
+    const o = selectAll<OutDraft>("outcome_texts", "dimension");
     outOriginal.clear();
-    (o.data ?? []).forEach((x) => outOriginal.set(x.id, x as Outcome));
-    setOuts((o.data ?? []) as OutDraft[]);
+    o.forEach((x) => outOriginal.set(x.id, x));
+    setOuts(o);
     setOutDeleted([]);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
-  // --- Recs ops ---
-  const updateRec = (id: string, patch: Partial<Rec>) =>
+  const updateRec = (id: string, patch: Partial<RecDraft>) =>
     setRecs((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch, _dirty: true } : r)));
   const addRec = () => {
     const id = `new-${crypto.randomUUID()}`;
@@ -84,32 +75,15 @@ export function RecommendationsTab() {
     if (!user) return;
     setSavingRec(true);
     try {
-      const inserts = recs.filter((r) => r._new).map(({ id, _new, _dirty, ...r }) => r);
-      const updates = recs.filter((r) => !r._new && r._dirty);
-      if (inserts.length) {
-        const { error } = await supabase.from("product_recommendations").insert(inserts);
-        if (error) throw error;
-        await logAudit(user.id, "product_recommendations", "insert", inserts);
-      }
-      for (const u of updates) {
-        const { id, _new, _dirty, ...payload } = u;
-        const { error } = await supabase.from("product_recommendations").update(payload).eq("id", id);
-        if (error) throw error;
-        await logAudit(user.id, "product_recommendations", "update", payload, recOriginal.get(id));
-      }
-      for (const d of recDeleted) {
-        const { error } = await supabase.from("product_recommendations").delete().eq("id", d.id);
-        if (error) throw error;
-        await logAudit(user.id, "product_recommendations", "delete", null, d);
-      }
+      await persistTable("product_recommendations", recs, recDeleted, recOriginal, user.id);
+      queryClient.invalidateQueries();
       toast.success("Recomendações salvas");
-      await load();
+      load();
     } catch (e) { toast.error((e as Error).message); }
     setSavingRec(false);
   };
 
-  // --- Outcomes ops ---
-  const updateOut = (id: string, patch: Partial<Outcome>) =>
+  const updateOut = (id: string, patch: Partial<OutDraft>) =>
     setOuts((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch, _dirty: true } : r)));
   const addOut = () => {
     const id = `new-${crypto.randomUUID()}`;
@@ -125,26 +99,10 @@ export function RecommendationsTab() {
     if (!user) return;
     setSavingOut(true);
     try {
-      const inserts = outs.filter((r) => r._new).map(({ id, _new, _dirty, ...r }) => r);
-      const updates = outs.filter((r) => !r._new && r._dirty);
-      if (inserts.length) {
-        const { error } = await supabase.from("outcome_texts").insert(inserts);
-        if (error) throw error;
-        await logAudit(user.id, "outcome_texts", "insert", inserts);
-      }
-      for (const u of updates) {
-        const { id, _new, _dirty, ...payload } = u;
-        const { error } = await supabase.from("outcome_texts").update(payload).eq("id", id);
-        if (error) throw error;
-        await logAudit(user.id, "outcome_texts", "update", payload, outOriginal.get(id));
-      }
-      for (const d of outDeleted) {
-        const { error } = await supabase.from("outcome_texts").delete().eq("id", d.id);
-        if (error) throw error;
-        await logAudit(user.id, "outcome_texts", "delete", null, d);
-      }
+      await persistTable("outcome_texts", outs, outDeleted, outOriginal, user.id);
+      queryClient.invalidateQueries();
       toast.success("Outcomes salvos");
-      await load();
+      load();
     } catch (e) { toast.error((e as Error).message); }
     setSavingOut(false);
   };

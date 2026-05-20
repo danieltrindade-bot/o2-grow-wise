@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Plus, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { selectAll, updateRow } from "@/lib/local-store";
 import { useAuth } from "@/context/AuthContext";
 import { logAudit } from "@/lib/admin-audit";
 import { Button } from "@/components/ui/button";
@@ -23,13 +24,13 @@ type SetupMod = DraftBase & {
 
 const SETTING_KEYS: Array<{ key: string; label: string }> = [
   { key: "dias_uteis", label: "Dias úteis" },
-  { key: "markup_percent", label: "Markup %" },
   { key: "tier_1_limit", label: "Limite Tier 1" },
   { key: "tier_2_limit", label: "Limite Tier 2" },
 ];
 
 export function BpoTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -45,18 +46,15 @@ export function BpoTab() {
   const [setupDeleted, setSetupDeleted] = useState<SetupMod[]>([]);
   const setupOriginal = useMemo(() => new Map<string, SetupMod>(), []);
 
-  const load = async () => {
+  const load = () => {
     setLoading(true);
-    const [s, p, m] = await Promise.all([
-      supabase.from("bpo_settings").select("*"),
-      supabase.from("bpo_packages").select("*").order("display_order"),
-      supabase.from("bpo_setup_module").select("*"),
-    ]);
-    if (s.error || p.error || m.error) toast.error((s.error || p.error || m.error)!.message);
+    const sData = selectAll<Setting>("bpo_settings");
+    const pData = selectAll<Pkg>("bpo_packages", "display_order");
+    const mData = selectAll<SetupMod>("bpo_setup_module");
 
     const map: Record<string, number> = {};
     const orig: Record<string, { id: string; value: number }> = {};
-    (s.data ?? []).forEach((row: Setting) => {
+    sData.forEach((row) => {
       const v = typeof row.value === "number" ? row.value : Number(row.value);
       map[row.key] = v;
       orig[row.key] = { id: row.id, value: v };
@@ -66,13 +64,13 @@ export function BpoTab() {
     setSettingsDirty(false);
 
     pkgOriginal.clear();
-    (p.data ?? []).forEach((r) => pkgOriginal.set(r.id, r as Pkg));
-    setPkgs((p.data ?? []) as Pkg[]);
+    pData.forEach((r) => pkgOriginal.set(r.id, r));
+    setPkgs(pData);
     setPkgDeleted([]);
 
     setupOriginal.clear();
-    (m.data ?? []).forEach((r) => setupOriginal.set(r.id, r as SetupMod));
-    setSetups((m.data ?? []) as SetupMod[]);
+    mData.forEach((r) => setupOriginal.set(r.id, r));
+    setSetups(mData);
     setSetupDeleted([]);
 
     setLoading(false);
@@ -116,22 +114,21 @@ export function BpoTab() {
     if (!user) return;
     setSaving(true);
     try {
-      // settings
       if (settingsDirty) {
         for (const { key } of SETTING_KEYS) {
           const orig = settingsOriginal[key];
           const cur = settings[key];
           if (orig && orig.value !== cur) {
-            const { error } = await supabase.from("bpo_settings").update({ value: cur }).eq("id", orig.id);
-            if (error) throw error;
+            updateRow("bpo_settings", orig.id, { value: cur });
             await logAudit(user.id, "bpo_settings", "update", { key, value: cur }, { key, value: orig.value });
           }
         }
       }
       await persistTable("bpo_packages", pkgs, pkgDeleted, pkgOriginal, user.id);
       await persistTable("bpo_setup_module", setups, setupDeleted, setupOriginal, user.id);
+      queryClient.invalidateQueries();
       toast.success("Configurações BPO salvas");
-      await load();
+      load();
     } catch (e) { toast.error((e as Error).message); }
     setSaving(false);
   };
