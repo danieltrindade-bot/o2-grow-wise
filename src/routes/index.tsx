@@ -183,9 +183,9 @@ function LandingPage() {
             <img
               src="/mapa-brasil.png"
               alt="Mapa de atuação O2 no Brasil"
-              className="absolute inset-0 w-full h-full object-cover object-[85%_60%] scale-125"
+              className="absolute inset-0 w-full h-full object-cover object-center scale-110"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
           </div>
         </div>
       </section>
