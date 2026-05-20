@@ -35,6 +35,43 @@ const SERVICE_DETAILS: Record<string, ServiceDetail> = {
       "Forecast de caixa 30/60/90 dias",
       "Acompanhamento de metas e desvios",
     ],
+    stages: [
+      {
+        title: "Gestão Financeira Estratégica Contínua",
+        description: "Suporte executivo de alto nível para a gestão financeira estratégica, com acompanhamento diário e rituais de governança",
+        items: [
+          "Disponibilidade diária",
+          "Reunião Fixa semanal",
+          "Comitê Estratégico Mensal",
+          "Report semanal do status do projeto O2 Inc.",
+        ],
+      },
+      {
+        title: "Análise e Planejamento Avançado",
+        description: "Construção e análise de relatórios financeiros complexos e auxílio no planejamento orçamentário e estratégico de negócios",
+        items: [
+          "Construção e Análise do DRE",
+          "Construção e Análise do Fluxo de Caixa",
+          "Construção e Análise do Ciclo Financeiro",
+          "Análise de relatórios financeiros",
+          "Auxílio na construção do Planejamento orçamentário",
+          "Análise estratégica de negócios",
+        ],
+      },
+      {
+        title: "Suporte Estratégico para o Negócio",
+        description: "Orientação em reestruturação de passivos, captação de recursos, e coordenação de melhorias, atuando como um parceiro estratégico",
+        items: [
+          "Interlocução com a Contabilidade",
+          "Suporte na captação de Recursos",
+          "Suporte na Reestruturação dos Passivos",
+          "Coordenação de planos de ação para melhoria de processos e de resultado financeiro",
+          "Suporte na implementação das melhorias no ERP",
+          "Suporte na construção e treinamento da equipe financeira",
+          "Acompanhamento da Implementação Plataforma Oxy",
+        ],
+      },
+    ],
   },
   oxy: {
     what: "Plataforma de dados financeiros em tempo real combinada com Agente de IA. Automatiza conciliação, gera alertas inteligentes e entrega visibilidade instantânea sobre a saúde financeira da empresa.",
@@ -128,7 +165,7 @@ const SERVICE_DETAILS: Record<string, ServiceDetail> = {
   },
 };
 
-function StageCard({ stage, index }: { stage: { title: string; description: string; items: string[] }; index: number }) {
+function StageCard({ stage, index, badge }: { stage: { title: string; description: string; items: string[] }; index: number; badge?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <div className={cn(
@@ -147,7 +184,7 @@ function StageCard({ stage, index }: { stage: { title: string; description: stri
           <p className="font-semibold text-sm leading-tight">{stage.title}</p>
           <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{stage.description}</p>
         </div>
-        <span className="text-xs text-primary font-medium shrink-0 mr-1">90 dias</span>
+        {badge && <span className="text-xs text-primary font-medium shrink-0 mr-1">{badge}</span>}
         <ChevronDown className={cn(
           "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
           open && "rotate-180",
@@ -189,11 +226,18 @@ export function ProductPresentation({ serviceKey, title }: { serviceKey: string;
       {hasStages ? (
         <div className="mb-4">
           <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
-            Jornada de Maturidade — 5 estágios de evolução
+            {serviceKey === "assessoria"
+              ? "Jornada de Maturidade — 5 estágios de evolução"
+              : "Escopo — Pilares de entrega"}
           </p>
           <div className="space-y-2">
             {detail.stages!.map((stage, i) => (
-              <StageCard key={stage.title} stage={stage} index={i} />
+              <StageCard
+                key={stage.title}
+                stage={stage}
+                index={i}
+                badge={serviceKey === "assessoria" ? "90 dias" : undefined}
+              />
             ))}
           </div>
         </div>
