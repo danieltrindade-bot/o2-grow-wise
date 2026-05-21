@@ -162,28 +162,32 @@ function ServicePillars() {
 
       {/* SVG connection lines (desktop only) */}
       <div className="hidden md:block relative h-24">
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 96" preserveAspectRatio="none" fill="none">
-          {/* Left line */}
-          <path d="M 133 0 L 133 48 L 400 48 L 400 96" stroke="url(#lineGrad)" strokeWidth="2"
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 900 96" fill="none">
+          <defs>
+            <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="1" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
+          {/* Left → center */}
+          <path d="M 150 0 L 150 48 L 450 48 L 450 96" stroke="url(#lineGrad)" strokeWidth="2"
             className={cn("transition-all duration-1000", visible ? "opacity-100" : "opacity-0")}
             strokeDasharray="8 4"
             style={{ animation: visible ? "dashFlow 2s linear infinite" : "none" }} />
-          {/* Center line */}
-          <path d="M 400 0 L 400 96" stroke="url(#lineGrad)" strokeWidth="2"
+          {/* Center (Tático → Tecnologia) — thicker with glow */}
+          <path d="M 450 0 L 450 96" stroke="var(--color-primary)" strokeWidth="3" filter="url(#glow)"
             className={cn("transition-all duration-1000 delay-200", visible ? "opacity-100" : "opacity-0")}
             strokeDasharray="8 4"
-            style={{ animation: visible ? "dashFlow 2s linear infinite 0.3s" : "none" }} />
-          {/* Right line */}
-          <path d="M 667 0 L 667 48 L 400 48 L 400 96" stroke="url(#lineGrad)" strokeWidth="2"
+            style={{ animation: visible ? "dashFlow 1.5s linear infinite" : "none" }} />
+          {/* Right → center */}
+          <path d="M 750 0 L 750 48 L 450 48 L 450 96" stroke="url(#lineGrad)" strokeWidth="2"
             className={cn("transition-all duration-1000 delay-500", visible ? "opacity-100" : "opacity-0")}
             strokeDasharray="8 4"
             style={{ animation: visible ? "dashFlow 2s linear infinite 0.6s" : "none" }} />
-          <defs>
-            <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="1" />
-            </linearGradient>
-          </defs>
         </svg>
       </div>
 
