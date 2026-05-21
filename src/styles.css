@@ -145,5 +145,5 @@
 }
 
 @keyframes dashFlow {
-  to { stroke-dashoffset: -24; }
+  to { stroke-dashoffset: -32; }
 }

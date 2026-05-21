@@ -176,17 +176,17 @@ function ServicePillars() {
           {/* Left → center */}
           <path d="M 150 0 L 150 48 L 450 48 L 450 96" stroke="url(#lineGrad)" strokeWidth="2"
             className={cn("transition-all duration-1000", visible ? "opacity-100" : "opacity-0")}
-            strokeDasharray="8 4"
+            strokeDasharray="10 6"
             style={{ animation: visible ? "dashFlow 2s linear infinite" : "none" }} />
-          {/* Center (Tático → Tecnologia) — thicker with glow */}
-          <path d="M 450 0 L 450 96" stroke="var(--color-primary)" strokeWidth="3" filter="url(#glow)"
+          {/* Center (Tático → Tecnologia) — same dash style with glow */}
+          <path d="M 450 0 L 450 96" stroke="var(--color-primary)" strokeWidth="2.5" filter="url(#glow)"
             className={cn("transition-all duration-1000 delay-200", visible ? "opacity-100" : "opacity-0")}
-            strokeDasharray="8 4"
+            strokeDasharray="10 6"
             style={{ animation: visible ? "dashFlow 1.5s linear infinite" : "none" }} />
           {/* Right → center */}
           <path d="M 750 0 L 750 48 L 450 48 L 450 96" stroke="url(#lineGrad)" strokeWidth="2"
             className={cn("transition-all duration-1000 delay-500", visible ? "opacity-100" : "opacity-0")}
-            strokeDasharray="8 4"
+            strokeDasharray="10 6"
             style={{ animation: visible ? "dashFlow 2s linear infinite 0.6s" : "none" }} />
         </svg>
       </div>
