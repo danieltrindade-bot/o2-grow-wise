@@ -25,9 +25,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-bold">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm">O2</span>
-          <span className="hidden sm:inline">O2 Inc</span>
+        <Link to="/" className="flex items-center">
+          <img src="/logo-o2-white.png" alt="O2 Inc" className="h-8" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
