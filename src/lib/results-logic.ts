@@ -72,15 +72,21 @@ interface CostRule {
 }
 
 const COST_RULES: CostRule[] = [
-  { qid: "financial:q2", when: "red", label: "Inadimplência sem controle", min: 0.03, max: 0.05 },
-  { qid: "financial:q2", when: "yellow", label: "Inadimplência parcialmente controlada", min: 0.01, max: 0.025 },
+  { qid: "financial:q1", when: "red", label: "Perda por atraso em recebíveis não monitorados", min: 0.01, max: 0.02 },
+  { qid: "financial:q1", when: "yellow", label: "Recebíveis parcialmente monitorados", min: 0.005, max: 0.01 },
+  { qid: "financial:q2", when: "red", label: "Inadimplência sem controle", min: 0.015, max: 0.025 },
+  { qid: "financial:q2", when: "yellow", label: "Inadimplência parcialmente controlada", min: 0.005, max: 0.0125 },
   { qid: "financial:q3", when: "red", label: "Compras sem processo de aprovação", min: 0.015, max: 0.023 },
   { qid: "financial:q4", when: "red", label: "Multas e juros por pagamentos em atraso", min: 0.0016, max: 0.0024 },
   { qid: "financial:q5", when: "red", label: "Erros não detectados (conciliação)", min: 0.005, max: 0.010 },
-  { qid: "commercial:q2", when: "red", label: "Margem perdida em descontos sem critério", min: 0.05, max: 0.10 },
-  { qid: "commercial:q2", when: "yellow", label: "Margem cedida sem necessidade", min: 0.02, max: 0.05 },
-  { qid: "commercial:q3", when: "red", label: "Capital de giro imobilizado (ciclo longo)", min: 0.08, max: 0.15 },
   { qid: "commercial:q1", when: "red", label: "Clientes não lucrativos sem priorização", qualitative: true },
+  { qid: "commercial:q2", when: "red", label: "Margem perdida em descontos sem critério", min: 0.025, max: 0.05 },
+  { qid: "commercial:q2", when: "yellow", label: "Margem cedida sem necessidade", min: 0.01, max: 0.025 },
+  { qid: "commercial:q3", when: "red", label: "Capital de giro imobilizado (ciclo longo)", min: 0.08, max: 0.15 },
+  { qid: "commercial:q4", when: "red", label: "Custo de antecipação recorrente (sobre 50% do faturamento)", min: 0.01, max: 0.02 },
+  { qid: "commercial:q4", when: "yellow", label: "Custo de antecipação eventual (sobre 50% do faturamento)", min: 0.004, max: 0.0075 },
+  { qid: "commercial:q5", when: "red", label: "Custo de crédito emergencial por descasamento de ciclo", min: 0.01, max: 0.025 },
+  { qid: "commercial:q5", when: "yellow", label: "Risco de descasamento vendas x caixa", min: 0.005, max: 0.01 },
 ];
 
 export function buildCostRows(

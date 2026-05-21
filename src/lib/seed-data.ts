@@ -18,6 +18,8 @@ import type {
 
 type WithId<T> = T & { id: string };
 
+export const SEED_VERSION = 2;
+
 // ---------------------------------------------------------------------------
 // Diagnostic Questions (10 questions)
 // ---------------------------------------------------------------------------
@@ -38,15 +40,21 @@ export const SEED_DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
 // Cost Parameters (9 rules)
 // ---------------------------------------------------------------------------
 export const SEED_COST_PARAMETERS: CostParameter[] = [
-  { id: "cp-1", dimension: "financial", question_key: "q2", trigger_color: "red", label: "Inadimplência sem controle", pct_min: 0.03, pct_max: 0.05, qualitative: false },
-  { id: "cp-2", dimension: "financial", question_key: "q2", trigger_color: "yellow", label: "Inadimplência parcialmente controlada", pct_min: 0.01, pct_max: 0.025, qualitative: false },
-  { id: "cp-3", dimension: "financial", question_key: "q3", trigger_color: "red", label: "Compras sem processo de aprovação", pct_min: 0.015, pct_max: 0.023, qualitative: false },
-  { id: "cp-4", dimension: "financial", question_key: "q4", trigger_color: "red", label: "Multas e juros por pagamentos em atraso", pct_min: 0.0016, pct_max: 0.0024, qualitative: false },
-  { id: "cp-5", dimension: "financial", question_key: "q5", trigger_color: "red", label: "Erros não detectados (conciliação)", pct_min: 0.005, pct_max: 0.01, qualitative: false },
-  { id: "cp-6", dimension: "commercial", question_key: "q2", trigger_color: "red", label: "Margem perdida em descontos sem critério", pct_min: 0.05, pct_max: 0.1, qualitative: false },
-  { id: "cp-7", dimension: "commercial", question_key: "q2", trigger_color: "yellow", label: "Margem cedida sem necessidade", pct_min: 0.02, pct_max: 0.05, qualitative: false },
-  { id: "cp-8", dimension: "commercial", question_key: "q3", trigger_color: "red", label: "Capital de giro imobilizado (ciclo longo)", pct_min: 0.08, pct_max: 0.15, qualitative: false },
-  { id: "cp-9", dimension: "commercial", question_key: "q1", trigger_color: "red", label: "Clientes não lucrativos sem priorização", pct_min: 0, pct_max: 0, qualitative: true },
+  { id: "cp-1", dimension: "financial", question_key: "q1", trigger_color: "red", label: "Perda por atraso em recebíveis não monitorados", pct_min: 0.01, pct_max: 0.02, qualitative: false },
+  { id: "cp-2", dimension: "financial", question_key: "q1", trigger_color: "yellow", label: "Recebíveis parcialmente monitorados", pct_min: 0.005, pct_max: 0.01, qualitative: false },
+  { id: "cp-3", dimension: "financial", question_key: "q2", trigger_color: "red", label: "Inadimplência sem controle", pct_min: 0.015, pct_max: 0.025, qualitative: false },
+  { id: "cp-4", dimension: "financial", question_key: "q2", trigger_color: "yellow", label: "Inadimplência parcialmente controlada", pct_min: 0.005, pct_max: 0.0125, qualitative: false },
+  { id: "cp-5", dimension: "financial", question_key: "q3", trigger_color: "red", label: "Compras sem processo de aprovação", pct_min: 0.015, pct_max: 0.023, qualitative: false },
+  { id: "cp-6", dimension: "financial", question_key: "q4", trigger_color: "red", label: "Multas e juros por pagamentos em atraso", pct_min: 0.0016, pct_max: 0.0024, qualitative: false },
+  { id: "cp-7", dimension: "financial", question_key: "q5", trigger_color: "red", label: "Erros não detectados (conciliação)", pct_min: 0.005, pct_max: 0.01, qualitative: false },
+  { id: "cp-8", dimension: "commercial", question_key: "q1", trigger_color: "red", label: "Clientes não lucrativos sem priorização", pct_min: 0, pct_max: 0, qualitative: true },
+  { id: "cp-9", dimension: "commercial", question_key: "q2", trigger_color: "red", label: "Margem perdida em descontos sem critério", pct_min: 0.025, pct_max: 0.05, qualitative: false },
+  { id: "cp-10", dimension: "commercial", question_key: "q2", trigger_color: "yellow", label: "Margem cedida sem necessidade", pct_min: 0.01, pct_max: 0.025, qualitative: false },
+  { id: "cp-11", dimension: "commercial", question_key: "q3", trigger_color: "red", label: "Capital de giro imobilizado (ciclo longo)", pct_min: 0.08, pct_max: 0.15, qualitative: false },
+  { id: "cp-12", dimension: "commercial", question_key: "q4", trigger_color: "red", label: "Custo de antecipação recorrente (sobre 50% do faturamento)", pct_min: 0.01, pct_max: 0.02, qualitative: false },
+  { id: "cp-13", dimension: "commercial", question_key: "q4", trigger_color: "yellow", label: "Custo de antecipação eventual (sobre 50% do faturamento)", pct_min: 0.004, pct_max: 0.0075, qualitative: false },
+  { id: "cp-14", dimension: "commercial", question_key: "q5", trigger_color: "red", label: "Custo de crédito emergencial por descasamento de ciclo", pct_min: 0.01, pct_max: 0.025, qualitative: false },
+  { id: "cp-15", dimension: "commercial", question_key: "q5", trigger_color: "yellow", label: "Risco de descasamento vendas x caixa", pct_min: 0.005, pct_max: 0.01, qualitative: false },
 ];
 
 // ---------------------------------------------------------------------------

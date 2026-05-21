@@ -1,6 +1,16 @@
-import { SEED_DATA } from "./seed-data";
+import { SEED_DATA, SEED_VERSION } from "./seed-data";
 
 const PREFIX = "o2-data-";
+const VERSION_KEY = "o2-seed-version";
+
+function checkSeedVersion(): void {
+  const stored = localStorage.getItem(VERSION_KEY);
+  if (stored !== String(SEED_VERSION)) {
+    Object.keys(SEED_DATA).forEach((t) => localStorage.removeItem(PREFIX + t));
+    localStorage.setItem(VERSION_KEY, String(SEED_VERSION));
+  }
+}
+checkSeedVersion();
 
 function getTable<T = any>(table: string): T[] {
   const raw = localStorage.getItem(PREFIX + table);
