@@ -1,4 +1,5 @@
 import { formatBRL } from "./format";
+import { SERVICE_DETAILS } from "@/components/ProductPresentation";
 
 async function getJsPDF() {
   const { jsPDF } = await import("jspdf");
@@ -145,15 +146,14 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
   highlightValue(doc, input.finalLabel, input.finalValue, finalY + 8);
 
   if (input.serviceKey) {
-    renderScope(doc, input.serviceKey, input.service, finalY + 38);
+    renderScope(doc, input.serviceKey, input.service);
   }
 
   footer(doc);
   doc.save(input.fileName ?? `O2-${input.service.replace(/\s+/g, "-")}.pdf`);
 }
 
-async function renderScope(doc: Doc, serviceKey: string, serviceTitle: string, startY: number) {
-  const { SERVICE_DETAILS } = await import("@/components/ProductPresentation");
+function renderScope(doc: Doc, serviceKey: string, serviceTitle: string) {
   const detail = SERVICE_DETAILS[serviceKey];
   if (!detail) return;
 
