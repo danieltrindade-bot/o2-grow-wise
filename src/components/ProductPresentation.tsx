@@ -179,8 +179,6 @@ const SERVICE_DETAILS: Record<string, ServiceDetail> = {
         items: [
           "Criação de checklists para abertura, execução e fechamento financeiro de eventos",
           "Padronização do processo de aprovação de pagamentos por alçada",
-          "Formalização da política de margem mínima por tipo de evento",
-          "Criação de rotina de fechamento mensal até D+5",
         ],
       },
       {
