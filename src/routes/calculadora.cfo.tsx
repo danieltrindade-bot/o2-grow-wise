@@ -207,7 +207,6 @@ function CalculadoraCFOPage() {
                       <TabsContent value="recorrencia" className="p-5 space-y-4 mt-0">
                         <Row label="Preço base" value={formatBRL(basePrice)} />
                         <Row label="Multiplicador CNPJ" value={`×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`} />
-                        <Row label="Complexidade" value={`${cf.label} ×${cf.factor} (${complexityScore})`} />
                         <Row label="Ajuste segmento" value={cnpjCount > 1 ? `+${segmentAdj}%` : "—"} />
                         <Row label="Taxa governança" value={formatBRL(governanceFee)} />
 
@@ -218,7 +217,6 @@ function CalculadoraCFOPage() {
                       </TabsContent>
 
                       <TabsContent value="setup" className="p-5 space-y-4 mt-0">
-                        <Row label="Classificação" value={setupResult.classification === "padrao" ? "Padrão" : "Complexo"} />
                         <Row label="Setup base" value={formatBRL(setupResult.base)} />
                         <Row label="Adicional por segmento" value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"} />
                         <Row label="Valor total setup" value={formatBRL(setupResult.total)} bold />
@@ -252,7 +250,6 @@ function CalculadoraCFOPage() {
                             rows: [
                               ["Preço base", formatBRL(basePrice)],
                               ["Multiplicador CNPJ", `×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`],
-                              ["Complexidade", `${cf.label} ×${cf.factor} (${complexityScore})`],
                               ["Ajuste segmento", cnpjCount > 1 ? `+${segmentAdj}%` : "—"],
                               ["Taxa governança", formatBRL(governanceFee)],
                               ["Mensalidade", formatBRL(finalRecorrencia)],

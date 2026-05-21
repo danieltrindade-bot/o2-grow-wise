@@ -144,7 +144,6 @@ function CoordenadorPage() {
               <p className="text-xs uppercase tracking-wider text-primary">Investimento</p>
               {showPrices ? (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <Row label="Classificação" value={result.classification === "padrao" ? "Padrão" : "Complexo"} />
                   <Row label="Valor base" value={formatBRL(result.base)} />
                   {result.surcharge > 0 && (
                     <Row label="Adicional segmento" value={formatBRL(result.surcharge)} />
@@ -185,7 +184,6 @@ function CoordenadorPage() {
                         clientName: state.companyName,
                         monthlyRevenue,
                         rows: [
-                          ["Classificação", result.classification === "padrao" ? "Padrão" : "Complexo"],
                           ["CNPJs", String(cnpjCount)],
                           ["Segmento", segmentType],
                           ["Valor base", formatBRL(result.base)],
@@ -205,7 +203,6 @@ function CoordenadorPage() {
                 </div>
               ) : (
                 <div className="mt-4">
-                  <Row label="Classificação" value={result.classification === "padrao" ? "Padrão" : "Complexo"} />
                   <div className="mt-5">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Inclui</p>
                     <ul className="space-y-1.5">
