@@ -318,15 +318,42 @@ interface UIQuestion {
   options: { key: OptionKey; label: string }[];
 }
 
+const DISPLAY_GROUPS: Record<string, string> = {
+  "commercial:q1": "faturamento",
+  "commercial:q2": "faturamento",
+  "commercial:q5": "faturamento",
+  "financial:q1": "contas_receber",
+  "financial:q2": "contas_receber",
+  "commercial:q3": "contas_receber",
+  "commercial:q4": "contas_receber",
+  "financial:q3": "compras",
+  "financial:q4": "contas_pagar",
+  "financial:q5": "conciliacao",
+};
+
+const DISPLAY_ORDER = [
+  "commercial:q1", "commercial:q2", "commercial:q5",
+  "financial:q1", "financial:q2", "commercial:q3", "commercial:q4",
+  "financial:q3",
+  "financial:q4",
+  "financial:q5",
+];
+
+const GROUP_ORDER = ["faturamento", "contas_receber", "compras", "contas_pagar", "conciliacao"];
+
 const CATEGORY_LABELS: Record<string, string> = {
-  financial: "Gestao Financeira",
-  commercial: "Gestao Comercial",
+  faturamento: "Faturamento",
+  contas_receber: "Contas a Receber",
+  compras: "Compras",
+  contas_pagar: "Contas a Pagar",
+  conciliacao: "Conciliação",
 };
 
 function toUIQuestion(q: DiagnosticQuestion): UIQuestion {
+  const id = `${q.dimension}:${q.question_key}`;
   return {
-    id: `${q.dimension}:${q.question_key}`,
-    category: q.dimension,
+    id,
+    category: DISPLAY_GROUPS[id] ?? q.dimension,
     text: q.question_text,
     options: [
       { key: "green", label: q.option_green },
@@ -345,7 +372,7 @@ function Screen3() {
     () =>
       FALLBACK_QUESTIONS.map((q) => ({
         id: q.id,
-        category: q.category,
+        category: DISPLAY_GROUPS[q.id] ?? q.category,
         text: q.text,
         options: q.options.map((o) => ({ key: o.key, label: o.label })),
       })),
@@ -354,7 +381,12 @@ function Screen3() {
 
   const questions: UIQuestion[] = useMemo(() => {
     const fromDb = (data?.questions ?? []).map(toUIQuestion);
-    return fromDb.length > 0 ? fromDb : fallbackUI;
+    const list = fromDb.length > 0 ? fromDb : fallbackUI;
+    return [...list].sort((a, b) => {
+      const ia = DISPLAY_ORDER.indexOf(a.id);
+      const ib = DISPLAY_ORDER.indexOf(b.id);
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    });
   }, [data, fallbackUI]);
 
   const groupedQuestions = useMemo(() => {
@@ -364,7 +396,14 @@ function Screen3() {
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(q);
     }
-    return groups;
+    const ordered: Record<string, UIQuestion[]> = {};
+    for (const g of GROUP_ORDER) {
+      if (groups[g]) ordered[g] = groups[g];
+    }
+    for (const [k, v] of Object.entries(groups)) {
+      if (!ordered[k]) ordered[k] = v;
+    }
+    return ordered;
   }, [questions]);
 
   const answeredCount = useMemo(
