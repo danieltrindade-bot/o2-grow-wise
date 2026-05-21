@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Check, Download } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +25,12 @@ export const Route = createFileRoute("/calculadora/coordenador")({
   component: CoordenadorPage,
 });
 
+const DISCOUNTS = [
+  { id: "none", label: "Sem desconto", percent: 0 },
+  { id: "d7", label: "Pagamento em 7 dias", percent: 7 },
+  { id: "meeting", label: "Fechamento em reunião", percent: 15 },
+];
+
 const INCLUDES = [
   "Coordenador financeiro dedicado",
   "Gestão de equipe financeira",
@@ -36,6 +44,7 @@ function CoordenadorPage() {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [cnpjCount, setCnpjCount] = useState(1);
   const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
+  const [discountId, setDiscountId] = useState<string>("none");
 
   useEffect(() => {
     if (monthlyRevenue === 0 && state.monthlyRevenue > 0) setMonthlyRevenue(state.monthlyRevenue);
@@ -49,7 +58,9 @@ function CoordenadorPage() {
   const result = rules
     ? calcSetupPriceFromRules(rules, monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
-  const parcela12x = result.total / 12;
+  const discount = DISCOUNTS.find((d) => d.id === discountId)!;
+  const totalComDesconto = result.total * (1 - discount.percent / 100);
+  const parcela12x = totalComDesconto / 12;
   const animatedParcela = useCountUp(parcela12x);
   const [showPrices, setShowPrices] = useState(false);
 
@@ -110,6 +121,22 @@ function CoordenadorPage() {
                   <p className="text-xs text-muted-foreground">Disponível com 2+ CNPJs</p>
                 )}
               </div>
+              <div className="space-y-2">
+                <Label>Desconto</Label>
+                <RadioGroup value={discountId} onValueChange={setDiscountId} className="space-y-2">
+                  {DISCOUNTS.map((d) => (
+                    <label key={d.id} htmlFor={`disc-coord-${d.id}`}
+                      className={cn("flex items-center justify-between rounded-xl border bg-background p-3 cursor-pointer",
+                        discountId === d.id ? "border-primary" : "border-border")}>
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem id={`disc-coord-${d.id}`} value={d.id} />
+                        <span className="text-sm">{d.label}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-primary">{d.percent}%</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
             </section>
 
             <aside className="rounded-2xl border-2 border-primary bg-card p-6"
@@ -124,6 +151,10 @@ function CoordenadorPage() {
                   )}
 
                   <Row label="Valor total do projeto" value={formatBRL(result.total)} bold />
+                  <Row label="Desconto aplicado" value={`${discount.percent}%`} />
+                  {discount.percent > 0 && (
+                    <Row label="Valor com desconto" value={formatBRL(totalComDesconto)} bold />
+                  )}
 
                   <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
                     <p className="text-xs uppercase tracking-wider text-primary">12x de</p>
@@ -131,7 +162,7 @@ function CoordenadorPage() {
                       {formatBRL(animatedParcela)}<span className="text-sm font-normal text-primary/70">/mês</span>
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Valor total: {formatBRL(result.total)}
+                      Valor total: {formatBRL(totalComDesconto)}
                     </p>
                   </div>
 
@@ -159,6 +190,9 @@ function CoordenadorPage() {
                           ["Segmento", segmentType],
                           ["Valor base", formatBRL(result.base)],
                           ["Adicional segmento", formatBRL(result.surcharge)],
+                          ["Valor total", formatBRL(result.total)],
+                          ["Desconto", `${discount.percent}%`],
+                          ["Valor com desconto", formatBRL(totalComDesconto)],
                         ],
                         finalLabel: "12x de",
                         finalValue: formatBRL(parcela12x),

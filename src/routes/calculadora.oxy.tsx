@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, CreditCard, Download, Check } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +25,12 @@ export const Route = createFileRoute("/calculadora/oxy")({
   component: OxyPage,
 });
 
+const DISCOUNTS = [
+  { id: "none", label: "Sem desconto", percent: 0 },
+  { id: "d7", label: "Pagamento em 7 dias", percent: 7 },
+  { id: "meeting", label: "Fechamento em reunião", percent: 15 },
+];
+
 const INCLUDES = [
   "Plataforma Oxy (dados em tempo real)",
   "Agente IA Gênio",
@@ -35,6 +43,7 @@ function OxyPage() {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [cnpjCount, setCnpjCount] = useState(1);
   const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
+  const [discountId, setDiscountId] = useState<string>("none");
 
   useEffect(() => {
     if (monthlyRevenue === 0 && state.monthlyRevenue > 0) setMonthlyRevenue(state.monthlyRevenue);
@@ -48,7 +57,9 @@ function OxyPage() {
   const result = rules
     ? calcSetupPriceFromRules(rules, monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
-  const parcela = result.total / 12;
+  const discount = DISCOUNTS.find((d) => d.id === discountId)!;
+  const totalComDesconto = result.total * (1 - discount.percent / 100);
+  const parcela = totalComDesconto / 12;
   const animatedParcela = useCountUp(parcela);
   const [showPrices, setShowPrices] = useState(false);
 
@@ -109,6 +120,22 @@ function OxyPage() {
                   <p className="text-xs text-muted-foreground">Disponível com 2+ CNPJs</p>
                 )}
               </div>
+              <div className="space-y-2">
+                <Label>Desconto</Label>
+                <RadioGroup value={discountId} onValueChange={setDiscountId} className="space-y-2">
+                  {DISCOUNTS.map((d) => (
+                    <label key={d.id} htmlFor={`disc-oxy-${d.id}`}
+                      className={cn("flex items-center justify-between rounded-xl border bg-background p-3 cursor-pointer",
+                        discountId === d.id ? "border-primary" : "border-border")}>
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem id={`disc-oxy-${d.id}`} value={d.id} />
+                        <span className="text-sm">{d.label}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-primary">{d.percent}%</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
             </section>
 
             <aside className="rounded-2xl border-2 border-primary bg-card p-6"
@@ -122,6 +149,10 @@ function OxyPage() {
                     <Row label="Adicional segmento" value={formatBRL(result.surcharge)} />
                   )}
                   <Row label="Valor total do projeto" value={formatBRL(result.total)} bold />
+                  <Row label="Desconto aplicado" value={`${discount.percent}%`} />
+                  {discount.percent > 0 && (
+                    <Row label="Valor com desconto" value={formatBRL(totalComDesconto)} bold />
+                  )}
 
                   <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
                     <div className="flex items-center gap-2 text-primary text-xs uppercase tracking-wider">
@@ -131,7 +162,7 @@ function OxyPage() {
                       12x de {formatBRL(animatedParcela)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Valor total: {formatBRL(result.total)}
+                      Valor total: {formatBRL(totalComDesconto)}
                     </p>
                   </div>
 
@@ -160,6 +191,8 @@ function OxyPage() {
                           ["Valor base", formatBRL(result.base)],
                           ["Adicional segmento", formatBRL(result.surcharge)],
                           ["Valor total", formatBRL(result.total)],
+                          ["Desconto", `${discount.percent}%`],
+                          ["Valor com desconto", formatBRL(totalComDesconto)],
                           ["12x no cartão", formatBRL(parcela)],
                         ],
                         finalLabel: "12x de",
