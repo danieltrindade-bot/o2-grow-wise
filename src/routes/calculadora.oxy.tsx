@@ -181,6 +181,7 @@ function OxyPage() {
                     onClick={() =>
                       exportCalculatorPDF({
                         service: "Oxy + Gênio",
+                        serviceKey: "oxy",
                         clientName: state.companyName,
                         monthlyRevenue,
                         rows: [

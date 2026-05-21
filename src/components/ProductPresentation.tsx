@@ -4,14 +4,14 @@ import { useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface ServiceDetail {
+export interface ServiceDetail {
   what: string;
   deliverables: string[];
   notIncluded?: string[];
   stages?: { title: string; description: string; items: string[] }[];
 }
 
-const SERVICE_DETAILS: Record<string, ServiceDetail> = {
+export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
   bpo: {
     what: "Terceirização completa da operação financeira. A O2 assume contas a pagar, contas a receber, conciliação bancária, faturamento e relatórios gerenciais — liberando sua equipe para focar no core business.",
     deliverables: [

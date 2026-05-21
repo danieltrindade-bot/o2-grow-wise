@@ -234,6 +234,7 @@ function CalculadoraBPOPage() {
                       onClick={() =>
                         exportCalculatorPDF({
                           service: "BPO Financeiro",
+                          serviceKey: "bpo",
                           clientName: clientName || state.companyName,
                           rows: [
                             ["Pacote", pacote.name],

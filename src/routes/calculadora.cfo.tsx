@@ -245,6 +245,7 @@ function CalculadoraCFOPage() {
                         onClick={() =>
                           exportCalculatorPDF({
                             service: "CFO as a Service",
+                            serviceKey: "cfo",
                             clientName: state.companyName,
                             monthlyRevenue,
                             rows: [

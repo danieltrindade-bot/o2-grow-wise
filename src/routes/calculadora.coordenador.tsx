@@ -181,6 +181,7 @@ function CoordenadorPage() {
                     onClick={() =>
                       exportCalculatorPDF({
                         service: "Coordenador as a Service",
+                        serviceKey: "coordenador",
                         clientName: state.companyName,
                         monthlyRevenue,
                         rows: [
