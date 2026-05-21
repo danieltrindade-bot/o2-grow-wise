@@ -257,24 +257,25 @@ function LandingPage() {
       </section>
 
       {/* ── Authority — Map ── */}
-      <section className="border-t border-border overflow-hidden">
-        <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 min-h-[420px]">
-          <AnimatedSection className="flex flex-col justify-end px-6 py-16 md:py-24 md:pr-12">
+      <section
+        className="border-t border-border overflow-hidden relative min-h-[420px]"
+        style={{
+          backgroundImage: "url(/mapa-brasil.png)",
+          backgroundSize: "contain",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right center",
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-background from-35% via-background/85 via-55% to-background/20" />
+        <div className="relative mx-auto max-w-7xl px-6 py-16 md:py-24 min-h-[420px] flex flex-col justify-end">
+          <AnimatedSection>
             <p className="text-xs text-muted-foreground uppercase tracking-widest font-mono mb-4">Mapa de atuação</p>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight max-w-lg">
               Estamos presentes em <span className="text-primary">todo o Brasil</span>
             </h2>
             <div className="w-16 h-px bg-border mt-6 mb-4" />
             <p className="text-sm text-muted-foreground">Temos franquias espalhadas por todo o país.</p>
           </AnimatedSection>
-          <div className="relative h-72 md:h-auto overflow-hidden">
-            <img
-              src="/mapa-brasil.png"
-              alt="Mapa de atuação O2 no Brasil"
-              className="absolute inset-0 w-full h-full object-contain object-right"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/30 to-transparent" />
-          </div>
         </div>
       </section>
 
