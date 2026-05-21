@@ -18,7 +18,7 @@ import type {
 
 type WithId<T> = T & { id: string };
 
-export const SEED_VERSION = 2;
+export const SEED_VERSION = 3;
 
 // ---------------------------------------------------------------------------
 // Diagnostic Questions (10 questions)
@@ -50,7 +50,7 @@ export const SEED_COST_PARAMETERS: CostParameter[] = [
   { id: "cp-8", dimension: "commercial", question_key: "q1", trigger_color: "red", label: "Clientes não lucrativos sem priorização", pct_min: 0, pct_max: 0, qualitative: true },
   { id: "cp-9", dimension: "commercial", question_key: "q2", trigger_color: "red", label: "Margem perdida em descontos sem critério", pct_min: 0.025, pct_max: 0.05, qualitative: false },
   { id: "cp-10", dimension: "commercial", question_key: "q2", trigger_color: "yellow", label: "Margem cedida sem necessidade", pct_min: 0.01, pct_max: 0.025, qualitative: false },
-  { id: "cp-11", dimension: "commercial", question_key: "q3", trigger_color: "red", label: "Capital de giro imobilizado (ciclo longo)", pct_min: 0.08, pct_max: 0.15, qualitative: false },
+  { id: "cp-11", dimension: "commercial", question_key: "q3", trigger_color: "red", label: "Capital de giro imobilizado (ciclo longo)", pct_min: 0.04, pct_max: 0.075, qualitative: false },
   { id: "cp-12", dimension: "commercial", question_key: "q4", trigger_color: "red", label: "Custo de antecipação recorrente (sobre 50% do faturamento)", pct_min: 0.01, pct_max: 0.02, qualitative: false },
   { id: "cp-13", dimension: "commercial", question_key: "q4", trigger_color: "yellow", label: "Custo de antecipação eventual (sobre 50% do faturamento)", pct_min: 0.004, pct_max: 0.0075, qualitative: false },
   { id: "cp-14", dimension: "commercial", question_key: "q5", trigger_color: "red", label: "Custo de crédito emergencial por descasamento de ciclo", pct_min: 0.01, pct_max: 0.025, qualitative: false },

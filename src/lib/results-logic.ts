@@ -82,7 +82,7 @@ const COST_RULES: CostRule[] = [
   { qid: "commercial:q1", when: "red", label: "Clientes não lucrativos sem priorização", qualitative: true },
   { qid: "commercial:q2", when: "red", label: "Margem perdida em descontos sem critério", min: 0.025, max: 0.05 },
   { qid: "commercial:q2", when: "yellow", label: "Margem cedida sem necessidade", min: 0.01, max: 0.025 },
-  { qid: "commercial:q3", when: "red", label: "Capital de giro imobilizado (ciclo longo)", min: 0.08, max: 0.15 },
+  { qid: "commercial:q3", when: "red", label: "Capital de giro imobilizado (ciclo longo)", min: 0.04, max: 0.075 },
   { qid: "commercial:q4", when: "red", label: "Custo de antecipação recorrente (sobre 50% do faturamento)", min: 0.01, max: 0.02 },
   { qid: "commercial:q4", when: "yellow", label: "Custo de antecipação eventual (sobre 50% do faturamento)", min: 0.004, max: 0.0075 },
   { qid: "commercial:q5", when: "red", label: "Custo de crédito emergencial por descasamento de ciclo", min: 0.01, max: 0.025 },
