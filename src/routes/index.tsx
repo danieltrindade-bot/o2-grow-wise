@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import {
   Database, BarChart3, Brain, Target,
-  Briefcase, LineChart, Cpu, Compass, Users,
+  Briefcase, LineChart, Cpu, Compass,
   ArrowRight, TrendingUp, DollarSign, Receipt, CreditCard, Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,25 +64,18 @@ const processes = [
 const pillars = [
   {
     level: "Operacional",
-    desc: "Execução do dia a dia financeiro com processos padronizados",
-    services: [
-      { icon: Briefcase, title: "BPO Financeiro", desc: "Operação financeira completa sob gestão especializada" },
-      { icon: Users, title: "Coordenador as a Service", desc: "Coordenação financeira dedicada para sua operação" },
-    ],
+    desc: "Execução do dia a dia financeiro com processos padronizados e controle rigoroso da rotina",
+    icon: Briefcase,
   },
   {
     level: "Tático",
-    desc: "Inteligência financeira para decisões de médio prazo",
-    services: [
-      { icon: LineChart, title: "CFO as a Service", desc: "Inteligência financeira executiva sob demanda" },
-    ],
+    desc: "Inteligência financeira para decisões de médio prazo com análise e planejamento avançado",
+    icon: LineChart,
   },
   {
     level: "Estratégico",
-    desc: "Visão de longo prazo e maturidade financeira",
-    services: [
-      { icon: Compass, title: "Assessoria Estratégica", desc: "Jornada de maturidade financeira personalizada" },
-    ],
+    desc: "Visão de longo prazo, maturidade financeira e governança para crescimento sustentável",
+    icon: Compass,
   },
 ];
 
@@ -149,29 +142,17 @@ function ServicePillars() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {pillars.map((p, i) => (
           <AnimatedSection key={p.level} delay={i * 150}>
-            <div className="relative bg-card border border-border rounded-2xl p-6 h-full flex flex-col">
-              <div className="mb-4">
-                <span className="text-xs text-primary font-semibold uppercase tracking-widest">{p.level}</span>
-                <p className="text-xs text-muted-foreground mt-1">{p.desc}</p>
+            <div className="relative bg-card border border-border rounded-2xl p-8 h-full flex flex-col items-center text-center hover:border-primary/50 transition-colors">
+              <div className="h-14 w-14 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5">
+                <p.icon className="h-7 w-7" />
               </div>
-              <div className="space-y-3 flex-1">
-                {p.services.map((s) => (
-                  <div key={s.title} className="flex items-start gap-3 group">
-                    <div className="h-9 w-9 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <s.icon className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold leading-tight">{s.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Connector dot at bottom center */}
-              <div className="hidden md:flex justify-center mt-5">
+              <h3 className="text-2xl font-bold tracking-tight mb-3">{p.level}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+              {/* Connector dot */}
+              <div className="hidden md:flex justify-center mt-6">
                 <div className={cn(
-                  "h-2.5 w-2.5 rounded-full transition-colors duration-700",
-                  visible ? "bg-primary" : "bg-border",
+                  "h-3 w-3 rounded-full transition-all duration-700",
+                  visible ? "bg-primary shadow-[0_0_8px_rgba(0,232,95,0.5)]" : "bg-border",
                 )} />
               </div>
             </div>
