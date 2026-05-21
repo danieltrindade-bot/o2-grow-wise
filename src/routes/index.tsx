@@ -267,13 +267,13 @@ function LandingPage() {
             <div className="w-16 h-px bg-border mt-6 mb-4" />
             <p className="text-sm text-muted-foreground">Temos franquias espalhadas por todo o país.</p>
           </AnimatedSection>
-          <div className="relative h-64 md:h-auto overflow-hidden">
+          <div className="relative h-72 md:h-auto overflow-hidden">
             <img
               src="/mapa-brasil.png"
               alt="Mapa de atuação O2 no Brasil"
-              className="absolute inset-0 w-full h-full object-cover object-center scale-110"
+              className="absolute inset-0 w-full h-full object-cover object-[50%_30%]"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
           </div>
         </div>
       </section>
