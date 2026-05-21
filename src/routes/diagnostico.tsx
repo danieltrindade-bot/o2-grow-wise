@@ -188,10 +188,10 @@ function Screen2() {
               <SelectValue placeholder="Selecione..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="strong">Crescimento forte</SelectItem>
-              <SelectItem value="moderate">Crescimento moderado</SelectItem>
-              <SelectItem value="stable">Estável</SelectItem>
-              <SelectItem value="declining">Em queda</SelectItem>
+              <SelectItem value="strong">Crescimento forte (+30%)</SelectItem>
+              <SelectItem value="moderate">Crescimento moderado (+10%)</SelectItem>
+              <SelectItem value="stable">Estável (0%)</SelectItem>
+              <SelectItem value="declining">Em queda (-10%)</SelectItem>
             </SelectContent>
           </Select>
           {attempted && missingGrowth && (
