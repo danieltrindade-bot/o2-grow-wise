@@ -162,6 +162,38 @@ const SERVICE_DETAILS: Record<string, ServiceDetail> = {
       "Implantação técnica de ERP",
       "Auditoria formal",
     ],
+    stages: [
+      {
+        title: "Diagnóstico de Pessoas e Processos Financeiros",
+        description: "Mapeia como os pagamentos, centros de custo e o canal de urgências estão sendo operados, identificando gargalos, riscos e oportunidades de padronização",
+        items: [
+          "Mapeamento completo dos papéis e responsabilidades do time financeiro",
+          "Diagnóstico do processo de contas a pagar e centros de custo por evento",
+          "Identificação de riscos operacionais no canal de urgências",
+          "Hipóteses de melhorias e quick wins com impacto imediato",
+        ],
+      },
+      {
+        title: "Padronização de Rotinas e Criação de Processos",
+        description: "Transforma as decisões que hoje dependem do fundador em processos documentados, checklists e políticas que o time executa de forma autônoma e consistente",
+        items: [
+          "Criação de checklists para abertura, execução e fechamento financeiro de eventos",
+          "Padronização do processo de aprovação de pagamentos por alçada",
+          "Formalização da política de margem mínima por tipo de evento",
+          "Criação de rotina de fechamento mensal até D+5",
+        ],
+      },
+      {
+        title: "Rituais de Acompanhamento e Indicador de Maturidade Operacional",
+        description: "Implanta rituais semanais e mensais que garantem que os processos sejam seguidos com consistência, com medição objetiva da evolução da maturidade operacional",
+        items: [
+          "Ritual semanal de alinhamento das atividades financeiras",
+          "Inspeção por amostragem de lançamentos e documentos",
+          "Indicador de Maturidade Operacional com nota quantitativa por processo",
+          "Relatório de aderência e recomendações de continuidade",
+        ],
+      },
+    ],
   },
 };
 
