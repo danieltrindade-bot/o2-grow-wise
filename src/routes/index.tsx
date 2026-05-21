@@ -405,16 +405,21 @@ function LandingPage() {
             Nosso processo estruturado entrega resultados mensuráveis em 90 dias, da fundação de dados à análise estratégica.
           </p>
           <div className="mt-10 flex items-center justify-center gap-2 md:gap-4">
-            {["Fundação", "Processos", "Análise", "Resultado"].map((step, i) => (
-              <AnimatedSection key={step} delay={i * 150 + 200} className="flex items-center gap-2 md:gap-4">
+            {[
+              { label: "Fundação", day: "01d" },
+              { label: "Processos", day: "30d" },
+              { label: "Análise", day: "60d" },
+              { label: "Resultado", day: "90d" },
+            ].map((step, i) => (
+              <AnimatedSection key={step.label} delay={i * 150 + 200} className="flex items-center gap-2 md:gap-4">
                 <div className="flex flex-col items-center gap-2">
                   <div className={cn(
                     "h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center text-sm font-bold transition-colors",
                     i === 3 ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground",
                   )}>
-                    {(i + 1) * 22}d
+                    {step.day}
                   </div>
-                  <span className="text-[10px] md:text-xs text-muted-foreground">{step}</span>
+                  <span className="text-[10px] md:text-xs text-muted-foreground">{step.label}</span>
                 </div>
                 {i < 3 && <div className="w-8 md:w-16 h-px bg-gradient-to-r from-primary/50 to-primary/20 mb-5" />}
               </AnimatedSection>
