@@ -96,11 +96,11 @@ function CalculadoraCFOPage() {
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
 
   const setupParcela = setupResult.total / 12;
-  const totalMensal = finalRecorrencia + setupParcela;
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const totalComDesconto = totalMensal * (1 - discount.percent / 100);
-  const animatedRecorrencia = useCountUp(finalRecorrencia);
-  const animatedTotal = useCountUp(totalComDesconto);
+  const recorrenciaComDesconto = finalRecorrencia * (1 - discount.percent / 100);
+  const totalMensal = recorrenciaComDesconto + setupParcela;
+  const animatedRecorrencia = useCountUp(recorrenciaComDesconto);
+  const animatedTotal = useCountUp(totalMensal);
   const [showPrices, setShowPrices] = useState(false);
 
   return (
@@ -232,14 +232,15 @@ function CalculadoraCFOPage() {
 
                     <div className="px-5 pb-5">
                       <div className="space-y-2 text-sm px-1 mb-4">
-                        <Row label="Subtotal mensal" value={formatBRL(totalMensal)} bold />
-                        <Row label="Desconto aplicado" value={`${discount.percent}%`} />
+                        <Row label="Recorrência" value={formatBRL(finalRecorrencia)} />
+                        <Row label="Desconto" value={`${discount.percent}%`} />
+                        <Row label="Recorrência c/ desconto" value={formatBRL(recorrenciaComDesconto)} bold />
                       </div>
                       <div className="rounded-xl bg-primary/15 border border-primary p-4">
                         <p className="text-xs uppercase tracking-wider text-primary">Investimento mensal total</p>
                         <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(animatedTotal)}</p>
                         <div className="mt-2 text-xs text-primary/70 space-y-0.5">
-                          <p>Recorrência: {formatBRL(finalRecorrencia)} + Setup 12x: {formatBRL(setupParcela)}</p>
+                          <p>Recorrência: {formatBRL(recorrenciaComDesconto)} + Setup 12x: {formatBRL(setupParcela)}</p>
                         </div>
                       </div>
                       <Button
@@ -255,12 +256,12 @@ function CalculadoraCFOPage() {
                               ["Ajuste segmento", cnpjCount > 1 ? `+${segmentAdj}%` : "—"],
                               ["Taxa governança", formatBRL(governanceFee)],
                               ["Mensalidade", formatBRL(finalRecorrencia)],
+                              ["Desconto (só recorrência)", `${discount.percent}%`],
+                              ["Mensalidade c/ desconto", formatBRL(recorrenciaComDesconto)],
                               ["Setup (12x)", formatBRL(setupParcela)],
-                              ["Subtotal mensal", formatBRL(totalMensal)],
-                              ["Desconto", `${discount.percent}%`],
                             ],
                             finalLabel: "Investimento mensal total",
-                            finalValue: formatBRL(totalComDesconto),
+                            finalValue: formatBRL(totalMensal),
                           })
                         }
                         className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -285,7 +286,7 @@ function CalculadoraCFOPage() {
         )}
       </div>
 
-      <MobilePriceSummary label="Investimento mensal total" value={formatBRL(totalComDesconto)} visible={showPrices} onReveal={() => setShowPrices(true)} />
+      <MobilePriceSummary label="Investimento mensal total" value={formatBRL(totalMensal)} visible={showPrices} onReveal={() => setShowPrices(true)} />
     </div>
   );
 }
