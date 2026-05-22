@@ -16,7 +16,7 @@ export const QUESTIONS: Question[] = [
   {
     id: "financial:q1",
     category: "financial",
-    text: "Se perguntarmos agora quanto a empresa tem a receber nos próximos 30 dias — conseguem responder com precisão em menos de 5 minutos?",
+    text: "Você tem previsão de D+90, no mínimo, do seu contas a receber?",
     options: [
       { key: "green", label: "Sim, temos controle preciso" },
       { key: "yellow", label: "Temos uma ideia geral, mas não consolidado" },
@@ -56,9 +56,9 @@ export const QUESTIONS: Question[] = [
   {
     id: "financial:q5",
     category: "financial",
-    text: "A empresa faz conciliação bancária com frequência — semanal ou mais?",
+    text: "A empresa faz conciliação bancária diariamente?",
     options: [
-      { key: "green", label: "Sim, semanalmente ou mais" },
+      { key: "green", label: "Sim, diariamente" },
       { key: "yellow", label: "Mensalmente" },
       { key: "red", label: "Pelo contador ou não fazemos" },
     ],
@@ -96,11 +96,11 @@ export const QUESTIONS: Question[] = [
   {
     id: "commercial:q4",
     category: "commercial",
-    text: "Conseguem projetar quanto vai entrar no caixa nos próximos 60 dias com base no pipeline de vendas?",
+    text: "A empresa faz antecipação de recebíveis?",
     options: [
-      { key: "green", label: "Sim, temos forecast integrado" },
-      { key: "yellow", label: "Estimamos de forma aproximada" },
-      { key: "red", label: "Não conseguimos projetar" },
+      { key: "green", label: "Nunca fazemos" },
+      { key: "yellow", label: "Fazemos às vezes" },
+      { key: "red", label: "Sim, todos os meses" },
     ],
   },
   {

@@ -18,21 +18,21 @@ import type {
 
 type WithId<T> = T & { id: string };
 
-export const SEED_VERSION = 3;
+export const SEED_VERSION = 4;
 
 // ---------------------------------------------------------------------------
 // Diagnostic Questions (10 questions)
 // ---------------------------------------------------------------------------
 export const SEED_DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
-  { id: "dq-1", dimension: "financial", question_key: "q1", global_order: 1, question_text: "Se perguntarmos agora quanto a empresa tem a receber nos próximos 30 dias — conseguem responder com precisão em menos de 5 minutos?", option_green: "Sim, temos controle preciso", option_yellow: "Temos uma ideia geral, mas não consolidado", option_red: "Não conseguiríamos responder" },
+  { id: "dq-1", dimension: "financial", question_key: "q1", global_order: 1, question_text: "Você tem previsão de D+90, no mínimo, do seu contas a receber?", option_green: "Sim, temos controle preciso", option_yellow: "Temos uma ideia geral, mas não consolidado", option_red: "Não conseguiríamos responder" },
   { id: "dq-2", dimension: "financial", question_key: "q2", global_order: 2, question_text: "Quando um cliente não paga no vencimento, existe uma régua de cobrança definida com responsável e canal?", option_green: "Sim, temos isso estruturado", option_yellow: "Fazemos algo, mas é informal", option_red: "Não temos / Não sei" },
   { id: "dq-3", dimension: "financial", question_key: "q3", global_order: 3, question_text: "Existe um processo formal de aprovação para compras, com alçadas e registro — com prazo, antes do pagamento?", option_green: "Sim, temos fluxo de aprovação", option_yellow: "Aprovação informal ou parcial", option_red: "Não temos processo definido" },
   { id: "dq-4", dimension: "financial", question_key: "q4", global_order: 4, question_text: "Pagamentos em atraso, multas ou juros com fornecedores acontecem com frequência?", option_green: "Raramente ou nunca acontece", option_yellow: "Acontece às vezes", option_red: "Sim, é comum" },
-  { id: "dq-5", dimension: "financial", question_key: "q5", global_order: 5, question_text: "A empresa faz conciliação bancária com frequência — semanal ou mais?", option_green: "Sim, semanalmente ou mais", option_yellow: "Mensalmente", option_red: "Pelo contador ou não fazemos" },
+  { id: "dq-5", dimension: "financial", question_key: "q5", global_order: 5, question_text: "A empresa faz conciliação bancária diariamente?", option_green: "Sim, diariamente", option_yellow: "Mensalmente", option_red: "Pelo contador ou não fazemos" },
   { id: "dq-6", dimension: "commercial", question_key: "q1", global_order: 6, question_text: "A empresa sabe quais clientes ou produtos são mais lucrativos — não só os que mais faturam, mas os que mais geram margem?", option_green: "Sim, temos essa visibilidade", option_yellow: "Sabemos parcialmente", option_red: "Não medimos / não sabemos" },
   { id: "dq-7", dimension: "commercial", question_key: "q2", global_order: 7, question_text: "Quando o time de vendas dá desconto, existe um limite definido com critério claro de aprovação?", option_green: "Sim, temos política de desconto", option_yellow: "Existe algo informal", option_red: "Desconto é decidido na hora" },
   { id: "dq-8", dimension: "commercial", question_key: "q3", global_order: 8, question_text: "As condições de pagamento são definidas pela empresa ou pelo cliente na hora de fechar o negócio?", option_green: "A empresa define as condições", option_yellow: "Negociamos caso a caso", option_red: "O cliente acaba definindo" },
-  { id: "dq-9", dimension: "commercial", question_key: "q4", global_order: 9, question_text: "Conseguem projetar quanto vai entrar no caixa nos próximos 60 dias com base no pipeline de vendas?", option_green: "Sim, temos forecast integrado", option_yellow: "Estimamos de forma aproximada", option_red: "Não conseguimos projetar" },
+  { id: "dq-9", dimension: "commercial", question_key: "q4", global_order: 9, question_text: "A empresa faz antecipação de recebíveis?", option_green: "Nunca fazemos", option_yellow: "Fazemos às vezes", option_red: "Sim, todos os meses" },
   { id: "dq-10", dimension: "commercial", question_key: "q5", global_order: 10, question_text: "Já aconteceu de vender muito em um mês e não ter caixa suficiente no mês seguinte?", option_green: "Nunca aconteceu", option_yellow: "Aconteceu raramente", option_red: "Sim, é recorrente" },
 ];
 

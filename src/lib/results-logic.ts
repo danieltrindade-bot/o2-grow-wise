@@ -135,7 +135,7 @@ const OUTCOME_RULES: OutcomeRule[] = [
   { qid: "financial:q5", current: "Conciliação mensal ou inexistente", future: "Conciliação semanal — erros detectados em 48h" },
   { qid: "commercial:q2", current: "Desconto decidido na hora", future: "Piso de margem definido — desconto só dentro do aprovado" },
   { qid: "commercial:q3", current: "Cliente define as condições", future: "Tabela padrão — empresa retoma o controle" },
-  { qid: "commercial:q4", current: "Caixa imprevisível", future: "Forecast confiável de 30/60/90 dias" },
+  { qid: "commercial:q4", current: "Antecipação de recebíveis recorrente", future: "Gestão de caixa que elimina necessidade de antecipação" },
   { qid: "commercial:q5", current: "Vende muito, caixa aperta", future: "Ciclo financeiro de vendas mapeado e gerenciado" },
 ];
 
@@ -169,7 +169,7 @@ const SHORT_LABELS: Record<string, string> = {
   "commercial:q1": "Lucratividade não medida",
   "commercial:q2": "Desconto sem critério",
   "commercial:q3": "Cliente define condições",
-  "commercial:q4": "Sem forecast de caixa",
+  "commercial:q4": "Antecipação de recebíveis recorrente",
   "commercial:q5": "Vendas x caixa descasados",
 };
 
@@ -250,7 +250,7 @@ const PAIN_LABELS: Record<string, string> = {
   "commercial:q1": "lucratividade por cliente não medida",
   "commercial:q2": "descontos concedidos sem critério",
   "commercial:q3": "condições comerciais ditadas pelo cliente",
-  "commercial:q4": "sem previsibilidade de caixa",
+  "commercial:q4": "antecipação de recebíveis recorrente",
   "commercial:q5": "vendas e caixa descasados",
 };
 
