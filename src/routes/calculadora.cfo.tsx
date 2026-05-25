@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { formatBRL } from "@/lib/format";
@@ -24,12 +23,6 @@ import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared"
 export const Route = createFileRoute("/calculadora/cfo")({
   component: CalculadoraCFOPage,
 });
-
-const DISCOUNTS = [
-  { id: "none", label: "Sem desconto", percent: 0 },
-  { id: "d7", label: "Pagamento em 7 dias", percent: 7 },
-  { id: "meeting", label: "Fechamento em reunião", percent: 15 },
-];
 
 
 function lookupCFOBase(rules: CFOBaseRule[], annualRevenue: number): number {
@@ -58,7 +51,6 @@ function CalculadoraCFOPage() {
   const [cnpjCount, setCnpjCount] = useState<number>(1);
   const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
   const [governanceType, setGovernanceType] = useState<string>("simples");
-  const [discountId, setDiscountId] = useState<string>("none");
   const complexity = [2, 2, 2, 2, 2, 2];
 
   useEffect(() => {
@@ -96,10 +88,8 @@ function CalculadoraCFOPage() {
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
 
   const setupParcela = setupResult.total / 12;
-  const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const recorrenciaComDesconto = finalRecorrencia * (1 - discount.percent / 100);
-  const totalMensal = recorrenciaComDesconto + setupParcela;
-  const animatedRecorrencia = useCountUp(recorrenciaComDesconto);
+  const totalMensal = finalRecorrencia + setupParcela;
+  const animatedRecorrencia = useCountUp(finalRecorrencia);
   const animatedTotal = useCountUp(totalMensal);
   const [showPrices, setShowPrices] = useState(false);
 
@@ -173,22 +163,6 @@ function CalculadoraCFOPage() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="text-lg font-semibold mb-4">Desconto</h2>
-                <RadioGroup value={discountId} onValueChange={setDiscountId} className="space-y-2">
-                  {DISCOUNTS.map((d) => (
-                    <label key={d.id} htmlFor={`disc-cfo-${d.id}`}
-                      className={cn("flex items-center justify-between rounded-xl border bg-background p-3 cursor-pointer",
-                        discountId === d.id ? "border-primary" : "border-border")}>
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem id={`disc-cfo-${d.id}`} value={d.id} />
-                        <span className="text-sm">{d.label}</span>
-                      </div>
-                      <span className="text-sm font-semibold text-primary">{d.percent}%</span>
-                    </label>
-                  ))}
-                </RadioGroup>
-              </section>
             </div>
 
             <aside className="lg:col-span-1">
@@ -207,6 +181,7 @@ function CalculadoraCFOPage() {
                       <TabsContent value="recorrencia" className="p-5 space-y-4 mt-0">
                         <Row label="Preço base" value={formatBRL(basePrice)} />
                         <Row label="Multiplicador CNPJ" value={`×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`} />
+                        <Row label="Complexidade" value={`${cf.label} ×${cf.factor} (${complexityScore})`} />
                         <Row label="Ajuste segmento" value={cnpjCount > 1 ? `+${segmentAdj}%` : "—"} />
                         <Row label="Taxa governança" value={formatBRL(governanceFee)} />
 
@@ -217,6 +192,7 @@ function CalculadoraCFOPage() {
                       </TabsContent>
 
                       <TabsContent value="setup" className="p-5 space-y-4 mt-0">
+                        <Row label="Classificação" value={setupResult.classification === "padrao" ? "Padrão" : "Complexo"} />
                         <Row label="Setup base" value={formatBRL(setupResult.base)} />
                         <Row label="Adicional por segmento" value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"} />
                         <Row label="Valor total setup" value={formatBRL(setupResult.total)} bold />
@@ -229,33 +205,26 @@ function CalculadoraCFOPage() {
                     </Tabs>
 
                     <div className="px-5 pb-5">
-                      <div className="space-y-2 text-sm px-1 mb-4">
-                        <Row label="Recorrência" value={formatBRL(finalRecorrencia)} />
-                        <Row label="Desconto" value={`${discount.percent}%`} />
-                        <Row label="Recorrência c/ desconto" value={formatBRL(recorrenciaComDesconto)} bold />
-                      </div>
                       <div className="rounded-xl bg-primary/15 border border-primary p-4">
                         <p className="text-xs uppercase tracking-wider text-primary">Investimento mensal total</p>
                         <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(animatedTotal)}</p>
                         <div className="mt-2 text-xs text-primary/70 space-y-0.5">
-                          <p>Recorrência: {formatBRL(recorrenciaComDesconto)} + Setup 12x: {formatBRL(setupParcela)}</p>
+                          <p>Recorrência: {formatBRL(finalRecorrencia)} + Setup 12x: {formatBRL(setupParcela)}</p>
                         </div>
                       </div>
                       <Button
                         onClick={() =>
                           exportCalculatorPDF({
                             service: "CFO as a Service",
-                            serviceKey: "cfo",
                             clientName: state.companyName,
                             monthlyRevenue,
                             rows: [
                               ["Preço base", formatBRL(basePrice)],
                               ["Multiplicador CNPJ", `×${cnpjMultiplier.toFixed(2)} (${cnpjCount})`],
+                              ["Complexidade", `${cf.label} ×${cf.factor} (${complexityScore})`],
                               ["Ajuste segmento", cnpjCount > 1 ? `+${segmentAdj}%` : "—"],
                               ["Taxa governança", formatBRL(governanceFee)],
                               ["Mensalidade", formatBRL(finalRecorrencia)],
-                              ["Desconto (só recorrência)", `${discount.percent}%`],
-                              ["Mensalidade c/ desconto", formatBRL(recorrenciaComDesconto)],
                               ["Setup (12x)", formatBRL(setupParcela)],
                             ],
                             finalLabel: "Investimento mensal total",

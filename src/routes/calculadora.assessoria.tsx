@@ -173,7 +173,6 @@ function AssessoriaPage() {
                     onClick={() =>
                       exportCalculatorPDF({
                         service: "Assessoria Estratégica",
-                        serviceKey: "assessoria",
                         clientName: state.companyName,
                         monthlyRevenue,
                         rows: [

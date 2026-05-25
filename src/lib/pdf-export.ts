@@ -1,5 +1,4 @@
 import { formatBRL } from "./format";
-import { SERVICE_DETAILS } from "@/components/ProductPresentation";
 
 async function getJsPDF() {
   const { jsPDF } = await import("jspdf");
@@ -91,26 +90,12 @@ function darkTableStyles(fontSize: number) {
 
 export interface CalcPDFInput {
   service: string;
-  serviceKey?: string;
   clientName?: string;
   monthlyRevenue?: number;
   rows: Array<[string, string]>;
   finalLabel: string;
   finalValue: string;
   fileName?: string;
-}
-
-const PAGE_BOTTOM = 275;
-const MARGIN_LEFT = 14;
-const TEXT_WIDTH = 182;
-
-function ensureSpace(doc: Doc, y: number, needed: number): number {
-  if (y + needed > PAGE_BOTTOM) {
-    doc.addPage();
-    pageBg(doc);
-    return 20;
-  }
-  return y;
 }
 
 export async function exportCalculatorPDF(input: CalcPDFInput) {
@@ -121,17 +106,17 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...WHITE);
-  doc.text("Dados do cliente", MARGIN_LEFT, 40);
+  doc.text("Dados do cliente", 14, 40);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...LIGHT_GRAY);
   let y = 47;
   if (input.clientName) {
-    doc.text(`Empresa: ${input.clientName}`, MARGIN_LEFT, y);
+    doc.text(`Empresa: ${input.clientName}`, 14, y);
     y += 6;
   }
   if (input.monthlyRevenue !== undefined) {
-    doc.text(`Faturamento mensal: ${formatBRL(input.monthlyRevenue)}`, MARGIN_LEFT, y);
+    doc.text(`Faturamento mensal: ${formatBRL(input.monthlyRevenue)}`, 14, y);
     y += 6;
   }
 
@@ -145,157 +130,8 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
   const finalY = (doc as any).lastAutoTable?.finalY ?? y + 30;
   highlightValue(doc, input.finalLabel, input.finalValue, finalY + 8);
 
-  if (input.serviceKey) {
-    renderScope(doc, input.serviceKey, input.service);
-  }
-
   footer(doc);
   doc.save(input.fileName ?? `O2-${input.service.replace(/\s+/g, "-")}.pdf`);
-}
-
-function renderScope(doc: Doc, serviceKey: string, serviceTitle: string) {
-  const detail = SERVICE_DETAILS[serviceKey];
-  if (!detail) return;
-
-  doc.addPage();
-  pageBg(doc);
-  let y = 20;
-
-  // Title
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(...GREEN);
-  doc.text(`Escopo — ${serviceTitle}`, MARGIN_LEFT, y);
-  y += 10;
-
-  // "O que é"
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...WHITE);
-  doc.text("O que é", MARGIN_LEFT, y);
-  y += 6;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...LIGHT_GRAY);
-  const whatLines = doc.splitTextToSize(detail.what, TEXT_WIDTH);
-  for (const line of whatLines) {
-    y = ensureSpace(doc, y, 5);
-    doc.text(line, MARGIN_LEFT, y);
-    y += 4.5;
-  }
-  y += 6;
-
-  // Deliverables
-  y = ensureSpace(doc, y, 15);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...WHITE);
-  doc.text("Entregas incluídas", MARGIN_LEFT, y);
-  y += 7;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...LIGHT_GRAY);
-  for (const item of detail.deliverables) {
-    y = ensureSpace(doc, y, 6);
-    doc.setTextColor(...GREEN);
-    doc.text("✓", MARGIN_LEFT + 2, y);
-    doc.setTextColor(...LIGHT_GRAY);
-    doc.text(item, MARGIN_LEFT + 8, y);
-    y += 5.5;
-  }
-  y += 6;
-
-  // Stages
-  if (detail.stages?.length) {
-    y = ensureSpace(doc, y, 15);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(...WHITE);
-    doc.text(
-      serviceKey === "assessoria"
-        ? "Jornada de Maturidade — 5 estágios de evolução"
-        : "Pilares de entrega",
-      MARGIN_LEFT,
-      y,
-    );
-    y += 8;
-
-    for (let i = 0; i < detail.stages.length; i++) {
-      const stage = detail.stages[i];
-      const stageHeaderHeight = 14;
-      const stageItemsHeight = stage.items.length * 5.5;
-      const stageTotal = stageHeaderHeight + stageItemsHeight + 8;
-
-      if (y + Math.min(stageTotal, 40) > PAGE_BOTTOM) {
-        doc.addPage();
-        pageBg(doc);
-        y = 20;
-      }
-
-      // Stage number + title
-      doc.setFillColor(...GREEN);
-      doc.roundedRect(MARGIN_LEFT, y - 4, 7, 7, 1.5, 1.5, "F");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(...DARK_1);
-      doc.text(String(i + 1), MARGIN_LEFT + 2.5, y + 1);
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      doc.setTextColor(...WHITE);
-      doc.text(stage.title, MARGIN_LEFT + 10, y + 1);
-      y += 6;
-
-      // Stage description
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(...GRAY);
-      const descLines = doc.splitTextToSize(stage.description, TEXT_WIDTH - 10);
-      for (const line of descLines) {
-        y = ensureSpace(doc, y, 5);
-        doc.text(line, MARGIN_LEFT + 10, y);
-        y += 4;
-      }
-      y += 3;
-
-      // Stage items
-      doc.setFontSize(8);
-      for (const item of stage.items) {
-        y = ensureSpace(doc, y, 5);
-        doc.setTextColor(...GREEN);
-        doc.text("•", MARGIN_LEFT + 12, y);
-        doc.setTextColor(...LIGHT_GRAY);
-        const itemLines = doc.splitTextToSize(item, TEXT_WIDTH - 18);
-        for (let li = 0; li < itemLines.length; li++) {
-          if (li > 0) {
-            y += 4;
-            y = ensureSpace(doc, y, 5);
-          }
-          doc.text(itemLines[li], MARGIN_LEFT + 16, y);
-        }
-        y += 4.5;
-      }
-      y += 6;
-    }
-  }
-
-  // Not included
-  if (detail.notIncluded?.length) {
-    y = ensureSpace(doc, y, 15);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(...WHITE);
-    doc.text("Não inclui", MARGIN_LEFT, y);
-    y += 7;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...GRAY);
-    for (const item of detail.notIncluded) {
-      y = ensureSpace(doc, y, 6);
-      doc.text(`✕  ${item}`, MARGIN_LEFT + 2, y);
-      y += 5.5;
-    }
-  }
 }
 
 export interface DiagnosticPDFInput {

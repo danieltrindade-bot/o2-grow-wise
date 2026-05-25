@@ -1,13 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
-  RefreshCw,
-  Pencil,
-  Sparkles,
   Download,
+  RefreshCw,
 } from "lucide-react";
 import { exportDiagnosticPDF } from "@/lib/pdf-export";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -22,12 +18,9 @@ import {
   calcGrade,
   formatBRL,
   getMaturity,
-  getRecommendation,
   type CostRow,
   type AlertItem,
-  type Recommendation,
   type Maturity,
-  type ProfileContext,
 } from "@/lib/results-logic";
 import { formatDateBR } from "@/lib/format";
 
@@ -36,7 +29,7 @@ export const Route = createFileRoute("/resultados")({
 });
 
 function ResultadosPage() {
-  const { state, goTo, reset } = useDiagnostic();
+  const { state, reset } = useDiagnostic();
   const navigate = useNavigate();
   const { data: config, isLoading, error, refetch } = useDiagnosticConfig();
 
@@ -57,25 +50,6 @@ function ResultadosPage() {
     () => buildAlerts(state.answers, config?.questions),
     [state.answers, config],
   );
-  const profile: ProfileContext = useMemo(() => ({
-    monthlyRevenue: state.monthlyRevenue,
-    growth: state.growth,
-    mainChallenges: state.mainChallenges,
-  }), [state.monthlyRevenue, state.growth, state.mainChallenges]);
-  const recommendation = useMemo(
-    () => getRecommendation(state.overallScore, state.answers, config?.recommendations, config?.questions, profile),
-    [state.overallScore, state.answers, config, profile],
-  );
-  const [showRec, setShowRec] = useState(false);
-
-  const handleEdit = () => {
-    goTo(3);
-    navigate({ to: "/diagnostico" });
-  };
-  const handleNew = () => {
-    reset();
-    navigate({ to: "/diagnostico" });
-  };
 
   const handleExportPDF = () => {
     const totalMin = costRows.reduce((s, r) => s + r.min, 0);
@@ -96,7 +70,7 @@ function ResultadosPage() {
       })),
       costTotal: hasQuant ? `${formatBRL(totalMin)} — ${formatBRL(totalMax)}` : undefined,
       outcomeRows: [],
-      recommendation: { service: recommendation.service, tagline: recommendation.tagline },
+      recommendation: { service: "", tagline: "" },
     });
   };
 
@@ -135,39 +109,13 @@ function ResultadosPage() {
             <CostTable rows={costRows} />
             <AlertPills items={alerts} />
 
-            {!showRec ? (
-              <div className="flex justify-center">
-                <Button
-                  onClick={() => setShowRec(true)}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 text-base"
-                >
-                  <Sparkles className="mr-2 h-5 w-5" /> Apresentar {recommendation.service}
-                </Button>
-              </div>
-            ) : (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <RecommendationCard rec={recommendation} />
-              </div>
-            )}
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-between pt-4">
-              <Button variant="outline" onClick={handleEdit}>
-                <Pencil className="mr-2 h-4 w-4" /> Editar Respostas
+            <div className="flex justify-center gap-3 pt-4">
+              <Button variant="outline" onClick={handleExportPDF}>
+                <Download className="mr-2 h-4 w-4" /> Exportar PDF
               </Button>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" onClick={handleNew}>
-                  <RefreshCw className="mr-2 h-4 w-4" /> Nova Reunião
-                </Button>
-                <Button variant="outline" onClick={handleExportPDF}>
-                  <Download className="mr-2 h-4 w-4" /> Exportar PDF
-                </Button>
-                <Button
-                  onClick={() => navigate({ to: "/servicos" })}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  Ver Serviços e Precificar <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
+              <Button variant="outline" onClick={() => { reset(); navigate({ to: "/diagnostico" }); }}>
+                <RefreshCw className="mr-2 h-4 w-4" /> Novo Diagnóstico
+              </Button>
             </div>
           </>
         )}
@@ -353,78 +301,6 @@ function AlertPills({ items }: { items: AlertItem[] }) {
           );
         })}
       </div>
-    </div>
-  );
-}
-function RecommendationCard({ rec }: { rec: Recommendation }) {
-  const navigate = useNavigate();
-  return (
-    <div className="space-y-4">
-      <div
-        className="rounded-2xl border-2 p-6 bg-card border-[var(--color-primary)]"
-        style={{
-          backgroundColor: "color-mix(in oklab, var(--color-primary) 8%, var(--card))",
-        }}
-      >
-        <div className="flex items-start gap-3 mb-4">
-          <div className="rounded-lg bg-primary/15 p-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-primary">Recomendação principal</p>
-            <h2 className="text-2xl font-bold mt-1">{rec.service}</h2>
-            <p className="text-sm text-muted-foreground mt-1">{rec.tagline}</p>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-background/50 border border-border p-4 mb-4">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Por que este serviço?</p>
-          <p className="text-sm">{rec.reason}</p>
-        </div>
-
-        {rec.gaps.length > 0 && (
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-              Resolve os seguintes gaps
-            </p>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {rec.gaps.map((g) => (
-                <li key={g} className="flex items-start gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span>{g}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <Button
-          onClick={() => navigate({ to: rec.calculatorPath as any })}
-          className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          Calcular preço — {rec.service} <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-
-      {rec.complementary && (
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Serviço complementar</p>
-              <h3 className="text-lg font-semibold mt-1">{rec.complementary.service}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{rec.complementary.reason}</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate({ to: rec.complementary!.calculatorPath as any })}
-              className="shrink-0"
-            >
-              Ver preço <ArrowRight className="ml-1 h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
