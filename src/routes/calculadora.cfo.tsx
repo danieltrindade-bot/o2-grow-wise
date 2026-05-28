@@ -43,6 +43,12 @@ function complexityFromRules(rules: CFOComplexityRule[], score: number): { facto
   return last ? { factor: Number(last.factor), label: last.level } : { factor: 1, label: "—" };
 }
 
+const DISCOUNTS = [
+  { id: "none", label: "Sem desconto", percent: 0 },
+  { id: "d7", label: "Pagamento em 7 dias", percent: 7 },
+  { id: "meeting", label: "Fechamento em reunião", percent: 15 },
+];
+
 function CalculadoraCFOPage() {
   const { state } = useDiagnostic();
   const { data, isLoading, error, refetch } = useCFOPricing();
@@ -51,6 +57,7 @@ function CalculadoraCFOPage() {
   const [cnpjCount, setCnpjCount] = useState<number>(1);
   const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
   const [governanceType, setGovernanceType] = useState<string>("simples");
+  const [discountId, setDiscountId] = useState("none");
   const complexity = [2, 2, 2, 2, 2, 2];
 
   useEffect(() => {
@@ -81,13 +88,17 @@ function CalculadoraCFOPage() {
   }, [data, governanceType]);
 
   const subtotalRecorrencia = basePrice * cnpjMultiplier * cf.factor;
-  const finalRecorrencia = subtotalRecorrencia * (1 + segmentAdj / 100) + governanceFee;
+  const recorrenciaSemDesconto = subtotalRecorrencia * (1 + segmentAdj / 100) + governanceFee;
+
+  const discount = DISCOUNTS.find((d) => d.id === discountId)!;
+  const finalRecorrencia = recorrenciaSemDesconto * (1 - discount.percent / 100);
 
   const setupResult = data
     ? calcSetupPriceFromRules(data.setup as SetupPricingRule[], monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
 
-  const setupParcela = setupResult.total / 12;
+  const setupComDesconto = setupResult.total * (1 - discount.percent / 100);
+  const setupParcela = setupComDesconto / 12;
   const totalMensal = finalRecorrencia + setupParcela;
   const animatedRecorrencia = useCountUp(finalRecorrencia);
   const animatedTotal = useCountUp(totalMensal);
@@ -163,6 +174,35 @@ function CalculadoraCFOPage() {
                 </div>
               </section>
 
+              <section className="rounded-2xl border border-border bg-card p-6 space-y-3">
+                <h2 className="text-lg font-semibold">Desconto</h2>
+                {DISCOUNTS.map((d) => {
+                  const selected = discountId === d.id;
+                  return (
+                    <label
+                      key={d.id}
+                      className={cn(
+                        "flex items-center justify-between rounded-xl border p-3 cursor-pointer transition-colors",
+                        selected ? "border-primary bg-primary/10" : "border-border"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          name="cfo-discount"
+                          value={d.id}
+                          checked={selected}
+                          onChange={() => setDiscountId(d.id)}
+                          className="accent-[var(--color-primary)]"
+                        />
+                        <span className="text-sm">{d.label}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-primary">{d.percent}%</span>
+                    </label>
+                  );
+                })}
+              </section>
+
             </div>
 
             <aside className="lg:col-span-1">
@@ -184,6 +224,9 @@ function CalculadoraCFOPage() {
                         <Row label="Complexidade" value={`${cf.label} ×${cf.factor} (${complexityScore})`} />
                         <Row label="Ajuste segmento" value={cnpjCount > 1 ? `+${segmentAdj}%` : "—"} />
                         <Row label="Taxa governança" value={formatBRL(governanceFee)} />
+                        {discount.percent > 0 && (
+                          <Row label={`Desconto (${discount.percent}%)`} value={`-${formatBRL(recorrenciaSemDesconto - finalRecorrencia)}`} />
+                        )}
 
                         <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
                           <p className="text-xs uppercase tracking-wider text-primary">Valor mensal</p>
@@ -196,6 +239,9 @@ function CalculadoraCFOPage() {
                         <Row label="Setup base" value={formatBRL(setupResult.base)} />
                         <Row label="Adicional por segmento" value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"} />
                         <Row label="Valor total setup" value={formatBRL(setupResult.total)} bold />
+                        {discount.percent > 0 && (
+                          <Row label={`Desconto (${discount.percent}%)`} value={`-${formatBRL(setupResult.total - setupComDesconto)}`} />
+                        )}
 
                         <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
                           <p className="text-xs uppercase tracking-wider text-primary">Setup em 12x</p>
@@ -224,6 +270,7 @@ function CalculadoraCFOPage() {
                               ["Complexidade", `${cf.label} ×${cf.factor} (${complexityScore})`],
                               ["Ajuste segmento", cnpjCount > 1 ? `+${segmentAdj}%` : "—"],
                               ["Taxa governança", formatBRL(governanceFee)],
+                              ...(discount.percent > 0 ? [["Desconto", `${discount.percent}% — ${discount.label}`] as [string, string]] : []),
                               ["Mensalidade", formatBRL(finalRecorrencia)],
                               ["Setup (12x)", formatBRL(setupParcela)],
                             ],

@@ -308,8 +308,8 @@ function pickTagline(key: ProductKey, fin: DimensionAnalysis, com: DimensionAnal
         : "Estruture a operação financeira e elimine perdas evitáveis";
     case "assessoria":
       return com.score >= 7
-        ? "Sua estratégia comercial precisa de direção imediata"
-        : "Transforme a gestão comercial em vantagem competitiva";
+        ? "Sua gestão financeira precisa de direção estratégica imediata"
+        : "Transforme a gestão financeira em vantagem competitiva";
     case "cfo":
       return "Gestão financeira executiva para transformação completa da empresa";
     case "oxy":
