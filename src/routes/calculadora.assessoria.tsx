@@ -185,6 +185,8 @@ function AssessoriaPage() {
                         finalLabel: "Valor mensal",
                         finalValue: formatBRL(valorFinal),
                         scope: SERVICE_DETAILS.assessoria.deliverables,
+                        stages: SERVICE_DETAILS.assessoria.stages,
+                        stagesTitle: "Jornada de Maturidade — 5 estágios de evolução",
                       })
                     }
                     className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"

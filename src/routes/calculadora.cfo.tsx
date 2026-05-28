@@ -277,6 +277,8 @@ function CalculadoraCFOPage() {
                             finalLabel: "Investimento mensal total",
                             finalValue: formatBRL(totalMensal),
                             scope: SERVICE_DETAILS.cfo.deliverables,
+                            stages: SERVICE_DETAILS.cfo.stages,
+                            stagesTitle: "Escopo — Pilares de entrega",
                           })
                         }
                         className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90"

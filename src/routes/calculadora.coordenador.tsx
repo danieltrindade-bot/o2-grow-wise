@@ -216,6 +216,8 @@ function CoordenadorPage() {
                       finalLabel: "Investimento mensal",
                       finalValue: formatBRL(totalMensal),
                       scope: SERVICE_DETAILS.coordenador.deliverables,
+                      stages: SERVICE_DETAILS.coordenador.stages,
+                      stagesTitle: "Escopo — Pilares de entrega",
                     })
                   }
                   className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"

@@ -88,6 +88,12 @@ function darkTableStyles(fontSize: number) {
   };
 }
 
+export interface CalcPDFStage {
+  title: string;
+  description: string;
+  items: string[];
+}
+
 export interface CalcPDFInput {
   service: string;
   clientName?: string;
@@ -97,6 +103,8 @@ export interface CalcPDFInput {
   finalValue: string;
   fileName?: string;
   scope?: string[];
+  stages?: CalcPDFStage[];
+  stagesTitle?: string;
 }
 
 export async function exportCalculatorPDF(input: CalcPDFInput) {
@@ -155,6 +163,68 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
       doc.text("✓", 16, sy);
       doc.setTextColor(...LIGHT_GRAY);
       doc.text(item, 24, sy);
+      sy += 6;
+    }
+  }
+
+  if (input.stages?.length) {
+    doc.addPage();
+    pageBg(doc);
+    header(doc, input.service, input.stagesTitle ?? "Escopo detalhado");
+
+    let sy = 40;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(...WHITE);
+    doc.text(input.stagesTitle ?? "Escopo detalhado", 14, sy);
+    sy += 12;
+
+    for (const stage of input.stages!) {
+      if (sy > 240) {
+        doc.addPage();
+        pageBg(doc);
+        header(doc, input.service, input.stagesTitle ?? "Escopo detalhado");
+        sy = 40;
+      }
+
+      doc.setFillColor(...DARK_2);
+      doc.setDrawColor(...DARK_3);
+      const titleLines = doc.splitTextToSize(stage.title, 155);
+      const descLines = doc.splitTextToSize(stage.description, 155);
+      const itemCount = stage.items.length;
+      const blockH = 10 + titleLines.length * 5 + descLines.length * 4.5 + itemCount * 5.5 + 6;
+
+      if (sy + blockH > 275) {
+        doc.addPage();
+        pageBg(doc);
+        header(doc, input.service, input.stagesTitle ?? "Escopo detalhado");
+        sy = 40;
+      }
+
+      doc.roundedRect(14, sy, 182, blockH, 2, 2, "FD");
+
+      sy += 7;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...GREEN);
+      doc.text(titleLines, 20, sy);
+      sy += titleLines.length * 5 + 2;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...GRAY);
+      doc.text(descLines, 20, sy);
+      sy += descLines.length * 4.5 + 3;
+
+      doc.setFontSize(8.5);
+      for (const item of stage.items) {
+        doc.setTextColor(...GREEN);
+        doc.text("✓", 22, sy);
+        doc.setTextColor(...LIGHT_GRAY);
+        doc.text(item, 30, sy);
+        sy += 5.5;
+      }
+
       sy += 6;
     }
   }
