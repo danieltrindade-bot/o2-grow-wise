@@ -17,7 +17,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation } from "@/components/ProductPresentation";
+import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
 
 export const Route = createFileRoute("/calculadora/cfo")({
@@ -276,6 +276,7 @@ function CalculadoraCFOPage() {
                             ],
                             finalLabel: "Investimento mensal total",
                             finalValue: formatBRL(totalMensal),
+                            scope: SERVICE_DETAILS.cfo.deliverables,
                           })
                         }
                         className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90"

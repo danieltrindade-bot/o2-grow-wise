@@ -96,6 +96,7 @@ export interface CalcPDFInput {
   finalLabel: string;
   finalValue: string;
   fileName?: string;
+  scope?: string[];
 }
 
 export async function exportCalculatorPDF(input: CalcPDFInput) {
@@ -129,6 +130,34 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
 
   const finalY = (doc as any).lastAutoTable?.finalY ?? y + 30;
   highlightValue(doc, input.finalLabel, input.finalValue, finalY + 8);
+
+  if (input.scope?.length) {
+    let sy = finalY + 40;
+    if (sy > 250) {
+      doc.addPage();
+      pageBg(doc);
+      sy = 20;
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...WHITE);
+    doc.text("Escopo do serviço", 14, sy);
+    sy += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    for (const item of input.scope) {
+      if (sy > 275) {
+        doc.addPage();
+        pageBg(doc);
+        sy = 20;
+      }
+      doc.setTextColor(...GREEN);
+      doc.text("✓", 16, sy);
+      doc.setTextColor(...LIGHT_GRAY);
+      doc.text(item, 24, sy);
+      sy += 6;
+    }
+  }
 
   footer(doc);
   doc.save(input.fileName ?? `O2-${input.service.replace(/\s+/g, "-")}.pdf`);

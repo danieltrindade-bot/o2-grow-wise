@@ -14,7 +14,7 @@ import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-u
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation } from "@/components/ProductPresentation";
+import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 
 export const Route = createFileRoute("/calculadora/bpo")({
   component: CalculadoraBPOPage,
@@ -246,6 +246,7 @@ function CalculadoraBPOPage() {
                           ],
                           finalLabel: "Valor final mensal",
                           finalValue: formatBRL(valorComDesconto),
+                          scope: SERVICE_DETAILS.bpo.deliverables,
                         })
                       }
                       className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"

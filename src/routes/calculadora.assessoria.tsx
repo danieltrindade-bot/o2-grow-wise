@@ -15,7 +15,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation } from "@/components/ProductPresentation";
+import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/calculadora/assessoria")({
@@ -184,6 +184,7 @@ function AssessoriaPage() {
                         ],
                         finalLabel: "Valor mensal",
                         finalValue: formatBRL(valorFinal),
+                        scope: SERVICE_DETAILS.assessoria.deliverables,
                       })
                     }
                     className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"

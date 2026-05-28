@@ -11,7 +11,7 @@ interface ServiceDetail {
   stages?: { title: string; description: string; items: string[] }[];
 }
 
-const SERVICE_DETAILS: Record<string, ServiceDetail> = {
+export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
   bpo: {
     what: "Terceirização completa da operação financeira. A O2 assume contas a pagar, contas a receber, conciliação bancária, faturamento e relatórios gerenciais — liberando sua equipe para focar no core business.",
     deliverables: [
