@@ -152,9 +152,6 @@ function AssessoriaPage() {
                     <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
                       {formatBRL(animatedFinal)}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Valores limitados entre {formatBRL(minP)} e {formatBRL(maxP)}/mês
-                    </p>
                   </div>
 
                   <div className="mt-5">
