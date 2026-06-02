@@ -352,6 +352,7 @@ export function getRecommendation(
 
   const ctx = profile ?? {};
   const cfoAllowed = !ctx.monthlyRevenue || ctx.monthlyRevenue >= 700_000;
+  const bpoAllowed = !ctx.monthlyRevenue || ctx.monthlyRevenue < 400_000;
 
   let primary: ProductKey;
   let secondary: ProductKey | null = null;
@@ -360,29 +361,32 @@ export function getRecommendation(
     if (cfoAllowed) {
       primary = "cfo";
       secondary = "coordenador";
-    } else {
+    } else if (bpoAllowed) {
       primary = "bpo";
+      secondary = "assessoria";
+    } else {
+      primary = "coordenador";
       secondary = "assessoria";
     }
   } else if (fin.score >= 5) {
-    primary = "bpo";
+    primary = bpoAllowed ? "bpo" : "coordenador";
     secondary = com.score >= 3 ? "assessoria" : null;
   } else if (com.score >= 5) {
     primary = "assessoria";
-    secondary = fin.score >= 3 ? "bpo" : null;
+    secondary = fin.score >= 3 ? (bpoAllowed ? "bpo" : "coordenador") : null;
   } else if (fin.score >= 3 && com.score >= 3) {
     if (prefersCoordenador(fin, answers, ctx)) {
       primary = "coordenador";
       secondary = "assessoria";
     } else if (fin.score >= com.score) {
-      primary = "bpo";
+      primary = bpoAllowed ? "bpo" : "coordenador";
       secondary = "assessoria";
     } else {
       primary = "assessoria";
-      secondary = "bpo";
+      secondary = bpoAllowed ? "bpo" : "coordenador";
     }
   } else if (fin.score >= 3) {
-    primary = prefersCoordenador(fin, answers, ctx) ? "coordenador" : "bpo";
+    primary = prefersCoordenador(fin, answers, ctx) ? "coordenador" : (bpoAllowed ? "bpo" : "coordenador");
   } else if (com.score >= 3) {
     primary = "assessoria";
   } else {
