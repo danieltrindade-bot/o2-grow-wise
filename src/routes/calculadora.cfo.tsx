@@ -12,12 +12,12 @@ import { cn } from "@/lib/utils";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { formatBRL } from "@/lib/format";
 import { useCFOPricing, type CFOBaseRule, type CFOComplexityRule, type SetupPricingRule } from "@/hooks/use-pricing";
-import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
+import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
+import { ProductPresentation } from "@/components/ProductPresentation";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
 
 export const Route = createFileRoute("/calculadora/cfo")({
@@ -43,12 +43,6 @@ function complexityFromRules(rules: CFOComplexityRule[], score: number): { facto
   return last ? { factor: Number(last.factor), label: last.level } : { factor: 1, label: "—" };
 }
 
-const DISCOUNTS = [
-  { id: "none", label: "Sem desconto", percent: 0 },
-  { id: "d7", label: "Pagamento em 7 dias", percent: 7 },
-  { id: "meeting", label: "Fechamento em reunião", percent: 15 },
-];
-
 function CalculadoraCFOPage() {
   const { state } = useDiagnostic();
   const { data, isLoading, error, refetch } = useCFOPricing();
@@ -57,7 +51,6 @@ function CalculadoraCFOPage() {
   const [cnpjCount, setCnpjCount] = useState<number>(1);
   const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
   const [governanceType, setGovernanceType] = useState<string>("simples");
-  const [discountId, setDiscountId] = useState("none");
   const complexity = [2, 2, 2, 2, 2, 2];
 
   useEffect(() => {
@@ -88,20 +81,14 @@ function CalculadoraCFOPage() {
   }, [data, governanceType]);
 
   const subtotalRecorrencia = basePrice * cnpjMultiplier * cf.factor;
-  const recorrenciaSemDesconto = subtotalRecorrencia * (1 + segmentAdj / 100) + governanceFee;
-
-  const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const finalRecorrencia = recorrenciaSemDesconto * (1 - discount.percent / 100);
+  const finalRecorrencia = subtotalRecorrencia * (1 + segmentAdj / 100) + governanceFee;
 
   const setupResult = data
     ? calcSetupPriceFromRules(data.setup as SetupPricingRule[], monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
 
-  const setupComDesconto = setupResult.total * (1 - discount.percent / 100);
-  const setupParcela = setupComDesconto / 12;
+  const setupParcela = setupResult.total / 12;
   const totalMensal = finalRecorrencia + setupParcela;
-  const animatedRecorrencia = useCountUp(finalRecorrencia);
-  const animatedTotal = useCountUp(totalMensal);
   const [showPrices, setShowPrices] = useState(false);
 
   return (
@@ -113,7 +100,7 @@ function CalculadoraCFOPage() {
         <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "CFO as a Service" }]} />
 
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Calculadora — CFO as a Service</h1>
+          <h1 className="font-bold tracking-[0.005em]" style={{ fontSize: "clamp(28px, 4vw, 48px)" }}>Calculadora — CFO as a Service</h1>
           <p className="text-muted-foreground mt-2">Configure os parâmetros para precificar mensalidade e setup.</p>
         </div>
 
@@ -125,7 +112,7 @@ function CalculadoraCFOPage() {
         {data && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <section className="rounded-2xl border border-border bg-card p-6">
+              <section className="rounded-2xl border border-border bg-card p-7">
                 <h2 className="text-lg font-semibold mb-4">Parâmetros</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2 space-y-2">
@@ -174,35 +161,6 @@ function CalculadoraCFOPage() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-6 space-y-3">
-                <h2 className="text-lg font-semibold">Desconto</h2>
-                {DISCOUNTS.map((d) => {
-                  const selected = discountId === d.id;
-                  return (
-                    <label
-                      key={d.id}
-                      className={cn(
-                        "flex items-center justify-between rounded-xl border p-3 cursor-pointer transition-colors",
-                        selected ? "border-primary bg-primary/10" : "border-border"
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          name="cfo-discount"
-                          value={d.id}
-                          checked={selected}
-                          onChange={() => setDiscountId(d.id)}
-                          className="accent-[var(--color-primary)]"
-                        />
-                        <span className="text-sm">{d.label}</span>
-                      </div>
-                      <span className="text-sm font-semibold text-primary">{d.percent}%</span>
-                    </label>
-                  );
-                })}
-              </section>
-
             </div>
 
             <aside className="lg:col-span-1">
@@ -224,13 +182,10 @@ function CalculadoraCFOPage() {
                         <Row label="Complexidade" value={`${cf.label} ×${cf.factor} (${complexityScore})`} />
                         <Row label="Ajuste segmento" value={cnpjCount > 1 ? `+${segmentAdj}%` : "—"} />
                         <Row label="Taxa governança" value={formatBRL(governanceFee)} />
-                        {discount.percent > 0 && (
-                          <Row label={`Desconto (${discount.percent}%)`} value={`-${formatBRL(recorrenciaSemDesconto - finalRecorrencia)}`} />
-                        )}
 
                         <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
-                          <p className="text-xs uppercase tracking-wider text-primary">Valor mensal</p>
-                          <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(animatedRecorrencia)}</p>
+                          <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Valor mensal</p>
+                          <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(finalRecorrencia)}</p>
                         </div>
                       </TabsContent>
 
@@ -239,12 +194,9 @@ function CalculadoraCFOPage() {
                         <Row label="Setup base" value={formatBRL(setupResult.base)} />
                         <Row label="Adicional por segmento" value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"} />
                         <Row label="Valor total setup" value={formatBRL(setupResult.total)} bold />
-                        {discount.percent > 0 && (
-                          <Row label={`Desconto (${discount.percent}%)`} value={`-${formatBRL(setupResult.total - setupComDesconto)}`} />
-                        )}
 
                         <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
-                          <p className="text-xs uppercase tracking-wider text-primary">Setup em 12x</p>
+                          <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Setup em 12x no cartão</p>
                           <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(setupParcela)}<span className="text-sm font-normal text-primary/70">/mês</span></p>
                         </div>
                       </TabsContent>
@@ -252,10 +204,10 @@ function CalculadoraCFOPage() {
 
                     <div className="px-5 pb-5">
                       <div className="rounded-xl bg-primary/15 border border-primary p-4">
-                        <p className="text-xs uppercase tracking-wider text-primary">Investimento mensal total</p>
-                        <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(animatedTotal)}</p>
+                        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Investimento mensal total</p>
+                        <p className="text-3xl font-bold text-primary mt-1 tabular-nums">{formatBRL(totalMensal)}</p>
                         <div className="mt-2 text-xs text-primary/70 space-y-0.5">
-                          <p>Recorrência: {formatBRL(finalRecorrencia)} + Setup 12x: {formatBRL(setupParcela)}</p>
+                          <p>Recorrência: {formatBRL(finalRecorrencia)} + Setup 12x no cartão: {formatBRL(setupParcela)}</p>
                         </div>
                       </div>
                       <Button
@@ -270,15 +222,11 @@ function CalculadoraCFOPage() {
                               ["Complexidade", `${cf.label} ×${cf.factor} (${complexityScore})`],
                               ["Ajuste segmento", cnpjCount > 1 ? `+${segmentAdj}%` : "—"],
                               ["Taxa governança", formatBRL(governanceFee)],
-                              ...(discount.percent > 0 ? [["Desconto", `${discount.percent}% — ${discount.label}`] as [string, string]] : []),
                               ["Mensalidade", formatBRL(finalRecorrencia)],
-                              ["Setup (12x)", formatBRL(setupParcela)],
+                              ["Setup (12x no cartão)", formatBRL(setupParcela)],
                             ],
                             finalLabel: "Investimento mensal total",
                             finalValue: formatBRL(totalMensal),
-                            scope: SERVICE_DETAILS.cfo.deliverables,
-                            stages: SERVICE_DETAILS.cfo.stages,
-                            stagesTitle: "Escopo — Pilares de entrega",
                           })
                         }
                         className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90"

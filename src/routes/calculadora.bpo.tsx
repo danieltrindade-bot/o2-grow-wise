@@ -10,11 +10,11 @@ import { cn } from "@/lib/utils";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { formatBRL } from "@/lib/format";
 import { useBPOPricing } from "@/hooks/use-pricing";
-import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
+import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
+import { ProductPresentation } from "@/components/ProductPresentation";
 
 export const Route = createFileRoute("/calculadora/bpo")({
   component: CalculadoraBPOPage,
@@ -84,8 +84,8 @@ function CalculadoraBPOPage() {
   const valorMensalSetup = data?.setup ? Number(data.setup.installment_value) : 0;
   const valorMensalTotal = valorMensalBPO + (data?.setup?.add_to_monthly ? valorMensalSetup : 0);
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const valorComDesconto = valorMensalTotal * (1 - discount.percent / 100);
-  const animatedFinal = useCountUp(valorComDesconto);
+  const BPO_MINIMUM = 2100;
+  const valorComDesconto = Math.max(BPO_MINIMUM, valorMensalTotal * (1 - discount.percent / 100));
   const [showPrices, setShowPrices] = useState(false);
 
   return (
@@ -97,7 +97,7 @@ function CalculadoraBPOPage() {
         <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "BPO Financeiro" }]} />
 
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Calculadora — BPO Financeiro</h1>
+          <h1 className="font-bold tracking-[0.005em]" style={{ fontSize: "clamp(28px, 4vw, 48px)" }}>Calculadora — BPO Financeiro</h1>
           <p className="text-muted-foreground mt-2">Configure os parâmetros para calcular o valor mensal da operação.</p>
         </div>
 
@@ -109,7 +109,7 @@ function CalculadoraBPOPage() {
         {data && pacote && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <section className="rounded-2xl border border-border bg-card p-6">
+              <section className="rounded-2xl border border-border bg-card p-7">
                 <h2 className="text-lg font-semibold mb-4">Dados do Cliente</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2 space-y-2">
@@ -165,8 +165,8 @@ function CalculadoraBPOPage() {
               </section>
 
               {data.setup && (
-                <section className="rounded-2xl border border-border bg-card p-6">
-                  <p className="text-xs uppercase tracking-wider text-primary">Obrigatório</p>
+                <section className="rounded-2xl border border-border bg-card p-7">
+                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Obrigatório</p>
                   <h2 className="text-lg font-semibold mt-1">{data.setup.name}</h2>
                   <p className="text-sm text-muted-foreground mt-1">
                     {data.setup.installments} parcelas
@@ -185,7 +185,7 @@ function CalculadoraBPOPage() {
                 </section>
               )}
 
-              <section className="rounded-2xl border border-border bg-card p-6">
+              <section className="rounded-2xl border border-border bg-card p-7">
                 <h2 className="text-lg font-semibold mb-4">Desconto</h2>
                 <RadioGroup value={discountId} onValueChange={setDiscountId} className="space-y-2">
                   {DISCOUNTS.map((d) => (
@@ -204,9 +204,9 @@ function CalculadoraBPOPage() {
             </div>
 
             <aside className="lg:col-span-1">
-              <div className="lg:sticky lg:top-6 rounded-2xl border-2 border-primary bg-card p-6"
+              <div className="lg:sticky lg:top-6 rounded-2xl border-2 border-primary bg-card p-7"
                    style={{ backgroundColor: "color-mix(in oklab, var(--color-primary) 6%, var(--card))" }}>
-                <p className="text-xs uppercase tracking-wider text-primary">Proposta</p>
+                <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Proposta</p>
                 <h2 className="text-xl font-bold mt-1">{clientName || "Cliente"}</h2>
                 <dl className="mt-5 space-y-2 text-sm">
                   <Row label="Pacote" value={pacote.name} />
@@ -219,15 +219,15 @@ function CalculadoraBPOPage() {
                     <dl className="space-y-2 text-sm">
                       <Row label="Valor mensal BPO" value={formatBRL(valorMensalBPO)} />
                       {data.setup?.add_to_monthly && (
-                        <Row label={`Setup mensal (${data.setup.installments}x)`} value={formatBRL(valorMensalSetup)} />
+                        <Row label={`Setup mensal (${data.setup.installments}x no cartão)`} value={formatBRL(valorMensalSetup)} />
                       )}
                       <Row label="Subtotal mensal" value={formatBRL(valorMensalTotal)} bold />
                       <Row label="Desconto aplicado" value={`${discount.percent}%`} />
                     </dl>
                     <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-4">
-                      <p className="text-xs uppercase tracking-wider text-primary">Valor final mensal</p>
+                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Valor final mensal</p>
                       <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
-                        {formatBRL(animatedFinal)}
+                        {formatBRL(valorComDesconto)}
                       </p>
                     </div>
                     <Button
@@ -240,13 +240,12 @@ function CalculadoraBPOPage() {
                             ["Tier", tier.label],
                             ["Lançamentos/mês", String(lancamentosMensais)],
                             ["Valor mensal BPO", formatBRL(valorMensalBPO)],
-                            ["Setup mensal", formatBRL(valorMensalSetup)],
+                            ["Setup mensal (no cartão)", formatBRL(valorMensalSetup)],
                             ["Subtotal mensal", formatBRL(valorMensalTotal)],
                             ["Desconto", `${discount.percent}%`],
                           ],
                           finalLabel: "Valor final mensal",
                           finalValue: formatBRL(valorComDesconto),
-                          scope: SERVICE_DETAILS.bpo.deliverables,
                         })
                       }
                       className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"

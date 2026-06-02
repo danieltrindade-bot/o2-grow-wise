@@ -15,6 +15,7 @@ import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as CalculadoraTributarioRouteImport } from './routes/calculadora.tributario'
 import { Route as CalculadoraOxyRouteImport } from './routes/calculadora.oxy'
 import { Route as CalculadoraCoordenadorRouteImport } from './routes/calculadora.coordenador'
 import { Route as CalculadoraCfoRouteImport } from './routes/calculadora.cfo'
@@ -50,6 +51,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculadoraTributarioRoute = CalculadoraTributarioRouteImport.update({
+  id: '/calculadora/tributario',
+  path: '/calculadora/tributario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalculadoraOxyRoute = CalculadoraOxyRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
+  '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
+  '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
+  '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/calculadora/cfo'
     | '/calculadora/coordenador'
     | '/calculadora/oxy'
+    | '/calculadora/tributario'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/calculadora/cfo'
     | '/calculadora/coordenador'
     | '/calculadora/oxy'
+    | '/calculadora/tributario'
     | '/admin'
   id:
     | '__root__'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/calculadora/cfo'
     | '/calculadora/coordenador'
     | '/calculadora/oxy'
+    | '/calculadora/tributario'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   CalculadoraCfoRoute: typeof CalculadoraCfoRoute
   CalculadoraCoordenadorRoute: typeof CalculadoraCoordenadorRoute
   CalculadoraOxyRoute: typeof CalculadoraOxyRoute
+  CalculadoraTributarioRoute: typeof CalculadoraTributarioRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -228,6 +241,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculadora/tributario': {
+      id: '/calculadora/tributario'
+      path: '/calculadora/tributario'
+      fullPath: '/calculadora/tributario'
+      preLoaderRoute: typeof CalculadoraTributarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calculadora/oxy': {
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalculadoraCfoRoute: CalculadoraCfoRoute,
   CalculadoraCoordenadorRoute: CalculadoraCoordenadorRoute,
   CalculadoraOxyRoute: CalculadoraOxyRoute,
+  CalculadoraTributarioRoute: CalculadoraTributarioRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
