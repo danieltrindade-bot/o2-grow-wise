@@ -54,4 +54,41 @@ export function calcSetupPriceFromRules(
   return { classification, base, surcharge, total: base + surcharge };
 }
 
+// ── Coordenador Financeiro ──
+// Matriz fixa do Playbook/Escopo (valores são a fonte da verdade; os rótulos
+// "+20%/+40%" do material não batem com os números, então não calculamos %).
+export type CoordPerfil = "essencial" | "estruturado" | "integrado";
+export type CoordNivel = "baixa" | "media" | "alta";
+
+const COORD_SETUP: Record<CoordPerfil, Record<CoordNivel, number>> = {
+  essencial: { baixa: 3727, media: 3926, alta: 4125 },
+  estruturado: { baixa: 5218, media: 5417, alta: 5616 },
+  integrado: { baixa: 6709, media: 6908, alta: 7107 },
+};
+
+const COORD_MENSAL: Record<CoordPerfil, Record<CoordNivel, number>> = {
+  essencial: { baixa: 1739.5, media: 2087.4, alta: 2435.3 },
+  estruturado: { baixa: 2485, media: 2982, alta: 3479 },
+  integrado: { baixa: 3727, media: 4174, alta: 5119 },
+};
+
+// Mais CNPJs → maior complexidade (multi-CNPJ é o 1º ajuste citado no material).
+export function cnpjToNivel(cnpjCount: number): CoordNivel {
+  if (cnpjCount <= 1) return "baixa";
+  if (cnpjCount === 2) return "media";
+  return "alta";
+}
+
+export interface CoordResult {
+  perfil: CoordPerfil;
+  nivel: CoordNivel;
+  setup: number;
+  mensal: number;
+}
+
+export function calcCoordenadorPrice(perfil: CoordPerfil, cnpjCount: number): CoordResult {
+  const nivel = cnpjToNivel(cnpjCount);
+  return { perfil, nivel, setup: COORD_SETUP[perfil][nivel], mensal: COORD_MENSAL[perfil][nivel] };
+}
+
 export { formatBRL } from "./format";
