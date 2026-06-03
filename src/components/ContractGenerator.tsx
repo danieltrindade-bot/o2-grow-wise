@@ -11,6 +11,8 @@ import {
   AlertCircle,
   ChevronDown,
   PenLine,
+  Upload,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -242,6 +244,13 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   const [signingLink, setSigningLink] = useState("");
   const [paymentLink, setPaymentLink] = useState("");
 
+  // Document extraction
+  const [extractStatus, setExtractStatus] = useState<ActionStatus>({ type: "idle" });
+  const [extractWarnings, setExtractWarnings] = useState<string[]>([]);
+  const [extractedFields, setExtractedFields] = useState<string[]>([]);
+  const csFileRef = useRef<HTMLInputElement>(null);
+  const cnhFileRef = useRef<HTMLInputElement>(null);
+
   const cepLookup = useCepLookup();
   const cepEmpTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const cepSocTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -320,6 +329,74 @@ export function ContractGenerator(props: ContractGeneratorProps) {
     enderecoSocio &&
     vSetup.trim() &&
     vMensal.trim();
+
+  async function handleExtract() {
+    const csFile = csFileRef.current?.files?.[0];
+    const cnhFile = cnhFileRef.current?.files?.[0];
+    if (!csFile && !cnhFile) return;
+
+    setExtractStatus({ type: "loading" });
+    setExtractWarnings([]);
+    setExtractedFields([]);
+
+    try {
+      const formData = new FormData();
+      if (csFile) formData.append("contrato_social", csFile);
+      if (cnhFile) formData.append("cnh", cnhFile);
+
+      const r = await fetch(`${API_BASE}/api/contracts/extract`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: "Erro" }));
+        throw new Error(err.detail);
+      }
+      const data = await r.json();
+      const filled: string[] = [];
+
+      if (data.empresa.razao_social) {
+        setNomeCliente(data.empresa.razao_social);
+        filled.push(`Razão Social: ${data.empresa.razao_social}`);
+      }
+      if (data.empresa.cnpj) {
+        setCnpj(formatCNPJ(data.empresa.cnpj));
+        filled.push(`CNPJ: ${formatCNPJ(data.empresa.cnpj)}`);
+      }
+      if (data.empresa.cep) {
+        setCepEmp(data.empresa.cep.replace(/\D/g, ""));
+        filled.push(`CEP empresa: ${data.empresa.cep}`);
+      }
+      if (data.empresa.socio_nome || data.cnh.nome) {
+        const nome = data.empresa.socio_nome || data.cnh.nome;
+        setNomeSocio(nome);
+        filled.push(`Sócio: ${nome}`);
+      }
+      if (data.empresa.socio_cpf || data.cnh.cpf) {
+        const cpf = data.empresa.socio_cpf || data.cnh.cpf;
+        setCpfSocio(formatCPF(cpf));
+        filled.push(`CPF sócio: ${formatCPF(cpf)}`);
+      }
+      if (data.empresa.socio_cep) {
+        setCepSoc(data.empresa.socio_cep.replace(/\D/g, ""));
+        filled.push(`CEP sócio: ${data.empresa.socio_cep}`);
+      }
+
+      setExtractWarnings(data.avisos || []);
+      setExtractedFields(filled);
+      setExtractStatus({
+        type: filled.length > 0 ? "success" : "error",
+        message: filled.length > 0
+          ? `${filled.length} campo(s) extraído(s)${data.usou_ocr ? " via OCR" : ""} — revise antes de gerar`
+          : "Nenhum dado encontrado nos documentos",
+      });
+    } catch (e) {
+      setExtractStatus({
+        type: "error",
+        message: e instanceof Error ? e.message : "Erro ao extrair dados",
+      });
+    }
+  }
 
   // Build request payload
   function buildPayload() {
@@ -575,6 +652,76 @@ export function ContractGenerator(props: ContractGeneratorProps) {
             <X className="h-4 w-4" />
           </button>
         </div>
+
+        {/* Section 0: Document Extraction */}
+        <section className="rounded-xl border border-border bg-background p-4 space-y-3">
+          <p className="text-sm font-medium flex items-center gap-2">
+            <Upload className="h-4 w-4 text-primary" />
+            Preencher automaticamente via Contrato Social / CNH
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Contrato Social (PDF)</Label>
+              <input
+                ref={csFileRef}
+                type="file"
+                accept=".pdf"
+                className="block w-full text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-border file:bg-card file:text-sm file:text-foreground file:cursor-pointer hover:file:bg-secondary"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">CNH do Sócio (PDF ou imagem)</Label>
+              <input
+                ref={cnhFileRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="block w-full text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-border file:bg-card file:text-sm file:text-foreground file:cursor-pointer hover:file:bg-secondary"
+              />
+            </div>
+          </div>
+          <Button
+            onClick={handleExtract}
+            disabled={extractStatus.type === "loading"}
+            variant="outline"
+            size="sm"
+          >
+            {extractStatus.type === "loading" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Search className="mr-2 h-4 w-4" />
+            )}
+            Extrair dados
+          </Button>
+          {extractStatus.type === "success" && (
+            <div className="rounded-lg bg-primary/10 px-3 py-2 text-sm space-y-1">
+              <p className="text-primary flex items-center gap-1">
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                {extractStatus.message}
+              </p>
+              {extractedFields.map((f, i) => (
+                <p key={i} className="text-muted-foreground text-xs ml-5">• {f}</p>
+              ))}
+            </div>
+          )}
+          {extractStatus.type === "error" && (
+            <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive flex items-center gap-1">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              {extractStatus.message}
+            </div>
+          )}
+          {extractWarnings.length > 0 && (
+            <div className="text-xs text-muted-foreground space-y-0.5">
+              {extractWarnings.map((w, i) => (
+                <p key={i} className="flex items-start gap-1">
+                  <AlertCircle className="h-3 w-3 shrink-0 mt-0.5 text-yellow-500" />
+                  {w}
+                </p>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <div className="border-t border-border" />
 
         {/* Section 1: Dados do Contratante */}
         <section>
