@@ -18,7 +18,7 @@ import type {
 
 type WithId<T> = T & { id: string };
 
-export const SEED_VERSION = 4;
+export const SEED_VERSION = 5;
 
 // ---------------------------------------------------------------------------
 // Diagnostic Questions (10 questions)
@@ -179,7 +179,7 @@ export const SEED_SETUP_PRICING_RULES: SetupPricingRule[] = [
   { id: "spr-1", label: "0 - 100k", min_revenue: 0, max_revenue: 100000, price_standard: 10000, price_complex: 15000, sort_order: 1 },
   { id: "spr-2", label: "100k - 200k", min_revenue: 100000, max_revenue: 200000, price_standard: 10000, price_complex: 15000, sort_order: 2 },
   { id: "spr-3", label: "200k - 350k", min_revenue: 200000, max_revenue: 350000, price_standard: 10000, price_complex: 15000, sort_order: 3 },
-  { id: "spr-4", label: "350k - 500k", min_revenue: 350000, max_revenue: 500000, price_standard: 15000, price_complex: 15000, sort_order: 4 },
+  { id: "spr-4", label: "350k - 500k", min_revenue: 350000, max_revenue: 500000, price_standard: 15000, price_complex: 20000, sort_order: 4 },
   { id: "spr-5", label: "500k - 1M", min_revenue: 500000, max_revenue: 1000000, price_standard: 15000, price_complex: 20000, sort_order: 5 },
   { id: "spr-6", label: "1M - 2.5M", min_revenue: 1000000, max_revenue: 2500000, price_standard: 20000, price_complex: 25000, sort_order: 6 },
   { id: "spr-7", label: "2.5M - 5M", min_revenue: 2500000, max_revenue: 5000000, price_standard: 25000, price_complex: 30000, sort_order: 7 },
