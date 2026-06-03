@@ -95,24 +95,25 @@ function formatCurrency(v: string): string {
 // ── CEP Hook ──
 
 function useCepLookup() {
-  const [cache] = useState<Map<string, CepData>>(new Map());
+  const cache = useRef<Map<string, CepData>>(new Map());
 
   const lookup = useCallback(
     async (cep: string): Promise<CepData | null> => {
       const digits = cep.replace(/\D/g, "");
       if (digits.length !== 8) return null;
-      if (cache.has(digits)) return cache.get(digits)!;
+      if (cache.current.has(digits)) return cache.current.get(digits)!;
       try {
-        const r = await fetch(`${API_BASE}/api/cep/${digits}`);
+        const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
         if (!r.ok) return null;
         const data = await r.json();
-        cache.set(digits, data);
+        if (data.erro) return null;
+        cache.current.set(digits, data);
         return data;
       } catch {
         return null;
       }
     },
-    [cache],
+    [],
   );
 
   return lookup;
@@ -129,6 +130,7 @@ function AddressBlock({
   complemento,
   onComplementoChange,
   cepData,
+  loading,
 }: {
   label: string;
   cep: string;
@@ -138,6 +140,7 @@ function AddressBlock({
   complemento: string;
   onComplementoChange: (v: string) => void;
   cepData: CepData | null;
+  loading?: boolean;
 }) {
   return (
     <>
@@ -148,6 +151,14 @@ function AddressBlock({
           onChange={(e) => onCepChange(e.target.value.replace(/\D/g, "").slice(0, 8))}
           placeholder="Ex: 01452001"
         />
+        {loading && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Loader2 className="h-3 w-3 animate-spin" /> Buscando endereço…
+          </p>
+        )}
+        {!loading && cep.length === 8 && !cepData && (
+          <p className="text-xs text-destructive">CEP não encontrado</p>
+        )}
       </div>
       {cepData && (
         <>
@@ -203,6 +214,7 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   const [cnpj, setCnpj] = useState("");
   const [cepEmp, setCepEmp] = useState("");
   const [cepEmpData, setCepEmpData] = useState<CepData | null>(null);
+  const [cepEmpLoading, setCepEmpLoading] = useState(false);
   const [numEmp, setNumEmp] = useState("");
   const [complEmp, setComplEmp] = useState("");
 
@@ -210,6 +222,7 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   const [cpfSocio, setCpfSocio] = useState("");
   const [cepSoc, setCepSoc] = useState("");
   const [cepSocData, setCepSocData] = useState<CepData | null>(null);
+  const [cepSocLoading, setCepSocLoading] = useState(false);
   const [numSoc, setNumSoc] = useState("");
   const [complSoc, setComplSoc] = useState("");
 
@@ -237,6 +250,9 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   // Generated contract bytes (base64)
   const [contractB64, setContractB64] = useState<string | null>(null);
   const [contractFilename, setContractFilename] = useState("");
+
+  // API health
+  const [apiOk, setApiOk] = useState<boolean | null>(null);
 
   // Action states
   const [generateStatus, setGenerateStatus] = useState<ActionStatus>({
@@ -267,6 +283,13 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   }, [clientName]);
 
   useEffect(() => {
+    if (!expanded) return;
+    fetch(`${API_BASE}/api/health`)
+      .then((r) => setApiOk(r.ok))
+      .catch(() => setApiOk(false));
+  }, [expanded]);
+
+  useEffect(() => {
     setVSetup(formatCurrency(valorSetup));
   }, [valorSetup]);
 
@@ -278,24 +301,30 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   useEffect(() => {
     clearTimeout(cepEmpTimer.current);
     if (cepEmp.length === 8) {
+      setCepEmpLoading(true);
       cepEmpTimer.current = setTimeout(async () => {
         const data = await cepLookup(cepEmp);
         setCepEmpData(data);
+        setCepEmpLoading(false);
       }, 400);
     } else {
       setCepEmpData(null);
+      setCepEmpLoading(false);
     }
   }, [cepEmp, cepLookup]);
 
   useEffect(() => {
     clearTimeout(cepSocTimer.current);
     if (cepSoc.length === 8) {
+      setCepSocLoading(true);
       cepSocTimer.current = setTimeout(async () => {
         const data = await cepLookup(cepSoc);
         setCepSocData(data);
+        setCepSocLoading(false);
       }, 400);
     } else {
       setCepSocData(null);
+      setCepSocLoading(false);
     }
   }, [cepSoc, cepLookup]);
 
@@ -768,6 +797,7 @@ export function ContractGenerator(props: ContractGeneratorProps) {
               complemento={complEmp}
               onComplementoChange={setComplEmp}
               cepData={cepEmpData}
+              loading={cepEmpLoading}
             />
           </div>
         </section>
@@ -803,6 +833,7 @@ export function ContractGenerator(props: ContractGeneratorProps) {
               complemento={complSoc}
               onComplementoChange={setComplSoc}
               cepData={cepSocData}
+              loading={cepSocLoading}
             />
           </div>
         </section>
@@ -998,10 +1029,16 @@ export function ContractGenerator(props: ContractGeneratorProps) {
 
         {/* Actions */}
         <section className="space-y-3">
+          {apiOk === false && (
+            <div className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 bg-destructive/10 text-destructive">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              API de contratos indisponível ({API_BASE}). Geração, Slack, Assinatura e Pagamento não funcionarão.
+            </div>
+          )}
           <div className="flex flex-wrap gap-3">
             <Button
               onClick={handleGenerate}
-              disabled={!isValid || generateStatus.type === "loading"}
+              disabled={!isValid || generateStatus.type === "loading" || apiOk === false}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {generateStatus.type === "loading" ? (
@@ -1013,7 +1050,7 @@ export function ContractGenerator(props: ContractGeneratorProps) {
             </Button>
             <Button
               onClick={handlePDF}
-              disabled={!isValid || pdfStatus.type === "loading"}
+              disabled={!isValid || pdfStatus.type === "loading" || apiOk === false}
               variant="outline"
             >
               {pdfStatus.type === "loading" ? (
@@ -1045,12 +1082,18 @@ export function ContractGenerator(props: ContractGeneratorProps) {
             </Button>
             <Button
               onClick={() => setShowIpag(!showIpag)}
+              disabled={apiOk === false}
               variant="outline"
             >
               <CreditCard className="mr-2 h-4 w-4" />
               Link Pagamento
             </Button>
           </div>
+          {!contractB64 && isValid && (
+            <p className="text-xs text-muted-foreground">
+              Gere o contrato (DOCX ou PDF) para habilitar Slack e Assinatura.
+            </p>
+          )}
 
           {/* Status messages */}
           {[generateStatus, pdfStatus, slackStatus].map((s, i) =>
