@@ -39,6 +39,8 @@ export interface ContractGeneratorProps {
   volContasReceber?: number;
   volContasPagar?: number;
   qtdBancos?: number;
+  expanded?: boolean;
+  onExpandedChange?: (expanded: boolean) => void;
 }
 
 interface LinkedCompany {
@@ -187,9 +189,14 @@ export function ContractGenerator(props: ContractGeneratorProps) {
     volContasReceber,
     volContasPagar,
     qtdBancos,
+    expanded: controlledExpanded,
+    onExpandedChange,
   } = props;
 
-  const [expanded, setExpanded] = useState(false);
+  const controlled = onExpandedChange !== undefined;
+  const [internalExpanded, setInternalExpanded] = useState(false);
+  const expanded = controlled ? (controlledExpanded ?? false) : internalExpanded;
+  const setExpanded = controlled ? onExpandedChange! : setInternalExpanded;
 
   // Form state
   const [nomeCliente, setNomeCliente] = useState(clientName);
@@ -626,6 +633,7 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   }
 
   if (!expanded) {
+    if (controlled) return null;
     return (
       <Button
         onClick={() => setExpanded(true)}

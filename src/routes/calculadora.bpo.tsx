@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, Download } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText } from "lucide-react";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,6 +88,7 @@ function CalculadoraBPOPage() {
   const BPO_MINIMUM = 2100;
   const valorComDesconto = Math.max(BPO_MINIMUM, valorMensalTotal * (1 - discount.percent / 100));
   const [showPrices, setShowPrices] = useState(false);
+  const [showContract, setShowContract] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -107,7 +108,7 @@ function CalculadoraBPOPage() {
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
-        {data && pacote && (
+        {data && pacote && (<>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <section className="rounded-2xl border border-border bg-card p-7">
@@ -253,16 +254,13 @@ function CalculadoraBPOPage() {
                     >
                       <Download className="mr-2 h-4 w-4" /> Exportar PDF
                     </Button>
-                    <ContractGenerator
-                      modelo="BPO Financeiro"
-                      clientName={clientName || state.companyName}
-                      valorMensal={String(Math.round(valorMensalBPO * 100))}
-                      valorSetup={data.setup ? String(Math.round(Number(data.setup.installment_value) * Number(data.setup.installments) * 100)) : undefined}
-                      qtdParcelasSetup={data.setup ? Number(data.setup.installments) : 12}
-                      volContasReceber={contasReceberDia * (data.settings.dias_uteis ?? 22)}
-                      volContasPagar={contasPagarDia * (data.settings.dias_uteis ?? 22)}
-                      qtdBancos={bancos}
-                    />
+                    <Button
+                      onClick={() => setShowContract(!showContract)}
+                      className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                      variant="outline"
+                    >
+                      <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
+                    </Button>
                   </div>
                 ) : (
                   <Button
@@ -275,7 +273,20 @@ function CalculadoraBPOPage() {
               </div>
             </aside>
           </div>
-        )}
+
+          <ContractGenerator
+            modelo="BPO Financeiro"
+            clientName={clientName || state.companyName}
+            valorMensal={String(Math.round(valorMensalBPO * 100))}
+            valorSetup={data.setup ? String(Math.round(Number(data.setup.installment_value) * Number(data.setup.installments) * 100)) : undefined}
+            qtdParcelasSetup={data.setup ? Number(data.setup.installments) : 12}
+            volContasReceber={contasReceberDia * (data.settings.dias_uteis ?? 22)}
+            volContasPagar={contasPagarDia * (data.settings.dias_uteis ?? 22)}
+            qtdBancos={bancos}
+            expanded={showContract}
+            onExpandedChange={setShowContract}
+          />
+        </>)}
       </div>
 
       <MobilePriceSummary label="Valor final mensal" value={formatBRL(valorComDesconto)} visible={showPrices} onReveal={() => setShowPrices(true)} />

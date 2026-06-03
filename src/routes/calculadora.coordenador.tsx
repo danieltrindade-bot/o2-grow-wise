@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Check, Download } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText } from "lucide-react";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,7 @@ function CoordenadorPage() {
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
   const parcela12x = result.total / 12;
   const [showPrices, setShowPrices] = useState(false);
+  const [showContract, setShowContract] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -69,7 +70,7 @@ function CoordenadorPage() {
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
-        {rules && (
+        {rules && (<>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <section className="rounded-2xl border border-border bg-card p-7 space-y-4">
               <h2 className="text-lg font-semibold">Parâmetros</h2>
@@ -168,11 +169,13 @@ function CoordenadorPage() {
                   >
                     <Download className="mr-2 h-4 w-4" /> Exportar PDF
                   </Button>
-                  <ContractGenerator
-                    modelo="Coordenador as a Service"
-                    valorSetup={String(Math.round(result.total * 100))}
-                    qtdParcelasSetup={12}
-                  />
+                  <Button
+                    onClick={() => setShowContract(!showContract)}
+                    className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                    variant="outline"
+                  >
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
+                  </Button>
                 </div>
               ) : (
                 <div className="mt-4">
@@ -198,7 +201,15 @@ function CoordenadorPage() {
               )}
             </aside>
           </div>
-        )}
+
+          <ContractGenerator
+            modelo="Coordenador as a Service"
+            valorSetup={String(Math.round(result.total * 100))}
+            qtdParcelasSetup={12}
+            expanded={showContract}
+            onExpandedChange={setShowContract}
+          />
+        </>)}
       </div>
 
       <MobilePriceSummary label="12x no cartão" value={formatBRL(parcela12x)} visible={showPrices} onReveal={() => setShowPrices(true)} />

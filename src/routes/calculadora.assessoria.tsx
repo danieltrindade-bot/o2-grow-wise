@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, Download } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText } from "lucide-react";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +70,7 @@ function AssessoriaPage() {
   const valorFinal = valorMensal * (1 - discount.percent / 100);
   const animatedFinal = useCountUp(valorFinal);
   const [showPrices, setShowPrices] = useState(false);
+  const [showContract, setShowContract] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -87,7 +88,7 @@ function AssessoriaPage() {
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
-        {data && (
+        {data && (<>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
               <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
@@ -194,11 +195,13 @@ function AssessoriaPage() {
                   >
                     <Download className="mr-2 h-4 w-4" /> Exportar PDF
                   </Button>
-                  <ContractGenerator
-                    modelo="Assessoria Financeira"
-                    clientName={state.companyName}
-                    valorMensal={String(Math.round(valorFinal * 100))}
-                  />
+                  <Button
+                    onClick={() => setShowContract(!showContract)}
+                    className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                    variant="outline"
+                  >
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
+                  </Button>
                 </div>
               ) : (
                 <div className="mt-4">
@@ -224,7 +227,15 @@ function AssessoriaPage() {
               )}
             </aside>
           </div>
-        )}
+
+          <ContractGenerator
+            modelo="Assessoria Financeira"
+            clientName={state.companyName}
+            valorMensal={String(Math.round(valorFinal * 100))}
+            expanded={showContract}
+            onExpandedChange={setShowContract}
+          />
+        </>)}
       </div>
 
       <MobilePriceSummary label="Valor mensal" value={formatBRL(valorFinal)} visible={showPrices} onReveal={() => setShowPrices(true)} />
