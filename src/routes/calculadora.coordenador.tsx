@@ -9,6 +9,8 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 import { calcSetupPriceFromRules, formatBRL, type SegmentType } from "@/lib/pricing-shared";
 import { useCoordenadorPricing } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
@@ -24,6 +26,12 @@ export const Route = createFileRoute("/calculadora/coordenador")({
   component: CoordenadorPage,
 });
 
+const DISCOUNTS = [
+  { id: "none", label: "Sem desconto", percent: 0 },
+  { id: "d7", label: "Pagamento em 7 dias", percent: 7 },
+  { id: "meeting", label: "Fechamento em reunião", percent: 15 },
+];
+
 const INCLUDES = [
   "Coordenador financeiro dedicado",
   "Gestão de equipe financeira",
@@ -37,6 +45,7 @@ function CoordenadorPage() {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [cnpjCount, setCnpjCount] = useState(1);
   const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
+  const [discountId, setDiscountId] = useState("none");
 
   useEffect(() => {
     if (monthlyRevenue === 0 && state.monthlyRevenue > 0) setMonthlyRevenue(state.monthlyRevenue);
@@ -50,7 +59,9 @@ function CoordenadorPage() {
   const result = rules
     ? calcSetupPriceFromRules(rules, monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
-  const parcela12x = result.total / 12;
+  const discount = DISCOUNTS.find((d) => d.id === discountId)!;
+  const totalComDesconto = result.total * (1 - discount.percent / 100);
+  const parcela12x = totalComDesconto / 12;
   const [showPrices, setShowPrices] = useState(false);
   const [showContract, setShowContract] = useState(false);
 
@@ -72,6 +83,7 @@ function CoordenadorPage() {
 
         {rules && (<>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
             <section className="rounded-2xl border border-border bg-card p-7 space-y-4">
               <h2 className="text-lg font-semibold">Parâmetros</h2>
               <div className="space-y-2">
@@ -113,6 +125,24 @@ function CoordenadorPage() {
               </div>
             </section>
 
+            <section className="rounded-2xl border border-border bg-card p-7">
+              <h2 className="text-lg font-semibold mb-4">Desconto</h2>
+              <RadioGroup value={discountId} onValueChange={setDiscountId} className="space-y-2">
+                {DISCOUNTS.map((d) => (
+                  <label key={d.id} htmlFor={`disc-${d.id}`}
+                    className={cn("flex items-center justify-between rounded-xl border bg-background p-3 cursor-pointer",
+                      discountId === d.id ? "border-primary" : "border-border")}>
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem id={`disc-${d.id}`} value={d.id} />
+                      <span className="text-sm">{d.label}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-primary">{d.percent}%</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </section>
+            </div>
+
             <aside className="rounded-2xl border-2 border-primary bg-card p-7"
                    style={{ backgroundColor: "color-mix(in oklab, var(--color-primary) 6%, var(--card))" }}>
               <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Investimento</p>
@@ -125,6 +155,9 @@ function CoordenadorPage() {
                   )}
 
                   <Row label="Valor total do projeto" value={formatBRL(result.total)} bold />
+                  {discount.percent > 0 && (
+                    <Row label={`Desconto (${discount.percent}%)`} value={`-${formatBRL(result.total - totalComDesconto)}`} />
+                  )}
 
                   <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
                     <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">12x no cartão</p>
@@ -132,7 +165,7 @@ function CoordenadorPage() {
                       {formatBRL(parcela12x)}<span className="text-sm font-normal text-primary/70">/mês</span>
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Valor total: {formatBRL(result.total)}
+                      Valor total: {formatBRL(totalComDesconto)}
                     </p>
                   </div>
 
@@ -160,6 +193,9 @@ function CoordenadorPage() {
                           ["Segmento", segmentType],
                           ["Valor base", formatBRL(result.base)],
                           ["Adicional segmento", formatBRL(result.surcharge)],
+                          ...(discount.percent > 0
+                            ? [[`Desconto (${discount.percent}%)`, `-${formatBRL(result.total - totalComDesconto)}`] as [string, string]]
+                            : []),
                         ],
                         finalLabel: "12x no cartão",
                         finalValue: formatBRL(parcela12x),
@@ -204,7 +240,7 @@ function CoordenadorPage() {
 
           <ContractGenerator
             modelo="Coordenador as a Service"
-            valorSetup={String(Math.round(result.total * 100))}
+            valorSetup={String(Math.round(totalComDesconto * 100))}
             qtdParcelasSetup={12}
             expanded={showContract}
             onExpandedChange={setShowContract}
