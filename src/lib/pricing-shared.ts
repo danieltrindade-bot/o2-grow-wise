@@ -72,11 +72,13 @@ const COORD_MENSAL: Record<CoordPerfil, Record<CoordNivel, number>> = {
   integrado: { baixa: 3727, media: 4174, alta: 5119 },
 };
 
-// Mais CNPJs → maior complexidade (multi-CNPJ é o 1º ajuste citado no material).
-export function cnpjToNivel(cnpjCount: number): CoordNivel {
-  if (cnpjCount <= 1) return "baixa";
-  if (cnpjCount === 2) return "media";
-  return "alta";
+// Perfil derivado de nº de funcionários + nº de CNPJs (pega o maior tier quando divergem).
+// Essencial: ≤3 func. e 1 CNPJ · Estruturado: 4-8 func. ou 2 CNPJs · Integrado: 9+ func. ou multi-CNPJ.
+export function perfilFromInputs(employees: number, cnpjCount: number): CoordPerfil {
+  const colabTier = employees <= 3 ? 1 : employees <= 8 ? 2 : 3;
+  const cnpjTier = cnpjCount <= 1 ? 1 : cnpjCount === 2 ? 2 : 3;
+  const tier = Math.max(colabTier, cnpjTier);
+  return tier === 1 ? "essencial" : tier === 2 ? "estruturado" : "integrado";
 }
 
 export interface CoordResult {
@@ -86,8 +88,7 @@ export interface CoordResult {
   mensal: number;
 }
 
-export function calcCoordenadorPrice(perfil: CoordPerfil, cnpjCount: number): CoordResult {
-  const nivel = cnpjToNivel(cnpjCount);
+export function calcCoordenadorPrice(perfil: CoordPerfil, nivel: CoordNivel): CoordResult {
   return { perfil, nivel, setup: COORD_SETUP[perfil][nivel], mensal: COORD_MENSAL[perfil][nivel] };
 }
 

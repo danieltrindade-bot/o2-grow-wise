@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import { calcCoordenadorPrice, formatBRL, type CoordPerfil, type CoordNivel } from "@/lib/pricing-shared";
+import { calcCoordenadorPrice, perfilFromInputs, formatBRL, type CoordPerfil, type CoordNivel } from "@/lib/pricing-shared";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip } from "@/components/InfoTooltip";
@@ -48,18 +48,24 @@ const INCLUDES = [
   "Reporte executivo",
 ];
 
+const FUNC_TOOLTIP =
+  "Colaboradores envolvidos na operação financeira. Junto com os CNPJs, define o perfil de valor.";
 const CNPJ_TOOLTIP =
-  "Quantidade de CNPJs/empresas atendidas. Mais CNPJs elevam o nível de complexidade e ajustam o setup e a mensalidade.";
+  "Quantidade de CNPJs/empresas atendidas. Junto com o nº de funcionários, define o perfil de valor.";
+const NIVEL_TOOLTIP =
+  "Ajuste por volume de lançamentos e nº de sistemas. Baixa é o padrão; Média soma +20% e Alta +40%.";
 
 function CoordenadorPage() {
   const { state } = useDiagnostic();
-  const [perfil, setPerfil] = useState<CoordPerfil>("essencial");
+  const [employees, setEmployees] = useState(1);
   const [cnpjCount, setCnpjCount] = useState(1);
+  const [nivel, setNivel] = useState<CoordNivel>("baixa");
   const [discountId, setDiscountId] = useState("none");
   const [showPrices, setShowPrices] = useState(false);
   const [showContract, setShowContract] = useState(false);
 
-  const result = calcCoordenadorPrice(perfil, cnpjCount);
+  const perfil = perfilFromInputs(employees, cnpjCount);
+  const result = calcCoordenadorPrice(perfil, nivel);
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
   const parcela12x = result.setup / 12;
   const mensalComDesconto = result.mensal * (1 - discount.percent / 100);
@@ -83,16 +89,15 @@ function CoordenadorPage() {
             <section className="rounded-2xl border border-border bg-card p-7 space-y-4">
               <h2 className="text-lg font-semibold">Parâmetros</h2>
               <div className="space-y-2">
-                <Label>Perfil de valor</Label>
-                <Select value={perfil} onValueChange={(v) => setPerfil(v as CoordPerfil)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {PERFIS.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">{perfilInfo.desc}</p>
+                <Label className="flex items-center gap-2">
+                  Número de funcionários <InfoTooltip text={FUNC_TOOLTIP} />
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={employees}
+                  onChange={(e) => setEmployees(Math.max(1, Number(e.target.value) || 1))}
+                />
               </div>
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
@@ -105,9 +110,24 @@ function CoordenadorPage() {
                   value={cnpjCount}
                   onChange={(e) => setCnpjCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Nível de complexidade: <span className="text-foreground">{NIVEL_LABEL[result.nivel]}</span>
-                </p>
+              </div>
+              <div className="rounded-xl bg-primary/10 border border-primary/40 p-3">
+                <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Perfil de valor</p>
+                <p className="text-base font-semibold mt-0.5">{perfilInfo.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{perfilInfo.desc}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  Nível de complexidade <InfoTooltip text={NIVEL_TOOLTIP} />
+                </Label>
+                <Select value={nivel} onValueChange={(v) => setNivel(v as CoordNivel)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="baixa">Baixa (padrão)</SelectItem>
+                    <SelectItem value="media">Média (+20%)</SelectItem>
+                    <SelectItem value="alta">Alta (+40%)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </section>
 
@@ -180,6 +200,7 @@ function CoordenadorPage() {
                       clientName: state.companyName,
                       rows: [
                         ["Perfil", perfilInfo.label],
+                        ["Funcionários", String(employees)],
                         ["CNPJs", String(cnpjCount)],
                         ["Complexidade", NIVEL_LABEL[result.nivel]],
                         ["Setup (valor único)", formatBRL(result.setup)],
