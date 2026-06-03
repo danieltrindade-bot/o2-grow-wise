@@ -216,10 +216,10 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   const [vinculadas, setVinculadas] = useState<LinkedCompany[]>([]);
   const [showVinculadas, setShowVinculadas] = useState(false);
 
-  const [vSetup, setVSetup] = useState(valorSetup);
+  const [vSetup, setVSetup] = useState(() => formatCurrency(valorSetup));
   const [formaSetup, setFormaSetup] = useState("cartao");
   const [parcSetup, setParcSetup] = useState(qtdParcelasSetup);
-  const [vMensal, setVMensal] = useState(valorMensal);
+  const [vMensal, setVMensal] = useState(() => formatCurrency(valorMensal));
   const [formaMensal, setFormaMensal] = useState("boleto");
   const [inicioRec, setInicioRec] = useState(90);
   const [antecedencia, setAntecedencia] = useState(30);
@@ -265,6 +265,14 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   useEffect(() => {
     if (clientName) setNomeCliente(clientName);
   }, [clientName]);
+
+  useEffect(() => {
+    setVSetup(formatCurrency(valorSetup));
+  }, [valorSetup]);
+
+  useEffect(() => {
+    setVMensal(formatCurrency(valorMensal));
+  }, [valorMensal]);
 
   // CEP auto-lookup with debounce
   useEffect(() => {
