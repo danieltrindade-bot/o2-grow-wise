@@ -18,6 +18,7 @@ import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation } from "@/components/ProductPresentation";
+import { ContractGenerator } from "@/components/ContractGenerator";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
 
 export const Route = createFileRoute("/calculadora/cfo")({
@@ -233,6 +234,12 @@ function CalculadoraCFOPage() {
                       >
                         <Download className="mr-2 h-4 w-4" /> Exportar PDF
                       </Button>
+                      <ContractGenerator
+                        modelo="CFO Enterprise"
+                        valorMensal={String(Math.round(finalRecorrencia * 100))}
+                        valorSetup={String(Math.round(setupResult.total * 100))}
+                        qtdParcelasSetup={12}
+                      />
                     </div>
                   </div>
                 ) : (

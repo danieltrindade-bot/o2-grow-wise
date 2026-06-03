@@ -15,6 +15,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation } from "@/components/ProductPresentation";
+import { ContractGenerator } from "@/components/ContractGenerator";
 
 export const Route = createFileRoute("/calculadora/bpo")({
   component: CalculadoraBPOPage,
@@ -252,6 +253,16 @@ function CalculadoraBPOPage() {
                     >
                       <Download className="mr-2 h-4 w-4" /> Exportar PDF
                     </Button>
+                    <ContractGenerator
+                      modelo="BPO Financeiro"
+                      clientName={clientName || state.companyName}
+                      valorMensal={String(Math.round(valorMensalBPO * 100))}
+                      valorSetup={data.setup ? String(Math.round(Number(data.setup.installment_value) * Number(data.setup.installments) * 100)) : undefined}
+                      qtdParcelasSetup={data.setup ? Number(data.setup.installments) : 12}
+                      volContasReceber={contasReceberDia * (data.settings.dias_uteis ?? 22)}
+                      volContasPagar={contasPagarDia * (data.settings.dias_uteis ?? 22)}
+                      qtdBancos={bancos}
+                    />
                   </div>
                 ) : (
                   <Button

@@ -18,6 +18,7 @@ import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
+import { ContractGenerator } from "@/components/ContractGenerator";
 
 export const Route = createFileRoute("/calculadora/oxy")({
   component: OxyPage,
@@ -171,6 +172,11 @@ function OxyPage() {
                   >
                     <Download className="mr-2 h-4 w-4" /> Exportar PDF
                   </Button>
+                  <ContractGenerator
+                    modelo="SaaS Oxy + Gênio"
+                    valorSetup={String(Math.round(result.total * 100))}
+                    qtdParcelasSetup={12}
+                  />
                 </div>
               ) : (
                 <div className="mt-4">
