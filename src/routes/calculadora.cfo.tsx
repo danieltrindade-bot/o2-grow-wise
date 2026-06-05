@@ -18,7 +18,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation } from "@/components/ProductPresentation";
+import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { ContractGenerator } from "@/components/ContractGenerator";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
 
@@ -267,6 +267,9 @@ function CalculadoraCFOPage() {
                             ],
                             finalLabel: "Investimento mensal total",
                             finalValue: formatBRL(totalMensal),
+                            scope: SERVICE_DETAILS.cfo.deliverables,
+                            stages: SERVICE_DETAILS.cfo.stages,
+                            stagesTitle: "Escopo detalhado — CFO as a Service",
                           })
                         }
                         className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90"
