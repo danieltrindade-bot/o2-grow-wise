@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, AlertTriangle, XCircle, Save } from "lucide-react";
-import { useDiagnostic, type TrafficLight } from "@/context/DiagnosticContext";
+import { useDiagnostic, type TrafficLight, type DiagnosticState } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SCORE_MAP, QUESTIONS as FALLBACK_QUESTIONS, type OptionKey } from "@/lib/diagnostic-questions";
+import { SECTORS, sectorQuestion } from "@/lib/sector-questions";
 import { useDiagnosticConfig, type DiagnosticQuestion } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton } from "@/components/calc-ui";
 import { cn } from "@/lib/utils";
@@ -129,13 +130,14 @@ function Screen2() {
   const { state, setState, goTo, saveMeeting } = useDiagnostic();
   const [attempted, setAttempted] = useState(false);
 
+  const missingSector = !state.sector;
   const missingRevenue = state.monthlyRevenue <= 0;
   const missingAge = !state.companyAge;
   const missingGrowth = !state.growth;
 
   const handleNext = () => {
     setAttempted(true);
-    if (missingRevenue || missingAge || missingGrowth) return;
+    if (missingSector || missingRevenue || missingAge || missingGrowth) return;
     saveMeeting("draft");
     goTo(3);
   };
@@ -144,6 +146,29 @@ function Screen2() {
     <div className="mx-auto max-w-2xl">
       <ScreenHeader title="Entendimento do Negócio" step={2} />
       <div className="rounded-2xl border border-border bg-card p-8 space-y-6">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Setor da empresa</label>
+          <Select
+            value={state.sector || undefined}
+            onValueChange={(v) => setState({ sector: v as DiagnosticState["sector"] })}
+          >
+            <SelectTrigger className={cn("h-10", attempted && missingSector && "border-destructive")}>
+              <SelectValue placeholder="Selecione..." />
+            </SelectTrigger>
+            <SelectContent>
+              {SECTORS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {attempted && missingSector && (
+            <p className="text-xs text-destructive">Campo obrigatório</p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            As perguntas do diagnóstico serão direcionadas ao setor selecionado.
+          </p>
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium">Faturamento médio mensal</label>
           <CurrencyInput
@@ -380,13 +405,25 @@ function Screen3() {
 
   const questions: UIQuestion[] = useMemo(() => {
     const fromDb = (data?.questions ?? []).map(toUIQuestion);
-    const list = fromDb.length > 0 ? fromDb : fallbackUI;
+    const base = fromDb.length > 0 ? fromDb : fallbackUI;
+    const list = base.map((q) => {
+      const override = sectorQuestion(state.sector, q.id);
+      if (!override) return q;
+      return {
+        ...q,
+        text: override.text,
+        options: q.options.map((o) => ({
+          ...o,
+          label: override.options?.[o.key] ?? o.label,
+        })),
+      };
+    });
     return [...list].sort((a, b) => {
       const ia = DISPLAY_ORDER.indexOf(a.id);
       const ib = DISPLAY_ORDER.indexOf(b.id);
       return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
     });
-  }, [data, fallbackUI]);
+  }, [data, fallbackUI, state.sector]);
 
   const groupedQuestions = useMemo(() => {
     const groups: Record<string, UIQuestion[]> = {};

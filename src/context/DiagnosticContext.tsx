@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import { selectAll, insertRows, updateRow } from "@/lib/local-store";
 import { sendLead } from "@/lib/lead-webhook";
+import type { Sector } from "@/lib/sector-questions";
 
 export type TrafficLight = "green" | "yellow" | "red" | null;
 
@@ -10,6 +11,7 @@ export interface DiagnosticState {
   consultantEmail: string;
   consultantPhone: string;
   date: string;
+  sector: "" | Sector;
   monthlyRevenue: number;
   companyAge: "" | "less_1" | "1_3" | "3_7" | "more_7";
   growth: "" | "strong" | "moderate" | "stable" | "declining";
@@ -29,6 +31,7 @@ export interface Meeting {
   consultantEmail: string;
   consultantPhone: string;
   date: string;
+  sector: string;
   monthlyRevenue: number;
   companyAge: string;
   growth: string;
@@ -53,6 +56,7 @@ const initialState = (): DiagnosticState => ({
   consultantEmail: "",
   consultantPhone: "",
   date: todayISO(),
+  sector: "",
   monthlyRevenue: 0,
   companyAge: "",
   growth: "",
@@ -97,6 +101,7 @@ function stateToMeeting(state: DiagnosticState, status: "draft" | "completed"): 
     consultantEmail: state.consultantEmail,
     consultantPhone: state.consultantPhone,
     date: state.date,
+    sector: state.sector,
     monthlyRevenue: state.monthlyRevenue,
     companyAge: state.companyAge,
     growth: state.growth,
@@ -182,6 +187,7 @@ export function DiagnosticProvider({ children }: { children: ReactNode }) {
       consultantEmail: meeting.consultantEmail || "",
       consultantPhone: meeting.consultantPhone || "",
       date: meeting.date,
+      sector: (meeting.sector || "") as DiagnosticState["sector"],
       monthlyRevenue: meeting.monthlyRevenue,
       companyAge: (meeting.companyAge || "") as DiagnosticState["companyAge"],
       growth: (meeting.growth || "") as DiagnosticState["growth"],

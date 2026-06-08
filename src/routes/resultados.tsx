@@ -30,6 +30,7 @@ import {
   type ProfileContext,
 } from "@/lib/results-logic";
 import { formatDateBR } from "@/lib/format";
+import { SECTOR_LABELS, type Sector } from "@/lib/sector-questions";
 
 export const Route = createFileRoute("/resultados")({
   component: ResultadosPage,
@@ -50,18 +51,19 @@ function ResultadosPage() {
     [state.overallScore, config],
   );
   const costRows = useMemo(
-    () => buildCostRows(state.answers, state.monthlyRevenue, config?.costs),
-    [state.answers, state.monthlyRevenue, config],
+    () => buildCostRows(state.answers, state.monthlyRevenue, config?.costs, state.sector),
+    [state.answers, state.monthlyRevenue, config, state.sector],
   );
   const alerts = useMemo(
-    () => buildAlerts(state.answers, config?.questions),
-    [state.answers, config],
+    () => buildAlerts(state.answers, config?.questions, state.sector),
+    [state.answers, config, state.sector],
   );
   const profile: ProfileContext = useMemo(() => ({
     monthlyRevenue: state.monthlyRevenue,
     growth: state.growth,
     mainChallenges: state.mainChallenges,
-  }), [state.monthlyRevenue, state.growth, state.mainChallenges]);
+    sector: state.sector,
+  }), [state.monthlyRevenue, state.growth, state.mainChallenges, state.sector]);
   const recommendation = useMemo(
     () => getRecommendation(state.overallScore, state.answers, config?.recommendations, config?.questions, profile),
     [state.overallScore, state.answers, config, profile],
@@ -128,6 +130,7 @@ function ResultadosPage() {
             <ScoreSummary
               companyName={state.companyName}
               monthlyRevenue={state.monthlyRevenue}
+              sectorLabel={state.sector ? SECTOR_LABELS[state.sector as Sector] : ""}
               date={formatDateBR(state.date)}
               grade={grade}
               maturity={maturity}
@@ -179,12 +182,14 @@ function ResultadosPage() {
 function ScoreSummary({
   companyName,
   monthlyRevenue,
+  sectorLabel,
   date,
   grade,
   maturity,
 }: {
   companyName: string;
   monthlyRevenue: number;
+  sectorLabel: string;
   date: string;
   grade: number;
   maturity: Maturity;
@@ -201,6 +206,11 @@ function ScoreSummary({
         <div>
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Empresa</p>
           <h1 className="text-3xl font-bold mt-1">{companyName}</h1>
+          {sectorLabel && (
+            <span className="inline-flex items-center mt-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-0.5 text-xs font-medium text-primary">
+              Análise direcionada · {sectorLabel}
+            </span>
+          )}
           {monthlyRevenue > 0 && (
             <p className="text-sm text-muted-foreground mt-1">
               Faturamento: {formatBRL(monthlyRevenue)}/mês

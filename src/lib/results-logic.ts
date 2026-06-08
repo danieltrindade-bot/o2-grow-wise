@@ -1,4 +1,5 @@
 import { QUESTIONS, type OptionKey } from "./diagnostic-questions";
+import { sectorResult, type Sector } from "./sector-questions";
 import type { TrafficLight } from "@/context/DiagnosticContext";
 import type {
   CostParameter,
@@ -93,6 +94,7 @@ export function buildCostRows(
   answers: Record<string, TrafficLight>,
   monthlyRevenue: number,
   costParams?: CostParameter[],
+  sector?: Sector | "",
 ): CostRow[] {
   const rules: CostRule[] = costParams
     ? costParams.map((c) => ({
@@ -108,7 +110,7 @@ export function buildCostRows(
     .filter((r) => answers[r.qid] === r.when)
     .map((r) => ({
       questionId: r.qid,
-      label: r.label,
+      label: sectorResult(sector, r.qid)?.costLabel?.[r.when] ?? r.label,
       min: r.qualitative ? 0 : (r.min ?? 0) * monthlyRevenue,
       max: r.qualitative ? 0 : (r.max ?? 0) * monthlyRevenue,
       qualitative: r.qualitative,
@@ -187,13 +189,15 @@ function shortify(text: string): string {
 export function buildAlerts(
   answers: Record<string, TrafficLight>,
   questions?: DiagnosticQuestion[],
+  sector?: Sector | "",
 ): AlertItem[] {
   if (questions && questions.length) {
     return questions.flatMap((q) => {
       const qid = `${q.dimension}:${q.question_key}`;
       const a = answers[qid];
       if (a === "red" || a === "yellow") {
-        return [{ questionId: qid, level: a, text: SHORT_LABELS[qid] ?? shortify(q.question_text) }];
+        const text = sectorResult(sector, qid)?.alert ?? SHORT_LABELS[qid] ?? shortify(q.question_text);
+        return [{ questionId: qid, level: a, text }];
       }
       return [];
     });
@@ -201,7 +205,8 @@ export function buildAlerts(
   return QUESTIONS.flatMap((q) => {
     const a = answers[q.id];
     if (a === "red" || a === "yellow") {
-      return [{ questionId: q.id, level: a, text: SHORT_LABELS[q.id] ?? shortify(q.text) }];
+      const text = sectorResult(sector, q.id)?.alert ?? SHORT_LABELS[q.id] ?? shortify(q.text);
+      return [{ questionId: q.id, level: a, text }];
     }
     return [];
   });
@@ -323,6 +328,7 @@ export interface ProfileContext {
   monthlyRevenue?: number;
   growth?: string;
   mainChallenges?: string[];
+  sector?: Sector | "";
 }
 
 function prefersCoordenador(
@@ -346,7 +352,7 @@ export function getRecommendation(
   questions?: DiagnosticQuestion[],
   profile?: ProfileContext,
 ): Recommendation {
-  const gaps = buildAlerts(answers, questions).map((a) => a.text);
+  const gaps = buildAlerts(answers, questions, profile?.sector).map((a) => a.text);
   const fin = analyzeDimension(answers, FINANCIAL_KEYS);
   const com = analyzeDimension(answers, COMMERCIAL_KEYS);
 
