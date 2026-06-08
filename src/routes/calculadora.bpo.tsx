@@ -13,6 +13,8 @@ import { useBPOPricing } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
+import { RoiPanel } from "@/components/RoiPanel";
+import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation } from "@/components/ProductPresentation";
@@ -50,6 +52,7 @@ const DISCOUNTS = [
 
 function CalculadoraBPOPage() {
   const { state } = useDiagnostic();
+  const { lossMinMonthly } = useDiagnosticLoss();
   const { data, isLoading, error, refetch } = useBPOPricing();
 
   const [clientName, setClientName] = useState("");
@@ -235,6 +238,7 @@ function CalculadoraBPOPage() {
                         {formatBRL(valorComDesconto)}
                       </p>
                     </div>
+                    <RoiPanel investmentMonthly={valorComDesconto} />
                     <Button
                       onClick={() =>
                         exportCalculatorPDF({
@@ -251,6 +255,7 @@ function CalculadoraBPOPage() {
                           ],
                           finalLabel: "Valor final mensal",
                           finalValue: formatBRL(valorComDesconto),
+                          roi: { lossMinMonthly, investmentMonthly: valorComDesconto },
                         })
                       }
                       className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"

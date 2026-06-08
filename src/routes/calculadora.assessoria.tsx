@@ -13,6 +13,8 @@ import { useAssessoriaPricing, type AssessoriaRule } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
+import { RoiPanel } from "@/components/RoiPanel";
+import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -47,6 +49,7 @@ function lookupTier(rules: AssessoriaRule[], monthlyRevenue: number): Assessoria
 
 function AssessoriaPage() {
   const { state } = useDiagnostic();
+  const { lossMinMonthly } = useDiagnosticLoss();
   const { data, isLoading, error, refetch } = useAssessoriaPricing();
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [cnpjCount, setCnpjCount] = useState(1);
@@ -159,6 +162,8 @@ function AssessoriaPage() {
                     </p>
                   </div>
 
+                  <RoiPanel investmentMonthly={valorFinal} />
+
                   <div className="mt-5">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Inclui</p>
                     <ul className="space-y-1.5">
@@ -189,6 +194,7 @@ function AssessoriaPage() {
                         ],
                         finalLabel: "Valor mensal",
                         finalValue: formatBRL(valorFinal),
+                        roi: { lossMinMonthly, investmentMonthly: valorFinal },
                         scope: SERVICE_DETAILS.assessoria.deliverables,
                         stages: SERVICE_DETAILS.assessoria.stages,
                         stagesTitle: "Jornada de Maturidade — 5 estágios de evolução",

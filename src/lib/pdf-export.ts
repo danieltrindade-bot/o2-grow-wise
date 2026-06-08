@@ -1,4 +1,5 @@
 import { formatBRL } from "./format";
+import { computeRoi, type RoiResult } from "./roi";
 
 async function getJsPDF() {
   const { jsPDF } = await import("jspdf");
@@ -73,6 +74,48 @@ function highlightValue(doc: Doc, label: string, value: string, y: number) {
   doc.setTextColor(...WHITE);
 }
 
+function roiBox(doc: Doc, roi: RoiResult, y: number) {
+  doc.setFillColor(...DARK_2);
+  doc.setDrawColor(...GREEN);
+  doc.roundedRect(14, y, 182, 44, 3, 3, "FD");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...GREEN);
+  doc.text("RETORNO SOBRE O INVESTIMENTO", 20, y + 8);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.text("Cenário conservador — considera apenas 30% da menor perda estimada no diagnóstico.", 20, y + 14);
+
+  doc.setFontSize(9);
+  doc.setTextColor(...LIGHT_GRAY);
+  doc.text(`Perda evitável/ano: ${formatBRL(roi.recoverableAnnual)}`, 20, y + 22);
+  doc.text(`Investimento/ano: ${formatBRL(roi.investmentAnnual)}`, 110, y + 22);
+
+  if (roi.positive) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(...GREEN);
+    doc.text(`Economia líquida/ano: ${formatBRL(roi.netAnnual)}`, 20, y + 31);
+  }
+
+  const roiPct = `${roi.positive ? "+" : ""}${Math.round((roi.multiple - 1) * 100)}%`;
+  const payback =
+    roi.paybackMonths < 1
+      ? "menos de 1 mês"
+      : `~${Math.round(roi.paybackMonths)} ${Math.round(roi.paybackMonths) === 1 ? "mês" : "meses"}`;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.text(
+    `Tempo de retorno: ${payback}   |   Retorno anual: ${roiPct}   |   Cada R$ 1 investido evita ${formatBRL(roi.multiple)}`,
+    20,
+    y + 39,
+  );
+  doc.setTextColor(...WHITE);
+}
+
 function darkTableStyles(fontSize: number) {
   return {
     headStyles: { fillColor: DARK_3, textColor: GREEN },
@@ -105,6 +148,7 @@ export interface CalcPDFInput {
   scope?: string[];
   stages?: CalcPDFStage[];
   stagesTitle?: string;
+  roi?: { lossMinMonthly: number; investmentMonthly: number };
 }
 
 export async function exportCalculatorPDF(input: CalcPDFInput) {
@@ -139,8 +183,24 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
   const finalY = (doc as any).lastAutoTable?.finalY ?? y + 30;
   highlightValue(doc, input.finalLabel, input.finalValue, finalY + 8);
 
+  let cursor = finalY + 30; // bottom of the highlighted value box
+
+  if (input.roi) {
+    const roi = computeRoi(input.roi.lossMinMonthly, input.roi.investmentMonthly);
+    if (roi) {
+      let ry = cursor + 6;
+      if (ry + 44 > 285) {
+        doc.addPage();
+        pageBg(doc);
+        ry = 20;
+      }
+      roiBox(doc, roi, ry);
+      cursor = ry + 44;
+    }
+  }
+
   if (input.scope?.length) {
-    let sy = finalY + 40;
+    let sy = cursor + 10;
     if (sy > 250) {
       doc.addPage();
       pageBg(doc);

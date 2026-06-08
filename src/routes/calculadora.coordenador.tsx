@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { calcCoordenadorPrice, perfilFromInputs, formatBRL, type CoordPerfil, type CoordNivel } from "@/lib/pricing-shared";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
+import { RoiPanel } from "@/components/RoiPanel";
+import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -58,6 +60,7 @@ const NIVEL_TOOLTIP =
 
 function CoordenadorPage() {
   const { state } = useDiagnostic();
+  const { lossMinMonthly } = useDiagnosticLoss();
   const [employees, setEmployees] = useState(1);
   const [cnpjCount, setCnpjCount] = useState(1);
   const [nivel, setNivel] = useState<CoordNivel>("baixa");
@@ -184,6 +187,8 @@ function CoordenadorPage() {
                   )}
                 </div>
 
+                <RoiPanel investmentMonthly={mensalComDesconto + parcela12x} />
+
                 <div className="mt-5">
                   <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground mb-2">Inclui</p>
                   <ul className="space-y-1.5">
@@ -215,6 +220,7 @@ function CoordenadorPage() {
                       ],
                       finalLabel: "Mensalidade",
                       finalValue: formatBRL(mensalComDesconto),
+                      roi: { lossMinMonthly, investmentMonthly: mensalComDesconto + parcela12x },
                     })
                   }
                   className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"

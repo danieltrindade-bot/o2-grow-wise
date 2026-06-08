@@ -16,6 +16,8 @@ import { useCFOPricing, type CFOBaseRule, type CFOComplexityRule, type SetupPric
 import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
+import { RoiPanel } from "@/components/RoiPanel";
+import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -54,6 +56,7 @@ function complexityFromRules(rules: CFOComplexityRule[], score: number): { facto
 
 function CalculadoraCFOPage() {
   const { state } = useDiagnostic();
+  const { lossMinMonthly } = useDiagnosticLoss();
   const { data, isLoading, error, refetch } = useCFOPricing();
 
   const [monthlyRevenue, setMonthlyRevenue] = useState<number>(0);
@@ -250,6 +253,7 @@ function CalculadoraCFOPage() {
                           <p>Recorrência: {formatBRL(finalRecorrencia)} + Setup 12x no cartão: {formatBRL(setupParcela)}</p>
                         </div>
                       </div>
+                      <RoiPanel investmentMonthly={totalMensal} />
                       <Button
                         onClick={() =>
                           exportCalculatorPDF({
@@ -270,6 +274,7 @@ function CalculadoraCFOPage() {
                             ],
                             finalLabel: "Investimento mensal total",
                             finalValue: formatBRL(totalMensal),
+                            roi: { lossMinMonthly, investmentMonthly: totalMensal },
                             scope: SERVICE_DETAILS.cfo.deliverables,
                             stages: SERVICE_DETAILS.cfo.stages,
                             stagesTitle: "Escopo detalhado — CFO as a Service",

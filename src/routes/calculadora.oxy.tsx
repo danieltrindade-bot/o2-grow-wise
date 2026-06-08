@@ -16,6 +16,8 @@ import { useOxyPricing } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
+import { RoiPanel } from "@/components/RoiPanel";
+import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -41,6 +43,7 @@ const INCLUDES = [
 
 function OxyPage() {
   const { state } = useDiagnostic();
+  const { lossMinMonthly } = useDiagnosticLoss();
   const { data: rules, isLoading, error, refetch } = useOxyPricing();
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [cnpjCount, setCnpjCount] = useState(1);
@@ -173,6 +176,8 @@ function OxyPage() {
                     </p>
                   </div>
 
+                  <RoiPanel investmentMonthly={parcela} />
+
                   <div className="mt-5">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Inclui</p>
                     <ul className="space-y-1.5">
@@ -205,6 +210,7 @@ function OxyPage() {
                         ],
                         finalLabel: "12x de",
                         finalValue: formatBRL(parcela),
+                        roi: { lossMinMonthly, investmentMonthly: parcela },
                         scope: SERVICE_DETAILS.oxy.deliverables,
                       })
                     }
