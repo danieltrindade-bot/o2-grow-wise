@@ -483,40 +483,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ── 90 dias ── */}
-      <section className="py-24 px-6 border-t border-border">
-        <AnimatedSection className="mx-auto max-w-3xl text-center">
-          <p className="text-xs text-muted-foreground uppercase tracking-widest font-mono mb-4">Do dado ao resultado</p>
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
-            <span className="text-primary"><CountUp end={90} /></span> dias para o resultado
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-            Nosso processo estruturado entrega resultados mensuráveis em 90 dias, da fundação de dados à análise estratégica.
-          </p>
-          <div className="mt-10 flex items-center justify-center gap-2 md:gap-4">
-            {[
-              { label: "Fundação", day: "01d" },
-              { label: "Processos", day: "30d" },
-              { label: "Análise", day: "60d" },
-              { label: "Resultado", day: "90d" },
-            ].map((step, i) => (
-              <AnimatedSection key={step.label} delay={i * 150 + 200} className="flex items-center gap-2 md:gap-4">
-                <div className="flex flex-col items-center gap-2">
-                  <div className={cn(
-                    "h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center text-sm font-bold transition-colors",
-                    i === 3 ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground",
-                  )}>
-                    {step.day}
-                  </div>
-                  <span className="text-[10px] md:text-xs text-muted-foreground">{step.label}</span>
-                </div>
-                {i < 3 && <div className="w-8 md:w-16 h-px bg-gradient-to-r from-primary/50 to-primary/20 mb-5" />}
-              </AnimatedSection>
-            ))}
-          </div>
-        </AnimatedSection>
-      </section>
-
       {/* ── Services ── */}
       <section className="py-24 px-6 border-t border-border bg-card/30 overflow-hidden">
         <div className="mx-auto max-w-5xl">
