@@ -12,6 +12,7 @@ import { formatBRL } from "@/lib/format";
 import { useBPOPricing } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation } from "@/components/ProductPresentation";
@@ -104,6 +105,8 @@ function CalculadoraBPOPage() {
         </div>
 
         <ProductPresentation serviceKey="bpo" title="BPO Financeiro" />
+
+        <LossSummaryPanel />
 
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}

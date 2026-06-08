@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { calcCoordenadorPrice, perfilFromInputs, formatBRL, type CoordPerfil, type CoordNivel } from "@/lib/pricing-shared";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -83,6 +84,8 @@ function CoordenadorPage() {
         </div>
 
         <ProductPresentation serviceKey="coordenador" title="Coordenador as a Service" />
+
+        <LossSummaryPanel />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">

@@ -15,6 +15,7 @@ import { formatBRL } from "@/lib/format";
 import { useCFOPricing, type CFOBaseRule, type CFOComplexityRule, type SetupPricingRule } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -119,6 +120,8 @@ function CalculadoraCFOPage() {
         </div>
 
         <ProductPresentation serviceKey="cfo" title="CFO as a Service" />
+
+        <LossSummaryPanel />
 
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}

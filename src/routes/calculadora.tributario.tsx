@@ -9,6 +9,7 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { formatBRL } from "@/lib/pricing-shared";
 import { useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
@@ -105,6 +106,8 @@ function TributarioPage() {
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Diagnóstico e Organização Tributária</h1>
           <p className="text-muted-foreground mt-2">Adequação à Reforma Tributária (EC 132/2023 + LC 214/2025)</p>
         </div>
+
+        <LossSummaryPanel />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">

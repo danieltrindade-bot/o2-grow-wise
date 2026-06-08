@@ -15,6 +15,7 @@ import { calcSetupPriceFromRules, formatBRL, type SegmentType } from "@/lib/pric
 import { useOxyPricing } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -77,6 +78,8 @@ function OxyPage() {
         </div>
 
         <ProductPresentation serviceKey="oxy" title="Oxy + Gênio" />
+
+        <LossSummaryPanel />
 
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}

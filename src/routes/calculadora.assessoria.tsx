@@ -12,6 +12,7 @@ import { formatBRL } from "@/lib/pricing-shared";
 import { useAssessoriaPricing, type AssessoriaRule } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -84,6 +85,8 @@ function AssessoriaPage() {
         </div>
 
         <ProductPresentation serviceKey="assessoria" title="Assessoria Estratégica" />
+
+        <LossSummaryPanel />
 
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
