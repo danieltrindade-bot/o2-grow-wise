@@ -60,17 +60,12 @@ function CalculadoraBPOPage() {
   const [contasReceberDia, setContasReceberDia] = useState(5);
   const [funcionarios, setFuncionarios] = useState(10);
   const [bancos, setBancos] = useState(2);
-  const [pacoteId, setPacoteId] = useState<string>("");
   const [discountId, setDiscountId] = useState<string>("none");
 
   useEffect(() => {
     if (!clientName && state.companyName) setClientName(state.companyName);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.companyName]);
-
-  useEffect(() => {
-    if (!pacoteId && data?.packages?.length) setPacoteId(data.packages[0].id);
-  }, [data, pacoteId]);
 
   const lancamentosMensais = (contasPagarDia + contasReceberDia) * (data?.settings.dias_uteis ?? 22);
   const tier = useMemo(() => {
@@ -81,7 +76,7 @@ function CalculadoraBPOPage() {
     return { key: "tier3" as TierKey, label: `Tier 3 (>${t2})` };
   }, [lancamentosMensais, data]);
 
-  const pacote = data?.packages.find((p) => p.id === pacoteId) ?? data?.packages[0];
+  const pacote = data?.packages.find((p) => p.name.toLowerCase() === "controle") ?? data?.packages[0];
   const basePrice = pacote
     ? Number(tier.key === "tier1" ? pacote.price_tier_1 : tier.key === "tier2" ? pacote.price_tier_2 : pacote.price_tier_3)
     : 0;
@@ -153,28 +148,9 @@ function CalculadoraBPOPage() {
                 </div>
               </section>
 
-              <section>
-                <h2 className="text-lg font-semibold mb-4">Pacote</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {data.packages.map((p) => {
-                    const selected = p.id === pacoteId;
-                    const price = Number(tier.key === "tier1" ? p.price_tier_1 : tier.key === "tier2" ? p.price_tier_2 : p.price_tier_3);
-                    return (
-                      <button key={p.id} type="button" onClick={() => setPacoteId(p.id)}
-                        className={cn("text-left rounded-2xl border bg-card p-5 transition-all hover:border-primary/60",
-                          selected ? "border-primary shadow-[0_0_0_1px_var(--color-primary)]" : "border-border")}>
-                        <h3 className="font-semibold">{p.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">no {tier.label}</p>
-                        {p.description && <p className="text-sm text-muted-foreground mt-3">{p.description}</p>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-
               {data.setup && (
                 <section className="rounded-2xl border border-border bg-card p-7">
-                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Obrigatório</p>
+                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Benefício</p>
                   <h2 className="text-lg font-semibold mt-1">{data.setup.name}</h2>
                   <p className="text-sm text-muted-foreground mt-1">
                     {data.setup.installments} parcelas
@@ -217,7 +193,6 @@ function CalculadoraBPOPage() {
                 <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Proposta</p>
                 <h2 className="text-xl font-bold mt-1">{clientName || "Cliente"}</h2>
                 <dl className="mt-5 space-y-2 text-sm">
-                  <Row label="Pacote" value={pacote.name} />
                   <Row label="Tier" value={tier.label} />
                   <Row label="Lançamentos/mês" value={String(lancamentosMensais)} />
                 </dl>
@@ -245,7 +220,6 @@ function CalculadoraBPOPage() {
                           service: "BPO Financeiro",
                           clientName: clientName || state.companyName,
                           rows: [
-                            ["Pacote", pacote.name],
                             ["Tier", tier.label],
                             ["Lançamentos/mês", String(lancamentosMensais)],
                             ["Valor mensal BPO", formatBRL(valorMensalBPO)],
@@ -253,6 +227,7 @@ function CalculadoraBPOPage() {
                             ["Subtotal mensal", formatBRL(valorMensalTotal)],
                             ["Desconto", `${discount.percent}%`],
                           ],
+                          scope: SETUP_DELIVERABLES,
                           finalLabel: "Valor final mensal",
                           finalValue: formatBRL(valorComDesconto),
                           roi: { lossMinMonthly, investmentMonthly: valorComDesconto },
