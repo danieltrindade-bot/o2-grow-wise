@@ -147,7 +147,6 @@ export interface CalcPDFInput {
   fileName?: string;
   scope?: string[];
   scopeIntro?: string;
-  notIncluded?: string[];
   stages?: CalcPDFStage[];
   stagesTitle?: string;
   roi?: { lossMinMonthly: number; investmentMonthly: number };
@@ -241,33 +240,6 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
       doc.setTextColor(...LIGHT_GRAY);
       doc.text(item, 24, sy);
       sy += 6;
-    }
-
-    if (input.notIncluded?.length) {
-      sy += 4;
-      if (sy > 270) {
-        doc.addPage();
-        pageBg(doc);
-        sy = 20;
-      }
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      doc.setTextColor(...WHITE);
-      doc.text("Não inclui", 14, sy);
-      sy += 7;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      for (const item of input.notIncluded) {
-        if (sy > 275) {
-          doc.addPage();
-          pageBg(doc);
-          sy = 20;
-        }
-        doc.setTextColor(...GRAY);
-        doc.text("•", 16, sy);
-        doc.text(item, 24, sy);
-        sy += 6;
-      }
     }
   }
 

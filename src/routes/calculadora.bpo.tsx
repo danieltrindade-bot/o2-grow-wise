@@ -229,7 +229,6 @@ function CalculadoraBPOPage() {
                           ],
                           scope: SERVICE_DETAILS.bpo.deliverables,
                           scopeIntro: SERVICE_DETAILS.bpo.what,
-                          notIncluded: SERVICE_DETAILS.bpo.notIncluded,
                           finalLabel: "Valor final mensal",
                           finalValue: formatBRL(valorComDesconto),
                           roi: { lossMinMonthly, investmentMonthly: valorComDesconto },
