@@ -17,7 +17,7 @@ import { RoiPanel } from "@/components/RoiPanel";
 import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation } from "@/components/ProductPresentation";
+import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { ContractGenerator } from "@/components/ContractGenerator";
 
 export const Route = createFileRoute("/calculadora/bpo")({
@@ -227,7 +227,9 @@ function CalculadoraBPOPage() {
                             ["Subtotal mensal", formatBRL(valorMensalTotal)],
                             ["Desconto", `${discount.percent}%`],
                           ],
-                          scope: SETUP_DELIVERABLES,
+                          scope: SERVICE_DETAILS.bpo.deliverables,
+                          scopeIntro: SERVICE_DETAILS.bpo.what,
+                          notIncluded: SERVICE_DETAILS.bpo.notIncluded,
                           finalLabel: "Valor final mensal",
                           finalValue: formatBRL(valorComDesconto),
                           roi: { lossMinMonthly, investmentMonthly: valorComDesconto },
