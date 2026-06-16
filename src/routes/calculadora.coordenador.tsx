@@ -72,7 +72,8 @@ function CoordenadorPage() {
   const result = calcCoordenadorPrice(perfil, nivel);
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
   const parcela12x = result.setup / 12;
-  const mensalComDesconto = result.mensal * (1 - discount.percent / 100);
+  const COORD_MENSAL_MINIMUM = 2300;
+  const mensalComDesconto = Math.max(COORD_MENSAL_MINIMUM, result.mensal * (1 - discount.percent / 100));
   const perfilInfo = PERFIS.find((p) => p.id === perfil)!;
 
   return (

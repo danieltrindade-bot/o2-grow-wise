@@ -61,15 +61,15 @@ export type CoordPerfil = "essencial" | "estruturado" | "integrado";
 export type CoordNivel = "baixa" | "media" | "alta";
 
 const COORD_SETUP: Record<CoordPerfil, Record<CoordNivel, number>> = {
-  essencial: { baixa: 3727, media: 3926, alta: 4125 },
-  estruturado: { baixa: 5218, media: 5417, alta: 5616 },
-  integrado: { baixa: 6709, media: 6908, alta: 7107 },
+  essencial: { baixa: 8000, media: 8427, alta: 8854 },
+  estruturado: { baixa: 11200, media: 11628, alta: 12055 },
+  integrado: { baixa: 14401, media: 14828, alta: 15255 },
 };
 
 const COORD_MENSAL: Record<CoordPerfil, Record<CoordNivel, number>> = {
-  essencial: { baixa: 1739.5, media: 2087.4, alta: 2435.3 },
-  estruturado: { baixa: 2485, media: 2982, alta: 3479 },
-  integrado: { baixa: 3727, media: 4174, alta: 5119 },
+  essencial: { baixa: 2300, media: 2760, alta: 3220 },
+  estruturado: { baixa: 3286, media: 3943, alta: 4600 },
+  integrado: { baixa: 4928, media: 5519, alta: 6768 },
 };
 
 // Perfil derivado de nº de funcionários + nº de CNPJs (pega o maior tier quando divergem).
