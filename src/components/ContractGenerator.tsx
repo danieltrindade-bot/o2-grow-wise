@@ -211,6 +211,7 @@ export function ContractGenerator(props: ContractGeneratorProps) {
 
   // Form state
   const [nomeCliente, setNomeCliente] = useState(clientName);
+  const [emailAssinante, setEmailAssinante] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [cepEmp, setCepEmp] = useState("");
   const [cepEmpData, setCepEmpData] = useState<CepData | null>(null);
@@ -460,6 +461,7 @@ export function ContractGenerator(props: ContractGeneratorProps) {
       nome_socio: nomeSocio.trim(),
       cpf_socio: cpfSocio.replace(/\D/g, ""),
       endereco_socio: enderecoSocio,
+      email_assinante: emailAssinante.trim(),
       empresas_vinculadas: vinculadas.filter(
         (v) => v.razao_social.trim() && v.cnpj.trim(),
       ),
@@ -786,6 +788,15 @@ export function ContractGenerator(props: ContractGeneratorProps) {
                 value={cnpj}
                 onChange={(e) => setCnpj(formatCNPJ(e.target.value))}
                 placeholder="XX.XXX.XXX/XXXX-XX"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>E-mail que assina</Label>
+              <Input
+                type="email"
+                value={emailAssinante}
+                onChange={(e) => setEmailAssinante(e.target.value)}
+                placeholder="contratante@empresa.com.br"
               />
             </div>
             <AddressBlock
