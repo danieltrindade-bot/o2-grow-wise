@@ -11,9 +11,9 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
     <nav aria-label="Breadcrumb" className="mb-4">
       <ol className="flex items-center flex-wrap gap-1.5 text-xs text-muted-foreground">
         <li>
-          <Link to="/" className="inline-flex items-center hover:text-foreground transition-colors">
+          <a href="/" className="inline-flex items-center hover:text-foreground transition-colors">
             <Home className="h-3.5 w-3.5" />
-          </Link>
+          </a>
         </li>
         {items.map((c, i) => (
           <li key={i} className="inline-flex items-center gap-1.5">
