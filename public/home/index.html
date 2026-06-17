@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="ds/colors_and_type.css" />
-<link rel="stylesheet" href="ds/components.css" />
-<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="/home/ds/colors_and_type.css" />
+<link rel="stylesheet" href="/home/ds/components.css" />
+<link rel="stylesheet" href="/home/styles.css" />
 <meta name="ext-resource-dependency" content="oxy-tour-inline.html" data-resource-id="oxyTour" />
 <meta name="ext-resource-dependency" content="genio-tour-inline.html" data-resource-id="genioTour" />
 </head>
@@ -73,9 +73,9 @@
   <!-- 01 — HERO -->
   <section class="scene hero" id="s1" data-screen-label="01 Hero" data-num="01" data-nav="Início">
     <div class="hero-slideshow">
-      <img src="media/office-1.jpg" alt="" />
-      <img src="media/office-2.jpg" alt="" />
-      <img src="media/office-3.jpg" alt="" />
+      <img src="/home/media/office-1.jpg" alt="" />
+      <img src="/home/media/office-2.jpg" alt="" />
+      <img src="/home/media/office-3.jpg" alt="" />
     </div>
     <div class="scene-inner hero-inner">
       <span class="hero-pill" data-reveal style="--d:120ms"><span class="pill-dot"></span>A maior assessoria de CFO as a Service do Brasil</span>
@@ -93,7 +93,7 @@
 
   <!-- 02 — QUEM SOMOS -->
   <section class="scene s-quemsomos" id="s2" data-screen-label="02 Quem somos" data-num="02" data-nav="Quem somos">
-    <div class="ring-bg"><img src="media/image25.jpg" alt="" /></div>
+    <div class="ring-bg"><img src="/home/media/image25.jpg" alt="" /></div>
     <div class="scene-inner">
       <div class="qs-wrap">
         <p class="kicker" data-reveal>Quem somos</p>
@@ -144,17 +144,17 @@
       <div class="manchetes">
         <figure class="manchete m-serasa" data-reveal="up" style="--d:300ms">
           <div class="manchete-float">
-            <div class="manchete-card"><img src="media/manchete-serasa.png" alt="Serasa Experian: empresas encerraram 2025 com R$ 213 bilhões em dívidas e inadimplência no maior patamar já registrado" /></div>
+            <div class="manchete-card"><img src="/home/media/manchete-serasa.png" alt="Serasa Experian: empresas encerraram 2025 com R$ 213 bilhões em dívidas e inadimplência no maior patamar já registrado" /></div>
           </div>
         </figure>
         <figure class="manchete m-g1" data-reveal="up" style="--d:440ms">
           <div class="manchete-float">
-            <div class="manchete-card"><img src="media/manchete-g1.png" alt="g1: a falta de gestão eficiente é o segundo maior motivo para o fechamento de empresas no Brasil" /></div>
+            <div class="manchete-card"><img src="/home/media/manchete-g1.png" alt="g1: a falta de gestão eficiente é o segundo maior motivo para o fechamento de empresas no Brasil" /></div>
           </div>
         </figure>
         <figure class="manchete m-valor" data-reveal="up" style="--d:580ms">
           <div class="manchete-float">
-            <div class="manchete-card"><img src="media/manchete-valor.png" alt="Valor Econômico: inadimplência de empresas fecha 2025 em volume recorde" /></div>
+            <div class="manchete-card"><img src="/home/media/manchete-valor.png" alt="Valor Econômico: inadimplência de empresas fecha 2025 em volume recorde" /></div>
           </div>
         </figure>
       </div>
@@ -245,7 +245,7 @@
       <div class="oxy-grid">
         <div class="stack">
           <p class="kicker" data-reveal>Informação inteligente</p>
-          <img class="oxy-logo" src="assets/oxy-logo.svg" alt="Oxy Finance" data-reveal style="--d: 140ms; object-fit: contain; width: 380px; height: 82px" />
+          <img class="oxy-logo" src="/home/assets/oxy-logo.svg" alt="Oxy Finance" data-reveal style="--d: 140ms; object-fit: contain; width: 380px; height: 82px" />
           <p class="lede2" data-reveal style="--d:300ms">Plataforma completa de inteligência financeira com agente de IA. <strong style="color:var(--fg)">O seu CFO 24/7.</strong></p>
           <div class="oxy-stats" data-reveal style="--d:440ms">
             <div><div class=" os-num"><span data-count="5">0</span></div><div class="stat-label">Anos de<br>desenvolvimento</div></div>
@@ -288,7 +288,7 @@
         <div class="stack">
           <p class="kicker" data-reveal>A inteligência artificial da O2 Inc.</p>
           <div class="genio-logo" data-reveal style="--d:140ms" aria-label="Gênio">
-            <img src="assets/genio-logo.svg" alt="Gênio®" />
+            <img src="/home/assets/genio-logo.svg" alt="Gênio®" />
           </div>
           <p class="lede2" data-reveal style="--d:300ms">Um agente de IA treinado em finanças corporativas. Pergunte em linguagem natural e receba leitura de DRE, fluxo de caixa, ciclo financeiro e recomendações <strong style="color:var(--fg)">na hora, 24/7.</strong></p>
           <div class="chiprow" data-reveal style="--d:440ms">
@@ -398,7 +398,7 @@
      populates window.__resources with self-contained blobs; in the dev file we
      fall back to the sibling tour HTMLs. */
   (function () {
-    var map = { oxyTour: 'oxy-tour-inline.html', genioTour: 'genio-tour-inline.html' };
+    var map = { oxyTour: '/home/oxy-tour-inline.html', genioTour: '/home/genio-tour-inline.html' };
     Object.keys(map).forEach(function (id) {
       var f = document.getElementById(id);
       if (!f) return;
@@ -406,6 +406,6 @@
     });
   })();
 </script>
-<script src="app.js"></script>
+<script src="/home/app.js"></script>
 </body>
 </html>
