@@ -35,6 +35,10 @@ const DISCOUNTS = [
   { id: "meeting", label: "Fechamento em reunião", percent: 15 },
 ];
 
+// Oxy: o setup não pode ser vendido abaixo deste piso em nenhum cenário,
+// mesmo após desconto ou ajustes de preço no admin.
+const OXY_SETUP_FLOOR = 8000;
+
 const INCLUDES = [
   "Plataforma Oxy (dados em tempo real)",
   "Agente IA Gênio",
@@ -62,8 +66,11 @@ function OxyPage() {
   const result = rules
     ? calcSetupPriceFromRules(rules, monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
+  const projectTotal = rules ? Math.max(result.total, OXY_SETUP_FLOOR) : 0;
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const totalComDesconto = result.total * (1 - discount.percent / 100);
+  const totalComDesconto = rules
+    ? Math.max(projectTotal * (1 - discount.percent / 100), OXY_SETUP_FLOOR)
+    : 0;
   const parcela = totalComDesconto / 12;
   const animatedParcela = useCountUp(parcela);
   const [showPrices, setShowPrices] = useState(false);
@@ -159,9 +166,9 @@ function OxyPage() {
                   {result.surcharge > 0 && (
                     <Row label="Adicional segmento" value={formatBRL(result.surcharge)} />
                   )}
-                  <Row label="Valor total do projeto" value={formatBRL(result.total)} bold />
+                  <Row label="Valor total do projeto" value={formatBRL(projectTotal)} bold />
                   {discount.percent > 0 && (
-                    <Row label={`Desconto (${discount.percent}%)`} value={`-${formatBRL(result.total - totalComDesconto)}`} />
+                    <Row label={`Desconto (${discount.percent}%)`} value={`-${formatBRL(projectTotal - totalComDesconto)}`} />
                   )}
 
                   <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
@@ -202,9 +209,9 @@ function OxyPage() {
                           ["Segmento", segmentType],
                           ["Valor base", formatBRL(result.base)],
                           ["Adicional segmento", formatBRL(result.surcharge)],
-                          ["Valor total", formatBRL(result.total)],
+                          ["Valor total", formatBRL(projectTotal)],
                           ...(discount.percent > 0
-                            ? [[`Desconto (${discount.percent}%)`, `-${formatBRL(result.total - totalComDesconto)}`] as [string, string]]
+                            ? [[`Desconto (${discount.percent}%)`, `-${formatBRL(projectTotal - totalComDesconto)}`] as [string, string]]
                             : []),
                           ["12x no cartão", formatBRL(parcela)],
                         ],
