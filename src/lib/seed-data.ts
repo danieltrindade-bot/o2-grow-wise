@@ -14,11 +14,13 @@ import type {
   SetupPricingRule,
   AssessoriaRule,
   AssessoriaSettings,
+  TurnaroundRule,
+  TurnaroundSettings,
 } from "@/hooks/use-pricing";
 
 type WithId<T> = T & { id: string };
 
-export const SEED_VERSION = 5;
+export const SEED_VERSION = 6;
 
 // ---------------------------------------------------------------------------
 // Diagnostic Questions (10 questions)
@@ -205,6 +207,27 @@ export const SEED_ASSESSORIA_SETTINGS: AssessoriaSettings[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Turnaround Pricing Rules
+// Matriz por faturamento ancorada na proposta (faixa 200k–500k = R$ 12.570) e
+// no piso contratual de R$ 11.570. Valores são a fonte da verdade.
+// ---------------------------------------------------------------------------
+export const SEED_TURNAROUND_PRICING_RULES: TurnaroundRule[] = [
+  { id: "tpr-1", label: "0 - 200k", min_revenue: 0, max_revenue: 200000, base_price: 11570, sort_order: 1 },
+  { id: "tpr-2", label: "200k - 500k", min_revenue: 200000, max_revenue: 500000, base_price: 12570, sort_order: 2 },
+  { id: "tpr-3", label: "500k - 1M", min_revenue: 500000, max_revenue: 1000000, base_price: 14500, sort_order: 3 },
+  { id: "tpr-4", label: "1M - 2.5M", min_revenue: 1000000, max_revenue: 2500000, base_price: 17000, sort_order: 4 },
+  { id: "tpr-5", label: "2.5M - 5M", min_revenue: 2500000, max_revenue: 5000000, base_price: 20000, sort_order: 5 },
+  { id: "tpr-6", label: "≥ 5M", min_revenue: 5000000, max_revenue: 999999999999, base_price: 24000, sort_order: 6 },
+];
+
+// ---------------------------------------------------------------------------
+// Turnaround Settings
+// ---------------------------------------------------------------------------
+export const SEED_TURNAROUND_SETTINGS: TurnaroundSettings[] = [
+  { id: "ts-1", cnpj_adjustment: 500, min_price: 11570 },
+];
+
+// ---------------------------------------------------------------------------
 // Unified lookup
 // ---------------------------------------------------------------------------
 export const SEED_DATA: Record<string, any[]> = {
@@ -224,4 +247,6 @@ export const SEED_DATA: Record<string, any[]> = {
   setup_pricing_rules: SEED_SETUP_PRICING_RULES,
   assessoria_pricing_rules: SEED_ASSESSORIA_PRICING_RULES,
   assessoria_settings: SEED_ASSESSORIA_SETTINGS,
+  turnaround_pricing_rules: SEED_TURNAROUND_PRICING_RULES,
+  turnaround_settings: SEED_TURNAROUND_SETTINGS,
 };

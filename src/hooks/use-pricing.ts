@@ -151,6 +151,33 @@ export function useAssessoriaPricing() {
   });
 }
 
+export interface TurnaroundRule {
+  id: string;
+  label: string;
+  min_revenue: number;
+  max_revenue: number | null;
+  base_price: number;
+  sort_order: number;
+}
+export interface TurnaroundSettings {
+  id: string;
+  cnpj_adjustment: number;
+  min_price: number;
+}
+
+export function useTurnaroundPricing() {
+  return useQuery({
+    queryKey: ["turnaround-pricing"],
+    staleTime: FIVE_MIN,
+    queryFn: () => {
+      const rules = selectAll<TurnaroundRule>("turnaround_pricing_rules", "sort_order");
+      const settingsArr = selectAll<TurnaroundSettings>("turnaround_settings");
+      const settings = settingsArr[0] ?? { id: "", cnpj_adjustment: 500, min_price: 11570 };
+      return { rules, settings };
+    },
+  });
+}
+
 // Diagnostic config
 export interface DiagnosticQuestion {
   id: string;
