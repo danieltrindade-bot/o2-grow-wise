@@ -6,6 +6,7 @@ import {
   Compass,
   Users,
   Scale,
+  RefreshCw,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
@@ -22,7 +23,7 @@ interface ServiceCard {
   id: string;
   name: string;
   description: string;
-  to: "/calculadora/bpo" | "/calculadora/cfo" | "/calculadora/oxy" | "/calculadora/assessoria" | "/calculadora/coordenador" | "/calculadora/tributario";
+  to: "/calculadora/bpo" | "/calculadora/cfo" | "/calculadora/oxy" | "/calculadora/assessoria" | "/calculadora/coordenador" | "/calculadora/tributario" | "/calculadora/turnaround";
   Icon: typeof Briefcase;
 }
 
@@ -68,6 +69,13 @@ const SERVICES: ServiceCard[] = [
     description: "Adequação à Reforma Tributária: diagnóstico, simulação de impacto e plano de transição",
     to: "/calculadora/tributario",
     Icon: Scale,
+  },
+  {
+    id: "turnaround",
+    name: "Turnaround",
+    description: "Recuperação do negócio: gestão e controladoria, captação de recursos e repactuação de passivos",
+    to: "/calculadora/turnaround",
+    Icon: RefreshCw,
   },
 ];
 

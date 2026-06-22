@@ -215,6 +215,55 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
       },
     ],
   },
+  turnaround: {
+    what: "Garantimos a sobrevivência e a sustentabilidade dos negócios, através de captação de recursos, repactuação de passivos, gestão e controladoria. Projeto de 12 meses com equipe sênior (Partner, CFO e Analista) para recuperar o equilíbrio operacional e financeiro da empresa.",
+    deliverables: [
+      "Clareza na estratégia de recuperação do negócio",
+      "Captação de recursos estratégicos",
+      "Credibilidade fortalecida",
+      "Ponto de equilíbrio operacional",
+      "Ponto de equilíbrio financeiro",
+      "Perspectiva de retomada de crescimento",
+      "Mitigação de riscos de pausa fabril",
+    ],
+    stages: [
+      {
+        title: "Gestão e Controladoria",
+        description: "Estruturação da controladoria e da tomada de decisão lastreada em dados fidedignos",
+        items: [
+          "Orientação e auxílio na elaboração de plano de contas",
+          "Orientação e auxílio na elaboração de fluxo de caixa",
+          "Acompanhamento da apuração e análise do resultado do negócio",
+          "Otimizar a tomada de decisão, lastreando opiniões em dados fidedignos",
+          "Acompanhamento de indicadores gerenciais de controladoria",
+          "Reuniões periódicas de alinhamento e evolução do projeto",
+        ],
+      },
+      {
+        title: "Assessoria na Captação de Recursos",
+        description: "Viabilização de operações financeiras estratégicas junto a bancos e instituições financeiras",
+        items: [
+          "Diagnóstico das necessidades de crédito da empresa com base em documentação atualizada",
+          "Análise do ciclo operacional e ciclo financeiro",
+          "Análise do indicador financeiro de necessidade de capital de giro",
+          "Análise do endividamento junto a bancos e instituições financeiras",
+          "Fechamento de contratos",
+        ],
+      },
+      {
+        title: "Repactuação de Passivos",
+        description: "Mapeamento e renegociação do endividamento com base na capacidade real de desembolso",
+        items: [
+          "Mapeamento de endividamento da empresa",
+          "Diagnóstico financeiro e contábil",
+          "Análise da necessidade de capital de giro",
+          "Projeção de fluxo de caixa e capacidade de desembolso",
+          "Mapeamento dos agentes financeiros",
+          "Fechamento de contratos de renegociação",
+        ],
+      },
+    ],
+  },
 };
 
 function StageCard({ stage, index, badge }: { stage: { title: string; description: string; items: string[] }; index: number; badge?: string }) {
