@@ -23,6 +23,7 @@ import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { ContractGenerator } from "@/components/ContractGenerator";
+import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
 
 export const Route = createFileRoute("/calculadora/cfo")({
@@ -108,6 +109,7 @@ function CalculadoraCFOPage() {
   const totalMensal = finalRecorrencia + setupParcela;
   const [showPrices, setShowPrices] = useState(false);
   const [showContract, setShowContract] = useState(false);
+  const [showDireto, setShowDireto] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -291,6 +293,13 @@ function CalculadoraCFOPage() {
                       >
                         <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                       </Button>
+                      <Button
+                        onClick={() => setShowDireto(!showDireto)}
+                        className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                        variant="outline"
+                      >
+                        <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -314,6 +323,15 @@ function CalculadoraCFOPage() {
             qtdParcelasSetup={12}
             expanded={showContract}
             onExpandedChange={setShowContract}
+          />
+
+          <DiretoContractGenerator
+            defaultServico="cfo"
+            clientName={state.companyName}
+            valorSetupReais={Math.round(setupComDesconto)}
+            valorMensalReais={Math.round(finalRecorrencia)}
+            expanded={showDireto}
+            onExpandedChange={setShowDireto}
           />
         </>)}
       </div>
