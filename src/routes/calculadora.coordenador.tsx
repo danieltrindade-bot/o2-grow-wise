@@ -21,6 +21,7 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { ContractGenerator } from "@/components/ContractGenerator";
+import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 
 export const Route = createFileRoute("/calculadora/coordenador")({
   component: CoordenadorPage,
@@ -67,6 +68,7 @@ function CoordenadorPage() {
   const [discountId, setDiscountId] = useState("none");
   const [showPrices, setShowPrices] = useState(false);
   const [showContract, setShowContract] = useState(false);
+  const [showDireto, setShowDireto] = useState(false);
 
   const perfil = perfilFromInputs(employees, cnpjCount);
   const result = calcCoordenadorPrice(perfil, nivel);
@@ -235,6 +237,13 @@ function CoordenadorPage() {
                 >
                   <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                 </Button>
+                <Button
+                  onClick={() => setShowDireto(!showDireto)}
+                  className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                  variant="outline"
+                >
+                  <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                </Button>
               </div>
             ) : (
               <div className="mt-4">
@@ -268,6 +277,15 @@ function CoordenadorPage() {
           qtdParcelasSetup={12}
           expanded={showContract}
           onExpandedChange={setShowContract}
+        />
+
+        <DiretoContractGenerator
+          defaultServico="coordenador"
+          clientName={state.companyName}
+          valorSetupReais={Math.round(result.setup)}
+          valorMensalReais={Math.round(mensalComDesconto)}
+          expanded={showDireto}
+          onExpandedChange={setShowDireto}
         />
       </div>
 

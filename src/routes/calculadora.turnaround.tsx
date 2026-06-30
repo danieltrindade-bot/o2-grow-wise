@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, Download } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText } from "lucide-react";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
+import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 
 export const Route = createFileRoute("/calculadora/turnaround")({
   component: TurnaroundPage,
@@ -74,6 +75,7 @@ function TurnaroundPage() {
   const valorFinal = Math.max(minP, valorMensal * (1 - discount.percent / 100));
   const animatedFinal = useCountUp(valorFinal);
   const [showPrices, setShowPrices] = useState(false);
+  const [showDireto, setShowDireto] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -94,7 +96,7 @@ function TurnaroundPage() {
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
-        {data && (
+        {data && (<>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
               <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
@@ -205,6 +207,13 @@ function TurnaroundPage() {
                   >
                     <Download className="mr-2 h-4 w-4" /> Exportar PDF
                   </Button>
+                  <Button
+                    onClick={() => setShowDireto(!showDireto)}
+                    className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                    variant="outline"
+                  >
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                  </Button>
                 </div>
               ) : (
                 <div className="mt-4">
@@ -230,7 +239,16 @@ function TurnaroundPage() {
               )}
             </aside>
           </div>
-        )}
+
+          <DiretoContractGenerator
+            defaultServico="turnaround"
+            clientName={state.companyName}
+            valorSetupReais={0}
+            valorMensalReais={0}
+            expanded={showDireto}
+            onExpandedChange={setShowDireto}
+          />
+        </>)}
       </div>
 
       <MobilePriceSummary label="Investimento mensal" value={formatBRL(valorFinal)} visible={showPrices} onReveal={() => setShowPrices(true)} />

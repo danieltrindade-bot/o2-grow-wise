@@ -19,6 +19,7 @@ import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { ContractGenerator } from "@/components/ContractGenerator";
+import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 
 export const Route = createFileRoute("/calculadora/bpo")({
   component: CalculadoraBPOPage,
@@ -88,6 +89,7 @@ function CalculadoraBPOPage() {
   const valorComDesconto = Math.max(BPO_MINIMUM, valorMensalTotal * (1 - discount.percent / 100));
   const [showPrices, setShowPrices] = useState(false);
   const [showContract, setShowContract] = useState(false);
+  const [showDireto, setShowDireto] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -245,6 +247,13 @@ function CalculadoraBPOPage() {
                     >
                       <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                     </Button>
+                    <Button
+                      onClick={() => setShowDireto(!showDireto)}
+                      className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                      variant="outline"
+                    >
+                      <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                    </Button>
                   </div>
                 ) : (
                   <Button
@@ -269,6 +278,22 @@ function CalculadoraBPOPage() {
             qtdBancos={bancos}
             expanded={showContract}
             onExpandedChange={setShowContract}
+          />
+
+          <DiretoContractGenerator
+            defaultServico="bpo"
+            clientName={clientName || state.companyName}
+            valorSetupReais={
+              data.setup
+                ? Math.round(
+                    Number(data.setup.installment_value) *
+                      Number(data.setup.installments),
+                  )
+                : 0
+            }
+            valorMensalReais={Math.round(valorMensalBPO)}
+            expanded={showDireto}
+            onExpandedChange={setShowDireto}
           />
         </>)}
       </div>

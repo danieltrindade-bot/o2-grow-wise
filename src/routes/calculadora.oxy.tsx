@@ -24,6 +24,7 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { ContractGenerator } from "@/components/ContractGenerator";
+import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 
 export const Route = createFileRoute("/calculadora/oxy")({
   component: OxyPage,
@@ -75,6 +76,7 @@ function OxyPage() {
   const animatedParcela = useCountUp(parcela);
   const [showPrices, setShowPrices] = useState(false);
   const [showContract, setShowContract] = useState(false);
+  const [showDireto, setShowDireto] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -232,6 +234,13 @@ function OxyPage() {
                   >
                     <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                   </Button>
+                  <Button
+                    onClick={() => setShowDireto(!showDireto)}
+                    className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                    variant="outline"
+                  >
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                  </Button>
                 </div>
               ) : (
                 <div className="mt-4">
@@ -264,6 +273,15 @@ function OxyPage() {
             qtdParcelasSetup={12}
             expanded={showContract}
             onExpandedChange={setShowContract}
+          />
+
+          <DiretoContractGenerator
+            defaultServico="oxy"
+            clientName={state.companyName}
+            valorSetupReais={Math.round(totalComDesconto)}
+            valorMensalReais={0}
+            expanded={showDireto}
+            onExpandedChange={setShowDireto}
           />
         </>)}
       </div>
