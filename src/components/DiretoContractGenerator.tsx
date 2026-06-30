@@ -6,6 +6,10 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
+  PenLine,
+  CreditCard,
+  Send,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,6 +163,15 @@ type ActionStatus = {
   type: "idle" | "loading" | "success" | "error";
   message?: string;
 };
+
+interface Signature {
+  name: string;
+  email: string;
+  link?: { short_link: string };
+}
+
+const DOCX_MIME =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 interface CepData {
   logradouro: string;
@@ -319,6 +332,29 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
   const [docxStatus, setDocxStatus] = useState<ActionStatus>({ type: "idle" });
   const [pdfStatus, setPdfStatus] = useState<ActionStatus>({ type: "idle" });
 
+  // ── Autentique ──
+  const [showAutentique, setShowAutentique] = useState(false);
+  const [emailContratante, setEmailContratante] = useState("");
+  const [autSandbox, setAutSandbox] = useState(false);
+  const [autStatus, setAutStatus] = useState<ActionStatus>({ type: "idle" });
+  const [signingLink, setSigningLink] = useState("");
+  const [signatures, setSignatures] = useState<Signature[]>([]);
+
+  // ── iPag ──
+  const [showIpag, setShowIpag] = useState(false);
+  const [ipagValor, setIpagValor] = useState("");
+  const [ipagParcelas, setIpagParcelas] = useState(12);
+  const [ipagSemJuros, setIpagSemJuros] = useState(3);
+  const [ipagSandbox, setIpagSandbox] = useState(false);
+  const [ipagDescricao, setIpagDescricao] = useState("");
+  const [ipagStatus, setIpagStatus] = useState<ActionStatus>({ type: "idle" });
+  const [paymentLink, setPaymentLink] = useState("");
+
+  // ── Drive / Slack ──
+  const [driveStatus, setDriveStatus] = useState<ActionStatus>({ type: "idle" });
+  const [driveLink, setDriveLink] = useState("");
+  const [slackStatus, setSlackStatus] = useState<ActionStatus>({ type: "idle" });
+
   const cepLookup = useCepLookup();
   const cepTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -341,6 +377,11 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
       .then((r) => setApiOk(r.ok))
       .catch(() => setApiOk(false));
   }, [expanded]);
+
+  // Prefill iPag description with client name
+  useEffect(() => {
+    setIpagDescricao(`${nomeCliente.trim() || "Cliente"} - Contrato Direto`);
+  }, [nomeCliente]);
 
   useEffect(() => {
     clearTimeout(cepTimer.current);
@@ -551,6 +592,36 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
     };
   }
 
+  // Generate a contract file via the given endpoint and return its bytes
+  // (base64) + filename. Mirrors the base64 conversion of ContractGenerator.
+  async function generateBytes(
+    endpoint: string,
+    fallback: string,
+  ): Promise<{ b64: string; filename: string; blob: Blob }> {
+    const r = await fetch(`${API_BASE}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildPayload()),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ detail: "Erro desconhecido" }));
+      throw new Error(err.detail || `HTTP ${r.status}`);
+    }
+    const blob = await r.blob();
+    const disposition = r.headers.get("content-disposition") || "";
+    const match = disposition.match(/filename="(.+?)"/);
+    const filename = match?.[1] || fallback;
+
+    const arrayBuf = await blob.arrayBuffer();
+    const b64 = btoa(
+      new Uint8Array(arrayBuf).reduce(
+        (data, byte) => data + String.fromCharCode(byte),
+        "",
+      ),
+    );
+    return { b64, filename, blob };
+  }
+
   async function download(
     endpoint: string,
     fallback: string,
@@ -558,24 +629,11 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
   ) {
     setStatus({ type: "loading" });
     try {
-      const r = await fetch(`${API_BASE}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildPayload()),
-      });
-      if (!r.ok) {
-        const err = await r.json().catch(() => ({ detail: "Erro desconhecido" }));
-        throw new Error(err.detail || `HTTP ${r.status}`);
-      }
-      const blob = await r.blob();
-      const disposition = r.headers.get("content-disposition") || "";
-      const match = disposition.match(/filename="(.+?)"/);
-      const fname = match?.[1] || fallback;
-
+      const { blob, filename } = await generateBytes(endpoint, fallback);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = fname;
+      a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
 
@@ -584,6 +642,171 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
       setStatus({
         type: "error",
         message: e instanceof Error ? e.message : "Erro ao gerar contrato",
+      });
+    }
+  }
+
+  async function handleAutentique() {
+    if (!emailContratante.trim()) return;
+    setAutStatus({ type: "loading" });
+    setSigningLink("");
+    setSignatures([]);
+    try {
+      // Prefer PDF; fall back to DOCX.
+      let bytes: { b64: string; filename: string };
+      try {
+        const pdf = await generateBytes(
+          "/api/contracts/generate-pdf",
+          "contrato.pdf",
+        );
+        bytes = { b64: pdf.b64, filename: pdf.filename };
+      } catch {
+        const docx = await generateBytes(
+          "/api/contracts/generate",
+          "contrato.docx",
+        );
+        bytes = { b64: docx.b64, filename: docx.filename };
+      }
+      const r = await fetch(`${API_BASE}/api/contracts/autentique`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_bytes_b64: bytes.b64,
+          filename: bytes.filename,
+          doc_name: `Contrato Direto - ${nomeCliente.trim()} & O2 Inc`,
+          email_contratante: emailContratante.trim(),
+          nome_contratante: nomeCliente.trim(),
+          sandbox: autSandbox,
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: "Erro" }));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      const data = await r.json();
+      setSigningLink(data.client_signing_link || "");
+      setSignatures(Array.isArray(data.signatures) ? data.signatures : []);
+      setAutStatus({
+        type: "success",
+        message: data.message || "Enviado para assinatura!",
+      });
+    } catch (e) {
+      setAutStatus({
+        type: "error",
+        message: e instanceof Error ? e.message : "Erro ao enviar",
+      });
+    }
+  }
+
+  async function handleIpag() {
+    setIpagStatus({ type: "loading" });
+    setPaymentLink("");
+    try {
+      const valor = parseMoney(ipagValor);
+      const r = await fetch(`${API_BASE}/api/contracts/ipag`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          valor,
+          descricao: ipagDescricao.trim(),
+          max_parcelas: ipagParcelas,
+          parcelas_sem_juros: ipagSemJuros,
+          sandbox: ipagSandbox,
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: "Erro" }));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      const data = await r.json();
+      setPaymentLink(data.payment_link || "");
+      setIpagStatus({
+        type: "success",
+        message: data.message || "Link de pagamento gerado!",
+      });
+    } catch (e) {
+      setIpagStatus({
+        type: "error",
+        message: e instanceof Error ? e.message : "Erro ao gerar link",
+      });
+    }
+  }
+
+  async function handleDrive() {
+    setDriveStatus({ type: "loading" });
+    setDriveLink("");
+    try {
+      const { b64, filename } = await generateBytes(
+        "/api/contracts/generate",
+        "contrato.docx",
+      );
+      const r = await fetch(`${API_BASE}/api/contracts/drive`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_bytes_b64: b64,
+          filename,
+          mimetype: DOCX_MIME,
+          company_name: nomeCliente.trim(),
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: "Erro" }));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      const data = await r.json();
+      setDriveLink(data.link || "");
+      setDriveStatus({
+        type: "success",
+        message: data.message || "Enviado para o Drive!",
+      });
+    } catch (e) {
+      setDriveStatus({
+        type: "error",
+        message: e instanceof Error ? e.message : "Erro ao enviar para o Drive",
+      });
+    }
+  }
+
+  async function handleSlack() {
+    setSlackStatus({ type: "loading" });
+    try {
+      const { b64, filename } = await generateBytes(
+        "/api/contracts/generate",
+        "contrato.docx",
+      );
+      const signLines = signatures
+        .map((s) => {
+          const link = s.link?.short_link;
+          return link ? `• ${s.name} (${s.email}): ${link}` : null;
+        })
+        .filter((l): l is string => l !== null);
+      const message = signLines.length
+        ? `Contrato Direto - ${nomeCliente.trim()}\nLinks de assinatura:\n${signLines.join("\n")}`
+        : undefined;
+
+      const r = await fetch(`${API_BASE}/api/contracts/slack`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_bytes_b64: b64,
+          filename,
+          ...(message ? { message } : {}),
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: "Erro" }));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      const data = await r.json();
+      setSlackStatus({
+        type: "success",
+        message: data.message || "Enviado para o Slack!",
+      });
+    } catch (e) {
+      setSlackStatus({
+        type: "error",
+        message: e instanceof Error ? e.message : "Erro ao enviar para o Slack",
       });
     }
   }
@@ -1315,6 +1538,276 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
                 {s.message}
               </div>
             ) : null,
+          )}
+
+          {/* Integration actions — available once a valid contract can be generated */}
+          {isValid && (
+            <div className="space-y-3 pt-1">
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={() => setShowAutentique((v) => !v)}
+                  variant="outline"
+                >
+                  <PenLine className="mr-2 h-4 w-4" />
+                  Assinatura
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowIpag((v) => {
+                      const next = !v;
+                      if (next && !ipagValor && pagamentoBaseNum > 0)
+                        setIpagValor(String(pagamentoBaseNum));
+                      return next;
+                    });
+                  }}
+                  variant="outline"
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Link Pagamento
+                </Button>
+                <Button
+                  onClick={handleDrive}
+                  disabled={driveStatus.type === "loading"}
+                  variant="outline"
+                >
+                  {driveStatus.type === "loading" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="mr-2 h-4 w-4" />
+                  )}
+                  Enviar para o Drive
+                </Button>
+                <Button
+                  onClick={handleSlack}
+                  disabled={slackStatus.type === "loading"}
+                  variant="outline"
+                >
+                  {slackStatus.type === "loading" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                  )}
+                  Enviar para o Slack
+                </Button>
+              </div>
+
+              {/* Drive / Slack status */}
+              {[driveStatus, slackStatus].map((s, i) =>
+                s.type === "success" || s.type === "error" ? (
+                  <div
+                    key={i}
+                    className={cn(
+                      "flex items-center gap-2 text-sm rounded-lg px-3 py-2",
+                      s.type === "success"
+                        ? "bg-primary/10 text-primary"
+                        : "bg-destructive/10 text-destructive",
+                    )}
+                  >
+                    {s.type === "success" ? (
+                      <CheckCircle className="h-4 w-4 shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                    )}
+                    {s.message}
+                  </div>
+                ) : null,
+              )}
+              {driveStatus.type === "success" && driveLink && (
+                <div className="font-mono text-xs bg-primary/10 rounded px-2 py-1 break-all">
+                  <a
+                    href={driveLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                  >
+                    {driveLink}
+                  </a>
+                </div>
+              )}
+
+              {/* Autentique panel */}
+              {showAutentique && (
+                <div className="rounded-xl border border-border bg-background p-4 space-y-3">
+                  <p className="text-sm font-medium">Enviar para Assinatura</p>
+                  <div className="space-y-2">
+                    <Label>E-mail do contratante</Label>
+                    <Input
+                      type="email"
+                      value={emailContratante}
+                      onChange={(e) => setEmailContratante(e.target.value)}
+                      placeholder="cliente@empresa.com.br"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={autSandbox}
+                      onCheckedChange={(c) => setAutSandbox(c === true)}
+                    />
+                    Modo teste (sandbox)
+                  </label>
+                  <Button
+                    onClick={handleAutentique}
+                    disabled={
+                      !emailContratante.trim() || autStatus.type === "loading"
+                    }
+                    size="sm"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    {autStatus.type === "loading" ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <PenLine className="mr-2 h-4 w-4" />
+                    )}
+                    Enviar para assinatura
+                  </Button>
+                  {autStatus.type === "success" && (
+                    <div className="text-sm text-primary space-y-2">
+                      <p className="flex items-center gap-1">
+                        <CheckCircle className="h-4 w-4 shrink-0" />
+                        {autStatus.message}
+                      </p>
+                      {signingLink && (
+                        <div className="font-mono text-xs bg-primary/10 rounded px-2 py-1 break-all">
+                          <a
+                            href={signingLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline"
+                          >
+                            {signingLink}
+                          </a>
+                        </div>
+                      )}
+                      {signatures.length > 0 && (
+                        <ul className="space-y-1 text-xs text-muted-foreground">
+                          {signatures.map((sig, i) => (
+                            <li
+                              key={i}
+                              className="flex items-center justify-between gap-2"
+                            >
+                              <span>
+                                {sig.name} — {sig.email}
+                              </span>
+                              {sig.link?.short_link && (
+                                <a
+                                  href={sig.link.short_link}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="underline text-primary shrink-0"
+                                >
+                                  Assinar
+                                </a>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                  {autStatus.type === "error" && (
+                    <div className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      {autStatus.message}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* iPag panel */}
+              {showIpag && (
+                <div className="rounded-xl border border-border bg-background p-4 space-y-3">
+                  <p className="text-sm font-medium">Link de Pagamento (iPag)</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label>Valor (R$)</Label>
+                      <Input
+                        value={ipagValor}
+                        onChange={(e) => setIpagValor(e.target.value)}
+                        placeholder="Ex: 12.000,00"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Máx. parcelas</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={ipagParcelas}
+                        onChange={(e) =>
+                          setIpagParcelas(Number(e.target.value) || 12)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Parcelas sem juros</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={ipagSemJuros}
+                        onChange={(e) =>
+                          setIpagSemJuros(Number(e.target.value) || 1)
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Descrição</Label>
+                    <Input
+                      value={ipagDescricao}
+                      onChange={(e) => setIpagDescricao(e.target.value)}
+                      placeholder="Descrição da cobrança"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={ipagSandbox}
+                      onCheckedChange={(c) => setIpagSandbox(c === true)}
+                    />
+                    Modo teste (sandbox)
+                  </label>
+                  <Button
+                    onClick={handleIpag}
+                    disabled={
+                      !parseMoney(ipagValor) || ipagStatus.type === "loading"
+                    }
+                    size="sm"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    {ipagStatus.type === "loading" ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CreditCard className="mr-2 h-4 w-4" />
+                    )}
+                    Gerar link de pagamento
+                  </Button>
+                  {ipagStatus.type === "success" && paymentLink && (
+                    <div className="text-sm text-primary space-y-2">
+                      <p className="flex items-center gap-1">
+                        <CheckCircle className="h-4 w-4 shrink-0" />
+                        {ipagStatus.message}
+                      </p>
+                      <div className="font-mono text-xs bg-primary/10 rounded px-2 py-1 break-all">
+                        <a
+                          href={paymentLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline"
+                        >
+                          {paymentLink}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {ipagStatus.type === "error" && (
+                    <div className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      {ipagStatus.message}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </section>
       </div>
