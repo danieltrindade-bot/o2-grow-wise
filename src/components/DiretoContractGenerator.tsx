@@ -321,6 +321,7 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
   const [valorSetup, setValorSetup] = useState(
     valorSetupReais != null ? String(valorSetupReais) : "",
   );
+  const [primeiraCobranca, setPrimeiraCobranca] = useState("D+30");
   const [mrr, setMrr] = useState<Record<string, string>>(() =>
     valorMensalReais != null ? { cfo: String(valorMensalReais) } : {},
   );
@@ -617,6 +618,7 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
       foro: foro || "Comarca de São Paulo/SP",
       valor_setup: hasSetup ? valorSetup : "",
       mrr_total: mrrTotalNum ? String(mrrTotalNum) : "",
+      primeira_cobranca: primeiraCobranca,
       mrr_breakdown: mrrBreakdown,
       valor_pontual: valorPontualObj,
       turn_fixo: selected.has("turnaround") ? turnFixo : "",
@@ -1046,12 +1048,30 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
                 ))}
 
                 {recurring.length > 0 && (
-                  <div className="rounded-lg bg-primary/10 px-3 py-2 text-sm">
-                    MRR total:{" "}
-                    <span className="font-medium text-primary">
-                      {formatBRLNumber(mrrTotalNum)}
-                    </span>
-                  </div>
+                  <>
+                    <div className="rounded-lg bg-primary/10 px-3 py-2 text-sm">
+                      MRR total:{" "}
+                      <span className="font-medium text-primary">
+                        {formatBRLNumber(mrrTotalNum)}
+                      </span>
+                    </div>
+                    <div className="space-y-2 max-w-xs">
+                      <Label>Primeiro pagamento (após a assinatura)</Label>
+                      <Select
+                        value={primeiraCobranca}
+                        onValueChange={setPrimeiraCobranca}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="D+30">30 dias</SelectItem>
+                          <SelectItem value="D+60">60 dias</SelectItem>
+                          <SelectItem value="D+90">90 dias</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
                 )}
 
                 {selected.has("oxy") && !oxyProjeto && (
