@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FileText,
-  Download,
   X,
   Loader2,
   CheckCircle,
@@ -170,6 +169,13 @@ interface Signature {
   link?: { short_link: string };
 }
 
+interface GenerateAndDriveResponse {
+  message: string;
+  pasta: string;
+  docx_link: string;
+  pdf_link: string | null;
+}
+
 const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
@@ -329,8 +335,10 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
 
   // ── API / status ──
   const [apiOk, setApiOk] = useState<boolean | null>(null);
-  const [docxStatus, setDocxStatus] = useState<ActionStatus>({ type: "idle" });
-  const [pdfStatus, setPdfStatus] = useState<ActionStatus>({ type: "idle" });
+  const [makeStatus, setMakeStatus] = useState<ActionStatus>({ type: "idle" });
+  const [driveResult, setDriveResult] = useState<GenerateAndDriveResponse | null>(
+    null,
+  );
 
   // ── Autentique ──
   const [showAutentique, setShowAutentique] = useState(false);
@@ -622,26 +630,29 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
     return { b64, filename, blob };
   }
 
-  async function download(
-    endpoint: string,
-    fallback: string,
-    setStatus: (s: ActionStatus) => void,
-  ) {
-    setStatus({ type: "loading" });
+  async function handleGenerateAndDrive() {
+    setMakeStatus({ type: "loading" });
+    setDriveResult(null);
     try {
-      const { blob, filename } = await generateBytes(endpoint, fallback);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      setStatus({ type: "success", message: "Contrato gerado e baixado!" });
+      const r = await fetch(`${API_BASE}/api/contracts/generate-and-drive`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: "Erro desconhecido" }));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      const data: GenerateAndDriveResponse = await r.json();
+      setDriveResult(data);
+      setMakeStatus({
+        type: "success",
+        message: data.message || "Contrato gerado e salvo no Drive!",
+      });
     } catch (e) {
-      setStatus({
+      setMakeStatus({
         type: "error",
-        message: e instanceof Error ? e.message : "Erro ao gerar contrato",
+        message: e instanceof Error ? e.message : "Erro ao fazer o contrato",
       });
     }
   }
@@ -1482,62 +1493,61 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
           )}
           <div className="flex flex-wrap gap-3">
             <Button
-              onClick={() =>
-                download(
-                  "/api/contracts/generate",
-                  "contrato.docx",
-                  setDocxStatus,
-                )
-              }
-              disabled={!isValid || docxStatus.type === "loading"}
+              onClick={handleGenerateAndDrive}
+              disabled={!isValid || makeStatus.type === "loading"}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              {docxStatus.type === "loading" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="mr-2 h-4 w-4" />
-              )}
-              Baixar DOCX
-            </Button>
-            <Button
-              onClick={() =>
-                download(
-                  "/api/contracts/generate-pdf",
-                  "contrato.pdf",
-                  setPdfStatus,
-                )
-              }
-              disabled={!isValid || pdfStatus.type === "loading"}
-              variant="outline"
-            >
-              {pdfStatus.type === "loading" ? (
+              {makeStatus.type === "loading" ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <FileText className="mr-2 h-4 w-4" />
               )}
-              Baixar PDF
+              Fazer contrato
             </Button>
           </div>
 
-          {[docxStatus, pdfStatus].map((s, i) =>
-            s.type === "success" || s.type === "error" ? (
-              <div
-                key={i}
-                className={cn(
-                  "flex items-center gap-2 text-sm rounded-lg px-3 py-2",
-                  s.type === "success"
-                    ? "bg-primary/10 text-primary"
-                    : "bg-destructive/10 text-destructive",
-                )}
-              >
-                {s.type === "success" ? (
-                  <CheckCircle className="h-4 w-4 shrink-0" />
+          {makeStatus.type === "error" && (
+            <div className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 bg-destructive/10 text-destructive">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              {makeStatus.message}
+            </div>
+          )}
+
+          {makeStatus.type === "success" && driveResult && (
+            <div className="rounded-lg bg-primary/10 px-3 py-2 text-sm space-y-2">
+              <p className="text-primary flex items-center gap-1">
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                {makeStatus.message}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Pasta: <span className="text-foreground">{driveResult.pasta}</span>
+              </p>
+              <div className="flex flex-col gap-1">
+                <a
+                  href={driveResult.docx_link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  📄 DOCX no Drive
+                </a>
+                {driveResult.pdf_link ? (
+                  <a
+                    href={driveResult.pdf_link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary underline"
+                  >
+                    📑 PDF no Drive
+                  </a>
                 ) : (
-                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <p className="text-xs text-yellow-500 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3 shrink-0" />
+                    PDF não foi gerado.
+                  </p>
                 )}
-                {s.message}
               </div>
-            ) : null,
+            </div>
           )}
 
           {/* Integration actions — available once a valid contract can be generated */}
