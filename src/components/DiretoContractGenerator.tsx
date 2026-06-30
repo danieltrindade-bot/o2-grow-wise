@@ -176,6 +176,34 @@ interface GenerateAndDriveResponse {
   pdf_link: string | null;
 }
 
+type SignerAction = "SIGN" | "SIGN_AS_A_WITNESS";
+
+interface Signer {
+  name: string;
+  email: string;
+  action: SignerAction;
+}
+
+// Fixed O2 signers shown by default in the Autentique panel.
+const DEFAULT_O2_SIGNERS: Signer[] = [
+  { name: "Pedro Albite", email: "pedro.albite@o2inc.com.br", action: "SIGN" },
+  {
+    name: "Daniel Trindade",
+    email: "daniel.trindade@o2inc.com.br",
+    action: "SIGN_AS_A_WITNESS",
+  },
+  {
+    name: "Tiago Pisoni",
+    email: "tiago.pisoni@o2inc.com.br",
+    action: "SIGN_AS_A_WITNESS",
+  },
+];
+
+const ACTION_LABEL: Record<SignerAction, string> = {
+  SIGN: "Assinante",
+  SIGN_AS_A_WITNESS: "Testemunha",
+};
+
 const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
@@ -343,6 +371,9 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
   // ── Autentique ──
   const [showAutentique, setShowAutentique] = useState(false);
   const [emailContratante, setEmailContratante] = useState("");
+  const [o2Signers, setO2Signers] = useState<Signer[]>(() =>
+    DEFAULT_O2_SIGNERS.map((s) => ({ ...s })),
+  );
   const [autSandbox, setAutSandbox] = useState(false);
   const [autStatus, setAutStatus] = useState<ActionStatus>({ type: "idle" });
   const [signingLink, setSigningLink] = useState("");
@@ -678,6 +709,15 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
         );
         bytes = { b64: docx.b64, filename: docx.filename };
       }
+      const signers: Signer[] = [
+        {
+          name: nomeCliente.trim(),
+          email: emailContratante.trim(),
+          action: "SIGN",
+        },
+        ...o2Signers.map((s) => ({ ...s, email: s.email.trim() })),
+      ].filter((s) => s.email !== "");
+
       const r = await fetch(`${API_BASE}/api/contracts/autentique`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -687,6 +727,7 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
           doc_name: `Contrato Direto - ${nomeCliente.trim()} & O2 Inc`,
           email_contratante: emailContratante.trim(),
           nome_contratante: nomeCliente.trim(),
+          signers,
           sandbox: autSandbox,
         }),
       });
@@ -1639,14 +1680,49 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
               {showAutentique && (
                 <div className="rounded-xl border border-border bg-background p-4 space-y-3">
                   <p className="text-sm font-medium">Enviar para Assinatura</p>
-                  <div className="space-y-2">
-                    <Label>E-mail do contratante</Label>
-                    <Input
-                      type="email"
-                      value={emailContratante}
-                      onChange={(e) => setEmailContratante(e.target.value)}
-                      placeholder="cliente@empresa.com.br"
-                    />
+                  <div className="space-y-3">
+                    {/* Contratante */}
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-2 md:items-center">
+                      <div>
+                        <Label>{nomeCliente.trim() || "Contratante"}</Label>
+                        <p className="text-xs text-muted-foreground">
+                          {ACTION_LABEL.SIGN}
+                        </p>
+                      </div>
+                      <Input
+                        type="email"
+                        value={emailContratante}
+                        onChange={(e) => setEmailContratante(e.target.value)}
+                        placeholder="cliente@empresa.com.br"
+                      />
+                    </div>
+
+                    {/* O2 signers */}
+                    {o2Signers.map((signer, i) => (
+                      <div
+                        key={signer.name}
+                        className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-2 md:items-center"
+                      >
+                        <div>
+                          <Label>{signer.name}</Label>
+                          <p className="text-xs text-muted-foreground">
+                            {ACTION_LABEL[signer.action]}
+                          </p>
+                        </div>
+                        <Input
+                          type="email"
+                          value={signer.email}
+                          onChange={(e) =>
+                            setO2Signers((prev) => {
+                              const next = [...prev];
+                              next[i] = { ...next[i], email: e.target.value };
+                              return next;
+                            })
+                          }
+                          placeholder="email@o2inc.com.br"
+                        />
+                      </div>
+                    ))}
                   </div>
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
                     <Checkbox
