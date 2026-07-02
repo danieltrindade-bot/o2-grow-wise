@@ -79,9 +79,10 @@ function CalculadoraCFOPage() {
   const annualRevenue = monthlyRevenue * 12;
   const basePrice = useMemo(() => (data ? lookupCFOBase(data.base, annualRevenue) : 0), [data, annualRevenue]);
   const cnpjMultiplier = useMemo(() => {
-    const r = data?.cnpj.find((c) => c.cnpj_count === Math.max(1, Math.min(10, cnpjCount)));
-    return r ? Number(r.multiplier) : 1;
-  }, [data, cnpjCount]);
+    // 1 CNPJ = 1,00; +0,05 por CNPJ adicional; teto em 10 CNPJs (1,45).
+    const n = Math.min(Math.max(1, cnpjCount), 10);
+    return 1 + (n - 1) * 0.05;
+  }, [cnpjCount]);
   const complexityScore = complexity.reduce((s, v) => s + v, 0);
   const cf = data ? complexityFromRules(data.complexity, complexityScore) : { factor: 1, label: "—" };
   const segmentAdj = useMemo(() => {
