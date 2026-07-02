@@ -85,7 +85,7 @@ function CalculadoraBPOPage() {
   const valorMensalSetup = data?.setup ? Number(data.setup.installment_value) : 0;
   const valorMensalTotal = valorMensalBPO + (data?.setup?.add_to_monthly ? valorMensalSetup : 0);
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const BPO_MINIMUM = 2100;
+  const BPO_MINIMUM = 3187;
   const valorComDesconto = Math.max(BPO_MINIMUM, valorMensalTotal * (1 - discount.percent / 100));
   const [showPrices, setShowPrices] = useState(false);
   const [showContract, setShowContract] = useState(false);
