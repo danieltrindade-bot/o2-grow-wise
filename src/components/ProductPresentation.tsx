@@ -15,19 +15,20 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
   bpo: {
     what: "Terceirização operacional das rotinas financeiras do dia a dia — contas a pagar, contas a receber e conciliação bancária — com execução padronizada e atualização contínua do ERP e da plataforma Oxy. Garante organização, previsibilidade e controle, liberando a gestão para focar em estratégia e crescimento.",
     deliverables: [
+      "Lançamento e atualização financeira no ERP",
       "Contas a pagar",
       "Contas a receber",
-      "Conciliação bancária",
+      "Conciliação bancária recorrente",
       "Ritual semanal de alinhamento das atividades",
-      "Atualização do ERP financeiro",
       "Relatório de inadimplência",
       "Relatório de contas a pagar",
       "Relatório de contas a receber",
       "Relatório de fluxo de caixa",
       "Organização do cronograma financeiro",
-      "Ajustes operacionais no ERP e processos",
       "Padronização de envio de documentos",
       "Agendamentos bancários",
+      "Ajustes operacionais no ERP e processos",
+      "Atualização da plataforma Oxy",
     ],
     notIncluded: [
       "Análise estratégica financeira / análise Oxy",

@@ -20,30 +20,14 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { ContractGenerator } from "@/components/ContractGenerator";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
+import { CronogramaImplantacao } from "@/components/CronogramaImplantacao";
+import { bpoImplantacaoStages, BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
 
 export const Route = createFileRoute("/calculadora/bpo")({
   component: CalculadoraBPOPage,
 });
 
 type TierKey = "tier1" | "tier2" | "tier3";
-
-const SETUP_DELIVERABLES = [
-  "Estudo prévio do cliente",
-  "Reunião de kick-off (início onboarding)",
-  "Reuniões de mapeamento de dados",
-  "Parametrização da plataforma Oxy",
-  "Integração com ERP",
-  "Treinamento da equipe",
-  "Implantação de dashboards",
-  "Setup do Agente Gênio",
-  "Parametrização de alertas",
-  "Conciliação inicial",
-  "Plano de contas revisado",
-  "Centros de custo definidos",
-  "Fluxo de aprovações",
-  "Régua de cobrança",
-  "Go-live assistido",
-];
 
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
@@ -152,14 +136,20 @@ function CalculadoraBPOPage() {
 
               {data.setup && (
                 <section className="rounded-2xl border border-border bg-card p-7">
-                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Benefício</p>
-                  <h2 className="text-lg font-semibold mt-1">{data.setup.name}</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {data.setup.installments} parcelas
-                    {data.setup.add_to_monthly && " — incluído no valor mensal"}
-                  </p>
-                  <ul className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
-                    {SETUP_DELIVERABLES.map((d) => (
+                  <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                    <div>
+                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Benefício</p>
+                      <h2 className="text-lg font-semibold mt-1">{data.setup.name}</h2>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {data.setup.installments} parcelas
+                      {data.setup.add_to_monthly && " — incluído no valor mensal"}
+                    </p>
+                  </div>
+
+                  <p className="mt-5 text-xs uppercase tracking-wider text-muted-foreground">Setup — o que inclui</p>
+                  <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                    {BPO_SETUP_DELIVERABLES.map((d) => (
                       <li key={d} className="flex items-start gap-2 text-sm">
                         <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary bg-primary/15 shrink-0">
                           <Check className="h-3 w-3 text-primary" />
@@ -168,6 +158,11 @@ function CalculadoraBPOPage() {
                       </li>
                     ))}
                   </ul>
+
+                  <div className="my-6 border-t border-border" />
+
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Cronograma de implantação</p>
+                  <CronogramaImplantacao />
                 </section>
               )}
 
@@ -231,6 +226,8 @@ function CalculadoraBPOPage() {
                           ],
                           scope: SERVICE_DETAILS.bpo.deliverables,
                           scopeIntro: SERVICE_DETAILS.bpo.what,
+                          stages: bpoImplantacaoStages(),
+                          stagesTitle: "Setup e cronograma de implantação",
                           finalLabel: "Valor final mensal",
                           finalValue: formatBRL(valorComDesconto),
                           roi: { lossMinMonthly, investmentMonthly: valorComDesconto },
