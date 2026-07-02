@@ -1,22 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Check, Download, FileText } from "lucide-react";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import { calcCoordenadorPrice, perfilFromInputs, formatBRL, type CoordPerfil, type CoordNivel } from "@/lib/pricing-shared";
+import { calcSetupPriceFromRules, perfilFromInputs, formatBRL, type CoordPerfil, type SegmentType } from "@/lib/pricing-shared";
+import { useCoordenadorPricing } from "@/hooks/use-pricing";
+import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { RoiPanel } from "@/components/RoiPanel";
 import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
-import { InfoTooltip } from "@/components/InfoTooltip";
+import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
@@ -39,11 +42,13 @@ const PERFIS: { id: CoordPerfil; label: string; desc: string }[] = [
   { id: "integrado", label: "Integrado", desc: "9+ colab. · Multi-CNPJ · Financeiro + Compras + Faturamento" },
 ];
 
-const NIVEL_LABEL: Record<CoordNivel, string> = {
-  baixa: "Baixa",
-  media: "Média",
-  alta: "Alta",
+const MENSAL_POR_PERFIL: Record<CoordPerfil, number> = {
+  essencial: 2087,
+  estruturado: 2982,
+  integrado: 4174,
 };
+
+const COORD_MENSAL_MINIMUM = 2300;
 
 const INCLUDES = [
   "Coordenador financeiro dedicado",
@@ -56,27 +61,42 @@ const FUNC_TOOLTIP =
   "Colaboradores envolvidos na operação financeira. Junto com os CNPJs, define o perfil de valor.";
 const CNPJ_TOOLTIP =
   "Quantidade de CNPJs/empresas atendidas. Junto com o nº de funcionários, define o perfil de valor.";
-const NIVEL_TOOLTIP =
-  "Ajuste por volume de lançamentos e nº de sistemas. Baixa é o padrão; Média soma +20% e Alta +40%.";
 
 function CoordenadorPage() {
   const { state } = useDiagnostic();
   const { lossMinMonthly } = useDiagnosticLoss();
+  const { data, isLoading, error, refetch } = useCoordenadorPricing();
+
   const [employees, setEmployees] = useState(1);
   const [cnpjCount, setCnpjCount] = useState(1);
-  const [nivel, setNivel] = useState<CoordNivel>("baixa");
+  const [monthlyRevenue, setMonthlyRevenue] = useState<number>(0);
+  const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
   const [discountId, setDiscountId] = useState("none");
   const [showPrices, setShowPrices] = useState(false);
   const [showContract, setShowContract] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
 
+  useEffect(() => {
+    if (monthlyRevenue === 0 && state.monthlyRevenue > 0) setMonthlyRevenue(state.monthlyRevenue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.monthlyRevenue]);
+
+  useEffect(() => {
+    if (cnpjCount === 1 && segmentType !== "mesmo") setSegmentType("mesmo");
+  }, [cnpjCount, segmentType]);
+
   const perfil = perfilFromInputs(employees, cnpjCount);
-  const result = calcCoordenadorPrice(perfil, nivel);
-  const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const parcela12x = result.setup / 12;
-  const COORD_MENSAL_MINIMUM = 2300;
-  const mensalComDesconto = Math.max(COORD_MENSAL_MINIMUM, result.mensal * (1 - discount.percent / 100));
   const perfilInfo = PERFIS.find((p) => p.id === perfil)!;
+  const discount = DISCOUNTS.find((d) => d.id === discountId)!;
+
+  const fase2 = MENSAL_POR_PERFIL[perfil];
+  const setupRes = data
+    ? calcSetupPriceFromRules(data, monthlyRevenue, cnpjCount, segmentType)
+    : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
+
+  const setupComDesconto = setupRes.total * (1 - discount.percent / 100);
+  const parcela12x = setupComDesconto / 12;
+  const mensalComDesconto = Math.max(COORD_MENSAL_MINIMUM, fase2 * (1 - discount.percent / 100));
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -93,10 +113,18 @@ function CoordenadorPage() {
 
         <LossSummaryPanel />
 
+        {isLoading && <CalcLoadingSkeleton />}
+        {error && <ErrorState error={error} retry={() => refetch()} />}
+
+        {data && (<>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
             <section className="rounded-2xl border border-border bg-card p-7 space-y-4">
               <h2 className="text-lg font-semibold">Parâmetros</h2>
+              <div className="space-y-2">
+                <Label>Faturamento mensal</Label>
+                <CurrencyInput value={monthlyRevenue} onValueChange={setMonthlyRevenue} />
+              </div>
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   Número de funcionários <InfoTooltip text={FUNC_TOOLTIP} />
@@ -120,29 +148,31 @@ function CoordenadorPage() {
                   onChange={(e) => setCnpjCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
                 />
               </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  Tipo de segmento <InfoTooltip text={TOOLTIPS.segmento} />
+                </Label>
+                <Select value={segmentType} onValueChange={(v) => setSegmentType(v as SegmentType)} disabled={cnpjCount === 1}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mesmo">Mesmo segmento</SelectItem>
+                    <SelectItem value="correlato">Correlato</SelectItem>
+                    <SelectItem value="diferente">Diferente</SelectItem>
+                    <SelectItem value="muito_diferente">Muito diferente</SelectItem>
+                  </SelectContent>
+                </Select>
+                {cnpjCount === 1 && <p className="text-xs text-muted-foreground">Disponível com 2+ CNPJs</p>}
+              </div>
               <div className="rounded-xl bg-primary/10 border border-primary/40 p-3">
                 <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Perfil de valor</p>
                 <p className="text-base font-semibold mt-0.5">{perfilInfo.label}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{perfilInfo.desc}</p>
               </div>
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  Nível de complexidade <InfoTooltip text={NIVEL_TOOLTIP} />
-                </Label>
-                <Select value={nivel} onValueChange={(v) => setNivel(v as CoordNivel)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="baixa">Baixa (padrão)</SelectItem>
-                    <SelectItem value="media">Média (+20%)</SelectItem>
-                    <SelectItem value="alta">Alta (+40%)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </section>
 
             <section className="rounded-2xl border border-border bg-card p-7">
               <h2 className="text-lg font-semibold mb-4">Desconto</h2>
-              <p className="text-xs text-muted-foreground mb-3">Aplicado à mensalidade (recorrência).</p>
+              <p className="text-xs text-muted-foreground mb-3">Aplicado à mensalidade (recorrência) e ao setup.</p>
               <RadioGroup value={discountId} onValueChange={setDiscountId} className="space-y-2">
                 {DISCOUNTS.map((d) => (
                   <label key={d.id} htmlFor={`disc-${d.id}`}
@@ -165,8 +195,7 @@ function CoordenadorPage() {
             {showPrices ? (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <Row label="Perfil" value={perfilInfo.label} />
-                <Row label="Complexidade" value={NIVEL_LABEL[result.nivel]} />
-                <Row label="Setup (valor único)" value={formatBRL(result.setup)} bold />
+                <Row label="Setup (valor único)" value={formatBRL(setupComDesconto)} bold />
 
                 <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
                   <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Setup · 12x no cartão</p>
@@ -174,7 +203,7 @@ function CoordenadorPage() {
                     {formatBRL(parcela12x)}<span className="text-sm font-normal text-primary/70">/mês</span>
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Valor total: {formatBRL(result.setup)}
+                    Valor total: {formatBRL(setupComDesconto)}
                   </p>
                 </div>
 
@@ -185,7 +214,7 @@ function CoordenadorPage() {
                   </p>
                   {discount.percent > 0 && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      Desconto {discount.percent}%: -{formatBRL(result.mensal - mensalComDesconto)}/mês (de {formatBRL(result.mensal)})
+                      Desconto {discount.percent}%: -{formatBRL(fase2 - mensalComDesconto)}/mês (de {formatBRL(fase2)})
                     </p>
                   )}
                 </div>
@@ -209,15 +238,15 @@ function CoordenadorPage() {
                     exportCalculatorPDF({
                       service: "Coordenador as a Service",
                       clientName: state.companyName,
+                      monthlyRevenue,
                       rows: [
                         ["Perfil", perfilInfo.label],
                         ["Funcionários", String(employees)],
                         ["CNPJs", String(cnpjCount)],
-                        ["Complexidade", NIVEL_LABEL[result.nivel]],
-                        ["Setup (valor único)", formatBRL(result.setup)],
+                        ["Setup (valor único)", formatBRL(setupComDesconto)],
                         ["Setup (12x)", formatBRL(parcela12x)],
                         ...(discount.percent > 0
-                          ? [[`Desconto (${discount.percent}%)`, `-${formatBRL(result.mensal - mensalComDesconto)}/mês`] as [string, string]]
+                          ? [[`Desconto (${discount.percent}%)`, `-${formatBRL(fase2 - mensalComDesconto)}/mês`] as [string, string]]
                           : []),
                         ["Mensalidade", formatBRL(mensalComDesconto)],
                       ],
@@ -272,7 +301,7 @@ function CoordenadorPage() {
 
         <ContractGenerator
           modelo="Coordenador as a Service"
-          valorSetup={String(Math.round(result.setup * 100))}
+          valorSetup={String(Math.round(setupComDesconto * 100))}
           valorMensal={String(Math.round(mensalComDesconto * 100))}
           qtdParcelasSetup={12}
           expanded={showContract}
@@ -282,11 +311,12 @@ function CoordenadorPage() {
         <DiretoContractGenerator
           defaultServico="coordenador"
           clientName={state.companyName}
-          valorSetupReais={Math.round(result.setup)}
+          valorSetupReais={Math.round(setupComDesconto)}
           valorMensalReais={Math.round(mensalComDesconto)}
           expanded={showDireto}
           onExpandedChange={setShowDireto}
         />
+        </>)}
       </div>
 
       <MobilePriceSummary label="Mensalidade" value={formatBRL(mensalComDesconto)} visible={showPrices} onReveal={() => setShowPrices(true)} />

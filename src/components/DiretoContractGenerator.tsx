@@ -322,9 +322,11 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
     valorSetupReais != null ? String(valorSetupReais) : "",
   );
   const [primeiraCobranca, setPrimeiraCobranca] = useState("D+30");
-  const [mrr, setMrr] = useState<Record<string, string>>(() =>
-    valorMensalReais != null ? { cfo: String(valorMensalReais) } : {},
-  );
+  const [mrr, setMrr] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    if (valorMensalReais != null) init[defaultServico] = String(valorMensalReais);
+    return init;
+  });
   const [valorPontual, setValorPontual] = useState<Record<string, string>>({});
   const [bpoLancamentos, setBpoLancamentos] = useState("6");
   const [bpoContas, setBpoContas] = useState("2");
@@ -715,7 +717,7 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
         {
           name: nomeCliente.trim(),
           email: emailContratante.trim(),
-          action: "SIGN",
+          action: "SIGN" as const,
         },
         ...o2Signers.map((s) => ({ ...s, email: s.email.trim() })),
       ].filter((s) => s.email !== "");
