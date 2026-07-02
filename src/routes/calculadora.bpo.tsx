@@ -21,6 +21,7 @@ import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresen
 import { ContractGenerator } from "@/components/ContractGenerator";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { CronogramaImplantacao } from "@/components/CronogramaImplantacao";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { bpoImplantacaoStages, BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
 
 export const Route = createFileRoute("/calculadora/bpo")({
@@ -88,14 +89,40 @@ function CalculadoraBPOPage() {
           <p className="text-muted-foreground mt-2">Configure os parâmetros para calcular o valor mensal da operação.</p>
         </div>
 
-        <ProductPresentation serviceKey="bpo" title="BPO Financeiro" />
-
         <LossSummaryPanel />
+
+        <ProductPresentation serviceKey="bpo" title="BPO Financeiro" />
 
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
         {data && pacote && (<>
+          <div className="space-y-6 mb-6">
+            <CollapsibleSection eyebrow="Implantação" title="Cronograma de implantação" subtitle="Kickoff → Semana 4 · 30 dias">
+              <CronogramaImplantacao />
+            </CollapsibleSection>
+
+            {data.setup && (
+              <CollapsibleSection
+                eyebrow="Benefício"
+                title={data.setup.name}
+                subtitle={`${data.setup.installments} parcelas${data.setup.add_to_monthly ? " — incluído no valor mensal" : ""}`}
+              >
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Setup — o que inclui</p>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                  {BPO_SETUP_DELIVERABLES.map((d) => (
+                    <li key={d} className="flex items-start gap-2 text-sm">
+                      <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary bg-primary/15 shrink-0">
+                        <Check className="h-3 w-3 text-primary" />
+                      </span>
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CollapsibleSection>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <section className="rounded-2xl border border-border bg-card p-7">
@@ -133,38 +160,6 @@ function CalculadoraBPOPage() {
                   <span className="rounded-full bg-secondary px-3 py-1">{tier.label}</span>
                 </div>
               </section>
-
-              {data.setup && (
-                <section className="rounded-2xl border border-border bg-card p-7">
-                  <div className="flex items-baseline justify-between gap-3 flex-wrap">
-                    <div>
-                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Benefício</p>
-                      <h2 className="text-lg font-semibold mt-1">{data.setup.name}</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {data.setup.installments} parcelas
-                      {data.setup.add_to_monthly && " — incluído no valor mensal"}
-                    </p>
-                  </div>
-
-                  <p className="mt-5 text-xs uppercase tracking-wider text-muted-foreground">Setup — o que inclui</p>
-                  <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
-                    {BPO_SETUP_DELIVERABLES.map((d) => (
-                      <li key={d} className="flex items-start gap-2 text-sm">
-                        <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary bg-primary/15 shrink-0">
-                          <Check className="h-3 w-3 text-primary" />
-                        </span>
-                        <span>{d}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="my-6 border-t border-border" />
-
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Cronograma de implantação</p>
-                  <CronogramaImplantacao />
-                </section>
-              )}
 
               <section className="rounded-2xl border border-border bg-card p-7">
                 <h2 className="text-lg font-semibold mb-4">Desconto</h2>
