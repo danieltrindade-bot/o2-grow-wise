@@ -66,10 +66,49 @@ const COORD_SETUP: Record<CoordPerfil, Record<CoordNivel, number>> = {
   integrado: { baixa: 14401, media: 14828, alta: 15255 },
 };
 
-const COORD_MENSAL: Record<CoordPerfil, Record<CoordNivel, number>> = {
-  essencial: { baixa: 2300, media: 2760, alta: 3220 },
-  estruturado: { baixa: 3286, media: 3943, alta: 4600 },
-  integrado: { baixa: 4928, media: 5519, alta: 6768 },
+// Matriz de recorrência (mensalidade) — item 10 "Precificação" do Playbook Coordenador V3.
+export const COORD_MENSAL: Record<CoordPerfil, Record<CoordNivel, number>> = {
+  essencial: { baixa: 2546.58, media: 3022.58, alta: 3499.58 },
+  estruturado: { baixa: 3664.83, media: 4327.42, alta: 4990.0 },
+  integrado: { baixa: 5280.08, media: 6240.67, alta: 7202.25 },
+};
+
+// Piso da mensalidade (menor faixa da tabela: Essencial · Baixa).
+export const COORD_MENSAL_MINIMUM = 2546.58;
+
+// Complexidade operacional derivada de multi-CNPJ + volume (faturamento mensal),
+// conforme nota do item 10 ("ajustes por multi-CNPJ, volume, nº de sistemas").
+export function coordComplexidade(
+  cnpjCount: number,
+  monthlyRevenue: number,
+): { nivel: CoordNivel; points: number; reasons: string[] } {
+  let points = 0;
+  const reasons: string[] = [];
+
+  if (cnpjCount >= 3) {
+    points += 2;
+    reasons.push(`${cnpjCount} CNPJs`);
+  } else if (cnpjCount === 2) {
+    points += 1;
+    reasons.push("2 CNPJs");
+  }
+
+  if (monthlyRevenue >= 1_500_000) {
+    points += 2;
+    reasons.push("faturamento ≥ R$ 1,5M/mês");
+  } else if (monthlyRevenue >= 500_000) {
+    points += 1;
+    reasons.push("faturamento R$ 500k–1,5M/mês");
+  }
+
+  const nivel: CoordNivel = points >= 3 ? "alta" : points === 2 ? "media" : "baixa";
+  return { nivel, points, reasons };
+}
+
+export const COORD_NIVEL_LABEL: Record<CoordNivel, string> = {
+  baixa: "Baixa (padrão)",
+  media: "Média",
+  alta: "Alta",
 };
 
 // Perfil derivado de nº de funcionários + nº de CNPJs (pega o maior tier quando divergem).

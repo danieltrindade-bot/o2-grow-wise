@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import { calcSetupPriceFromRules, perfilFromInputs, formatBRL, type CoordPerfil, type SegmentType } from "@/lib/pricing-shared";
+import { calcSetupPriceFromRules, perfilFromInputs, coordComplexidade, COORD_MENSAL, COORD_MENSAL_MINIMUM, COORD_NIVEL_LABEL, formatBRL, type CoordPerfil, type SegmentType } from "@/lib/pricing-shared";
 import { useCoordenadorPricing } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -41,14 +41,6 @@ const PERFIS: { id: CoordPerfil; label: string; desc: string }[] = [
   { id: "estruturado", label: "Estruturado", desc: "4–8 colab. · 1–2 CNPJs · Financeiro + 1 departamento" },
   { id: "integrado", label: "Integrado", desc: "9+ colab. · Multi-CNPJ · Financeiro + Compras + Faturamento" },
 ];
-
-const MENSAL_POR_PERFIL: Record<CoordPerfil, number> = {
-  essencial: 2087,
-  estruturado: 2982,
-  integrado: 4174,
-};
-
-const COORD_MENSAL_MINIMUM = 2300;
 
 const INCLUDES = [
   "Coordenador financeiro dedicado",
@@ -89,7 +81,8 @@ function CoordenadorPage() {
   const perfilInfo = PERFIS.find((p) => p.id === perfil)!;
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
 
-  const fase2 = MENSAL_POR_PERFIL[perfil];
+  const complexidade = coordComplexidade(cnpjCount, monthlyRevenue);
+  const fase2 = COORD_MENSAL[perfil][complexidade.nivel];
   const setupRes = data
     ? calcSetupPriceFromRules(data, monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
@@ -163,10 +156,19 @@ function CoordenadorPage() {
                 </Select>
                 {cnpjCount === 1 && <p className="text-xs text-muted-foreground">Disponível com 2+ CNPJs</p>}
               </div>
-              <div className="rounded-xl bg-primary/10 border border-primary/40 p-3">
-                <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Perfil de valor</p>
-                <p className="text-base font-semibold mt-0.5">{perfilInfo.label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{perfilInfo.desc}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-primary/10 border border-primary/40 p-3">
+                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Perfil de valor</p>
+                  <p className="text-base font-semibold mt-0.5">{perfilInfo.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{perfilInfo.desc}</p>
+                </div>
+                <div className="rounded-xl bg-card border border-border p-3">
+                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground">Complexidade</p>
+                  <p className="text-base font-semibold mt-0.5">{COORD_NIVEL_LABEL[complexidade.nivel]}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {complexidade.reasons.length ? complexidade.reasons.join(" · ") : "1 CNPJ · faturamento < R$ 500k/mês"}
+                  </p>
+                </div>
               </div>
             </section>
 
@@ -241,6 +243,7 @@ function CoordenadorPage() {
                       monthlyRevenue,
                       rows: [
                         ["Perfil", perfilInfo.label],
+                        ["Complexidade", COORD_NIVEL_LABEL[complexidade.nivel]],
                         ["Funcionários", String(employees)],
                         ["CNPJs", String(cnpjCount)],
                         ["Setup (valor único)", formatBRL(setupComDesconto)],
