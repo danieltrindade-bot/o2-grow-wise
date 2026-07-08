@@ -9,6 +9,7 @@ interface ServiceDetail {
   deliverables: string[];
   notIncluded?: string[];
   stages?: { title: string; description: string; items: string[] }[];
+  results?: string[];
 }
 
 export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
@@ -216,6 +217,22 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
       },
     ],
   },
+  estrategico: {
+    what: "Entregamos uma análise profunda e completa do seu negócio, identificando oportunidades de melhoria em todas as áreas essenciais, para levar sua empresa ao próximo nível, com mais controle e lucratividade.",
+    deliverables: [
+      "Análise histórica do desempenho financeiro e operacional da sua empresa",
+      "Avaliação detalhada de 10 áreas-chave: financeiro, tecnologia, planejamento, contábil, controladoria, fiscal, comercial, marketing, societário e capital humano",
+      "Identificação clara de pontos fortes, gargalos e oportunidades de crescimento",
+      "Construção e detalhamento de plano de ação prático para reverter situações críticas e potencializar fortalezas do negócio",
+      "Construção de simulação projetando resultado com as melhorias sugeridas",
+    ],
+    results: [
+      "Identificação profissional dos problemas atuais em todas as áreas do negócio.",
+      "Maior clareza para tomar decisões com base em dados fidedignos e não em sentimentos.",
+      "Plano de ação técnico e calculado para implementação de melhorias operacionais, financeiras, comerciais e de gestão.",
+      "Melhoria integrada dos resultados econômico-financeiros e operacionais, aumentando a eficiência e sinergia entre todas as áreas da empresa.",
+    ],
+  },
   turnaround: {
     what: "Garantimos a sobrevivência e a sustentabilidade dos negócios, através de captação de recursos, repactuação de passivos, gestão e controladoria. Projeto de 12 meses com equipe sênior (Partner, CFO e Analista) para recuperar o equilíbrio operacional e financeiro da empresa.",
     deliverables: [
@@ -354,6 +371,20 @@ export function ProductPresentation({ serviceKey, title }: { serviceKey: string;
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {detail.results && detail.results.length > 0 && (
+        <div className="border-t border-border pt-4 mb-4">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Resultados esperados</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {detail.results.map((r) => (
+              <div key={r} className="rounded-xl border border-border bg-background/50 p-4 flex items-start gap-2.5">
+                <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                <span className="text-sm leading-snug">{r}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

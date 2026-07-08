@@ -14,6 +14,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
+import { ProductPresentation } from "@/components/ProductPresentation";
 
 export const Route = createFileRoute("/calculadora/estrategico")({
   component: EstrategicoPage,
@@ -81,6 +82,10 @@ function EstrategicoPage() {
         <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "Diagnóstico Estratégico" }]} />
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Diagnóstico Estratégico</h1>
+        </div>
+
+        <div className="mb-6">
+          <ProductPresentation serviceKey="estrategico" title="Diagnóstico Estratégico" />
         </div>
 
         <LossSummaryPanel />
