@@ -81,9 +81,6 @@ function EstrategicoPage() {
         <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "Diagnóstico Estratégico" }]} />
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Diagnóstico Estratégico</h1>
-          <p className="text-muted-foreground mt-2">
-            Investimento único — parcele em até 12x no cartão ou 1+3 no boleto/Pix.
-          </p>
         </div>
 
         <LossSummaryPanel />
@@ -117,9 +114,6 @@ function EstrategicoPage() {
                     </label>
                   ))}
                 </RadioGroup>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Desconto máximo de 15%. O valor nunca fica abaixo do piso de {formatBRL(floor)}.
-                </p>
               </section>
             </div>
 
