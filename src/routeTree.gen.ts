@@ -18,6 +18,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CalculadoraTurnaroundRouteImport } from './routes/calculadora.turnaround'
 import { Route as CalculadoraTributarioRouteImport } from './routes/calculadora.tributario'
 import { Route as CalculadoraOxyRouteImport } from './routes/calculadora.oxy'
+import { Route as CalculadoraEstrategicoRouteImport } from './routes/calculadora.estrategico'
 import { Route as CalculadoraCoordenadorRouteImport } from './routes/calculadora.coordenador'
 import { Route as CalculadoraCfoRouteImport } from './routes/calculadora.cfo'
 import { Route as CalculadoraBpoRouteImport } from './routes/calculadora.bpo'
@@ -69,6 +70,11 @@ const CalculadoraOxyRoute = CalculadoraOxyRouteImport.update({
   path: '/calculadora/oxy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalculadoraEstrategicoRoute = CalculadoraEstrategicoRouteImport.update({
+  id: '/calculadora/estrategico',
+  path: '/calculadora/estrategico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalculadoraCoordenadorRoute = CalculadoraCoordenadorRouteImport.update({
   id: '/calculadora/coordenador',
   path: '/calculadora/coordenador',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
+  '/calculadora/estrategico': typeof CalculadoraEstrategicoRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
   '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/calculadora/turnaround': typeof CalculadoraTurnaroundRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
+  '/calculadora/estrategico': typeof CalculadoraEstrategicoRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
   '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/calculadora/turnaround': typeof CalculadoraTurnaroundRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/calculadora/bpo': typeof CalculadoraBpoRoute
   '/calculadora/cfo': typeof CalculadoraCfoRoute
   '/calculadora/coordenador': typeof CalculadoraCoordenadorRoute
+  '/calculadora/estrategico': typeof CalculadoraEstrategicoRoute
   '/calculadora/oxy': typeof CalculadoraOxyRoute
   '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/calculadora/turnaround': typeof CalculadoraTurnaroundRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/calculadora/bpo'
     | '/calculadora/cfo'
     | '/calculadora/coordenador'
+    | '/calculadora/estrategico'
     | '/calculadora/oxy'
     | '/calculadora/tributario'
     | '/calculadora/turnaround'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/calculadora/bpo'
     | '/calculadora/cfo'
     | '/calculadora/coordenador'
+    | '/calculadora/estrategico'
     | '/calculadora/oxy'
     | '/calculadora/tributario'
     | '/calculadora/turnaround'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/calculadora/bpo'
     | '/calculadora/cfo'
     | '/calculadora/coordenador'
+    | '/calculadora/estrategico'
     | '/calculadora/oxy'
     | '/calculadora/tributario'
     | '/calculadora/turnaround'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   CalculadoraBpoRoute: typeof CalculadoraBpoRoute
   CalculadoraCfoRoute: typeof CalculadoraCfoRoute
   CalculadoraCoordenadorRoute: typeof CalculadoraCoordenadorRoute
+  CalculadoraEstrategicoRoute: typeof CalculadoraEstrategicoRoute
   CalculadoraOxyRoute: typeof CalculadoraOxyRoute
   CalculadoraTributarioRoute: typeof CalculadoraTributarioRoute
   CalculadoraTurnaroundRoute: typeof CalculadoraTurnaroundRoute
@@ -277,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalculadoraOxyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calculadora/estrategico': {
+      id: '/calculadora/estrategico'
+      path: '/calculadora/estrategico'
+      fullPath: '/calculadora/estrategico'
+      preLoaderRoute: typeof CalculadoraEstrategicoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calculadora/coordenador': {
       id: '/calculadora/coordenador'
       path: '/calculadora/coordenador'
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalculadoraBpoRoute: CalculadoraBpoRoute,
   CalculadoraCfoRoute: CalculadoraCfoRoute,
   CalculadoraCoordenadorRoute: CalculadoraCoordenadorRoute,
+  CalculadoraEstrategicoRoute: CalculadoraEstrategicoRoute,
   CalculadoraOxyRoute: CalculadoraOxyRoute,
   CalculadoraTributarioRoute: CalculadoraTributarioRoute,
   CalculadoraTurnaroundRoute: CalculadoraTurnaroundRoute,

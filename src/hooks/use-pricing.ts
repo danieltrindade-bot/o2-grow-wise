@@ -151,6 +151,34 @@ export function useAssessoriaPricing() {
   });
 }
 
+// Diagnóstico Estratégico — cobrança única, tabela por faturamento com piso.
+export interface EstrategicoRule {
+  id: string;
+  label: string;
+  min_revenue: number;
+  max_revenue: number | null;
+  base_price: number;
+  sort_order: number;
+}
+export interface EstrategicoSettings {
+  id: string;
+  // Piso absoluto: nunca vende abaixo disso, mesmo com o desconto máximo (15%).
+  min_price: number;
+}
+
+export function useEstrategicoPricing() {
+  return useQuery({
+    queryKey: ["estrategico-pricing"],
+    staleTime: FIVE_MIN,
+    queryFn: () => {
+      const rules = selectAll<EstrategicoRule>("estrategico_pricing_rules", "sort_order");
+      const settingsArr = selectAll<EstrategicoSettings>("estrategico_settings");
+      const settings = settingsArr[0] ?? { id: "", min_price: 12000 };
+      return { rules, settings };
+    },
+  });
+}
+
 export interface TurnaroundRule {
   id: string;
   label: string;

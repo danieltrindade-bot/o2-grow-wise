@@ -14,13 +14,15 @@ import type {
   SetupPricingRule,
   AssessoriaRule,
   AssessoriaSettings,
+  EstrategicoRule,
+  EstrategicoSettings,
   TurnaroundRule,
   TurnaroundSettings,
 } from "@/hooks/use-pricing";
 
 type WithId<T> = T & { id: string };
 
-export const SEED_VERSION = 6;
+export const SEED_VERSION = 7;
 
 // ---------------------------------------------------------------------------
 // Diagnostic Questions (10 questions)
@@ -207,6 +209,24 @@ export const SEED_ASSESSORIA_SETTINGS: AssessoriaSettings[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Diagnóstico Estratégico — Pricing Rules
+// Cobrança única por faturamento mensal. Piso absoluto de R$ 12.000 nas settings.
+// ---------------------------------------------------------------------------
+export const SEED_ESTRATEGICO_PRICING_RULES: EstrategicoRule[] = [
+  { id: "estr-1", label: "até 500k", min_revenue: 0, max_revenue: 500000, base_price: 15000, sort_order: 1 },
+  { id: "estr-2", label: "500k - 1M", min_revenue: 500000, max_revenue: 1000000, base_price: 20000, sort_order: 2 },
+  { id: "estr-3", label: "1M - 2.5M", min_revenue: 1000000, max_revenue: 2500000, base_price: 25000, sort_order: 3 },
+  { id: "estr-4", label: "≥ 2.5M", min_revenue: 2500000, max_revenue: 999999999999, base_price: 30000, sort_order: 4 },
+];
+
+// ---------------------------------------------------------------------------
+// Diagnóstico Estratégico — Settings
+// ---------------------------------------------------------------------------
+export const SEED_ESTRATEGICO_SETTINGS: EstrategicoSettings[] = [
+  { id: "estr-s1", min_price: 12000 },
+];
+
+// ---------------------------------------------------------------------------
 // Turnaround Pricing Rules
 // Matriz por faturamento ancorada na proposta (faixa 200k–500k = R$ 12.570) e
 // no piso contratual de R$ 11.570. Valores são a fonte da verdade.
@@ -247,6 +267,8 @@ export const SEED_DATA: Record<string, any[]> = {
   setup_pricing_rules: SEED_SETUP_PRICING_RULES,
   assessoria_pricing_rules: SEED_ASSESSORIA_PRICING_RULES,
   assessoria_settings: SEED_ASSESSORIA_SETTINGS,
+  estrategico_pricing_rules: SEED_ESTRATEGICO_PRICING_RULES,
+  estrategico_settings: SEED_ESTRATEGICO_SETTINGS,
   turnaround_pricing_rules: SEED_TURNAROUND_PRICING_RULES,
   turnaround_settings: SEED_TURNAROUND_SETTINGS,
 };

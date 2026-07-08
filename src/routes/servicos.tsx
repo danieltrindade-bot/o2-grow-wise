@@ -7,6 +7,7 @@ import {
   Users,
   Scale,
   RefreshCw,
+  Target,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
@@ -23,7 +24,7 @@ interface ServiceCard {
   id: string;
   name: string;
   description: string;
-  to: "/calculadora/bpo" | "/calculadora/cfo" | "/calculadora/oxy" | "/calculadora/assessoria" | "/calculadora/coordenador" | "/calculadora/tributario" | "/calculadora/turnaround";
+  to: "/calculadora/bpo" | "/calculadora/cfo" | "/calculadora/oxy" | "/calculadora/assessoria" | "/calculadora/coordenador" | "/calculadora/tributario" | "/calculadora/turnaround" | "/calculadora/estrategico";
   Icon: typeof Briefcase;
 }
 
@@ -76,6 +77,13 @@ const SERVICES: ServiceCard[] = [
     description: "Recuperação do negócio: gestão e controladoria, captação de recursos e repactuação de passivos",
     to: "/calculadora/turnaround",
     Icon: RefreshCw,
+  },
+  {
+    id: "estrategico",
+    name: "Diagnóstico Estratégico",
+    description: "Diagnóstico aprofundado do negócio com análise de maturidade e plano de ação priorizado",
+    to: "/calculadora/estrategico",
+    Icon: Target,
   },
 ];
 
