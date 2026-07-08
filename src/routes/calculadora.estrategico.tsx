@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText } from "lucide-react";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,9 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation } from "@/components/ProductPresentation";
+import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
+import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
+import { exportCalculatorPDF } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/calculadora/estrategico")({
   component: EstrategicoPage,
@@ -51,6 +53,7 @@ function EstrategicoPage() {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [discountId, setDiscountId] = useState("none");
   const [showPrices, setShowPrices] = useState(false);
+  const [showDireto, setShowDireto] = useState(false);
 
   useEffect(() => {
     if (monthlyRevenue === 0 && state.monthlyRevenue > 0) setMonthlyRevenue(state.monthlyRevenue);
@@ -93,7 +96,7 @@ function EstrategicoPage() {
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
-        {data && (
+        {data && (<>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
               <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
@@ -171,6 +174,42 @@ function EstrategicoPage() {
                       ))}
                     </ul>
                   </div>
+
+                  <Button
+                    onClick={() =>
+                      exportCalculatorPDF({
+                        service: "Diagnóstico Estratégico",
+                        clientName: state.companyName,
+                        monthlyRevenue,
+                        rows: [
+                          ["Faixa de faturamento", tier?.label ?? "—"],
+                          ["Preço base", formatBRL(baseP)],
+                          ...(discount.percent > 0
+                            ? [["Desconto (" + discount.percent + "%)", "-" + formatBRL(baseP - baseP * (1 - discount.percent / 100))] as [string, string]]
+                            : []),
+                          ...(atPiso && discount.percent > 0
+                            ? [["Piso aplicado", formatBRL(floor)] as [string, string]]
+                            : []),
+                          ["Cartão", "12x de " + formatBRL(parcelaCartao)],
+                          ["Boleto / Pix (1+3)", "4x de " + formatBRL(parcelaBoleto)],
+                        ],
+                        finalLabel: "Valor total",
+                        finalValue: formatBRL(valorFinal),
+                        scope: SERVICE_DETAILS.estrategico.deliverables,
+                        scopeIntro: SERVICE_DETAILS.estrategico.what,
+                      })
+                    }
+                    className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    <Download className="mr-2 h-4 w-4" /> Exportar PDF
+                  </Button>
+                  <Button
+                    onClick={() => setShowDireto(!showDireto)}
+                    className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                    variant="outline"
+                  >
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                  </Button>
                 </div>
               ) : (
                 <div className="mt-4">
@@ -196,7 +235,16 @@ function EstrategicoPage() {
               )}
             </aside>
           </div>
-        )}
+
+          <DiretoContractGenerator
+            defaultServico="diagnostico"
+            clientName={state.companyName}
+            valorSetupReais={0}
+            valorMensalReais={Math.round(valorFinal)}
+            expanded={showDireto}
+            onExpandedChange={setShowDireto}
+          />
+        </>)}
       </div>
 
       <MobilePriceSummary label="Valor total" value={formatBRL(valorFinal)} visible={showPrices} onReveal={() => setShowPrices(true)} />
