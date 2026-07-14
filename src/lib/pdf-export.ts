@@ -21,6 +21,23 @@ const DARK_3: [number, number, number] = [51, 51, 51];
 const GRAY: [number, number, number] = [136, 136, 136];
 const LIGHT_GRAY: [number, number, number] = [187, 187, 187];
 const WHITE: [number, number, number] = [255, 255, 255];
+const RED: [number, number, number] = [224, 90, 90];
+
+// Marcadores vetoriais (independentes de fonte — o glifo "✓"/"✗" não existe na
+// helvetica padrão do jsPDF e saía como "'"). x é a margem esquerda; y é a
+// baseline do texto ao lado.
+function drawCheck(doc: Doc, x: number, y: number) {
+  doc.setDrawColor(...GREEN);
+  doc.setLineWidth(0.5);
+  doc.line(x, y - 1.4, x + 1.0, y - 0.4);
+  doc.line(x + 1.0, y - 0.4, x + 3.0, y - 2.6);
+}
+function drawCross(doc: Doc, x: number, y: number) {
+  doc.setDrawColor(...RED);
+  doc.setLineWidth(0.5);
+  doc.line(x, y - 2.4, x + 2.6, y - 0.2);
+  doc.line(x, y - 0.2, x + 2.6, y - 2.4);
+}
 
 function pageBg(doc: Doc) {
   doc.setFillColor(...DARK_1);
@@ -147,6 +164,7 @@ export interface CalcPDFInput {
   fileName?: string;
   scope?: string[];
   scopeIntro?: string;
+  notIncluded?: string[];
   stages?: CalcPDFStage[];
   stagesTitle?: string;
   roi?: { lossMinMonthly: number; investmentMonthly: number };
@@ -235,9 +253,36 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
         pageBg(doc);
         sy = 20;
       }
-      doc.setTextColor(...GREEN);
-      doc.text("✓", 16, sy);
+      drawCheck(doc, 16, sy);
       doc.setTextColor(...LIGHT_GRAY);
+      doc.text(item, 24, sy);
+      sy += 6;
+    }
+    cursor = sy;
+  }
+
+  if (input.notIncluded?.length) {
+    let sy = cursor + 8;
+    if (sy > 260) {
+      doc.addPage();
+      pageBg(doc);
+      sy = 20;
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...WHITE);
+    doc.text("Não incluído no escopo", 14, sy);
+    sy += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    for (const item of input.notIncluded) {
+      if (sy > 275) {
+        doc.addPage();
+        pageBg(doc);
+        sy = 20;
+      }
+      drawCross(doc, 16, sy);
+      doc.setTextColor(...GRAY);
       doc.text(item, 24, sy);
       sy += 6;
     }

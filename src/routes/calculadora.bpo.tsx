@@ -221,6 +221,7 @@ function CalculadoraBPOPage() {
                           ],
                           scope: SERVICE_DETAILS.bpo.deliverables,
                           scopeIntro: SERVICE_DETAILS.bpo.what,
+                          notIncluded: SERVICE_DETAILS.bpo.notIncluded,
                           stages: bpoImplantacaoStages(),
                           stagesTitle: "Setup e cronograma de implantação",
                           finalLabel: "Valor final mensal",

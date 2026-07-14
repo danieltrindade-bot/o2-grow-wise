@@ -199,6 +199,7 @@ function AssessoriaPage() {
                         finalValue: formatBRL(valorFinal),
                         roi: { lossMinMonthly, investmentMonthly: valorFinal },
                         scope: SERVICE_DETAILS.assessoria.deliverables,
+                        scopeIntro: SERVICE_DETAILS.assessoria.what,
                         stages: SERVICE_DETAILS.assessoria.stages,
                         stagesTitle: "Jornada de Maturidade — 5 estágios de evolução",
                       })

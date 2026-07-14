@@ -21,7 +21,7 @@ import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
-import { ProductPresentation } from "@/components/ProductPresentation";
+import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { ContractGenerator } from "@/components/ContractGenerator";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
@@ -255,6 +255,9 @@ function CoordenadorPage() {
                       ],
                       finalLabel: "Mensalidade",
                       finalValue: formatBRL(mensalComDesconto),
+                      scope: SERVICE_DETAILS.coordenador.deliverables,
+                      scopeIntro: SERVICE_DETAILS.coordenador.what,
+                      notIncluded: SERVICE_DETAILS.coordenador.notIncluded,
                       roi: { lossMinMonthly, investmentMonthly: mensalComDesconto + parcela12x },
                     })
                   }

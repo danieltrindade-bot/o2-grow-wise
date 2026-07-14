@@ -199,6 +199,7 @@ function TurnaroundPage() {
                         finalValue: formatBRL(valorFinal),
                         roi: { lossMinMonthly, investmentMonthly: valorFinal },
                         scope: SERVICE_DETAILS.turnaround.deliverables,
+                        scopeIntro: SERVICE_DETAILS.turnaround.what,
                         stages: SERVICE_DETAILS.turnaround.stages,
                         stagesTitle: "Escopo detalhado — Turnaround",
                       })

@@ -279,6 +279,7 @@ function CalculadoraCFOPage() {
                             finalValue: formatBRL(totalMensal),
                             roi: { lossMinMonthly, investmentMonthly: totalMensal },
                             scope: SERVICE_DETAILS.cfo.deliverables,
+                            scopeIntro: SERVICE_DETAILS.cfo.what,
                             stages: SERVICE_DETAILS.cfo.stages,
                             stagesTitle: "Escopo detalhado — CFO as a Service",
                           })

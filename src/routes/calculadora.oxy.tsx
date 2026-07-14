@@ -221,6 +221,7 @@ function OxyPage() {
                         finalValue: formatBRL(parcela),
                         roi: { lossMinMonthly, investmentMonthly: parcela },
                         scope: SERVICE_DETAILS.oxy.deliverables,
+                        scopeIntro: SERVICE_DETAILS.oxy.what,
                       })
                     }
                     className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
