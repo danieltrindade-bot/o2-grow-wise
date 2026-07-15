@@ -53,7 +53,8 @@ function CalculadoraBPOPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.companyName]);
 
-  const lancamentosMensais = (contasPagarDia + contasReceberDia) * (data?.settings.dias_uteis ?? 22);
+  // Contas a Receber é informativo — não entra no total de lançamentos/mês (tier/preço).
+  const lancamentosMensais = contasPagarDia * (data?.settings.dias_uteis ?? 22);
   const tier = useMemo(() => {
     const t1 = data?.settings.tier_1_limit ?? 200;
     const t2 = data?.settings.tier_2_limit ?? 500;
@@ -138,7 +139,7 @@ function CalculadoraBPOPage() {
                       onChange={(e) => setContasPagarDia(Math.max(1, Number(e.target.value) || 1))} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Lançamentos/dia — Contas a Receber</Label>
+                    <Label>Lançamentos/dia — Contas a Receber <span className="text-muted-foreground text-xs">(informativo)</span></Label>
                     <Input type="number" min={1} value={contasReceberDia}
                       onChange={(e) => setContasReceberDia(Math.max(1, Number(e.target.value) || 1))} />
                   </div>
