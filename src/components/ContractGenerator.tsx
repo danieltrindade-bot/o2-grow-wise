@@ -265,6 +265,8 @@ export function ContractGenerator(props: ContractGeneratorProps) {
   });
   const [autStatus, setAutStatus] = useState<ActionStatus>({ type: "idle" });
   const [ipagStatus, setIpagStatus] = useState<ActionStatus>({ type: "idle" });
+  const [driveStatus, setDriveStatus] = useState<ActionStatus>({ type: "idle" });
+  const [driveLink, setDriveLink] = useState("");
   const [signingLink, setSigningLink] = useState("");
   const [paymentLink, setPaymentLink] = useState("");
 
@@ -487,6 +489,41 @@ export function ContractGenerator(props: ContractGeneratorProps) {
     return payload;
   }
 
+  async function uploadToDrive(b64: string, filename: string, mimetype: string) {
+    setDriveStatus({ type: "loading" });
+    setDriveLink("");
+    try {
+      const r = await fetch(`${API_BASE}/api/contracts/drive`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_bytes_b64: b64,
+          filename,
+          mimetype,
+          company_name: nomeCliente,
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: "Erro desconhecido" }));
+        throw new Error(err.detail || `HTTP ${r.status}`);
+      }
+      const data = await r.json();
+      setDriveLink(data.link || "");
+      setDriveStatus({
+        type: "success",
+        message: `Salvo no Drive na pasta "${nomeCliente.trim() || "Sem nome"}"`,
+      });
+    } catch (e) {
+      setDriveStatus({
+        type: "error",
+        message:
+          e instanceof Error
+            ? `Falha ao salvar no Drive: ${e.message}`
+            : "Falha ao salvar no Drive",
+      });
+    }
+  }
+
   async function handleGenerate() {
     setGenerateStatus({ type: "loading" });
     try {
@@ -525,6 +562,12 @@ export function ContractGenerator(props: ContractGeneratorProps) {
         type: "success",
         message: "Contrato gerado e baixado!",
       });
+
+      await uploadToDrive(
+        b64,
+        fname,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      );
     } catch (e) {
       setGenerateStatus({
         type: "error",
@@ -568,6 +611,8 @@ export function ContractGenerator(props: ContractGeneratorProps) {
       URL.revokeObjectURL(url);
 
       setPdfStatus({ type: "success", message: "PDF gerado e baixado!" });
+
+      await uploadToDrive(b64, fname, "application/pdf");
     } catch (e) {
       setPdfStatus({
         type: "error",
@@ -1126,6 +1171,46 @@ export function ContractGenerator(props: ContractGeneratorProps) {
                 {s.message}
               </div>
             ) : null,
+          )}
+
+          {/* Drive status */}
+          {driveStatus.type === "loading" && (
+            <div className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 bg-primary/10 text-primary">
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+              Salvando no Drive...
+            </div>
+          )}
+          {(driveStatus.type === "success" || driveStatus.type === "error") && (
+            <div
+              className={cn(
+                "flex items-center gap-2 text-sm rounded-lg px-3 py-2",
+                driveStatus.type === "success"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-destructive/10 text-destructive",
+              )}
+            >
+              {driveStatus.type === "success" ? (
+                <CheckCircle className="h-4 w-4 shrink-0" />
+              ) : (
+                <AlertCircle className="h-4 w-4 shrink-0" />
+              )}
+              <span>
+                {driveStatus.message}
+                {driveStatus.type === "success" && driveLink && (
+                  <>
+                    {" — "}
+                    <a
+                      href={driveLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline underline-offset-2"
+                    >
+                      abrir no Drive
+                    </a>
+                  </>
+                )}
+              </span>
+            </div>
           )}
 
           {/* Autentique panel */}
