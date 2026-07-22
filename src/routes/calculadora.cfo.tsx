@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { formatBRL } from "@/lib/format";
@@ -184,19 +183,15 @@ function CalculadoraCFOPage() {
               </section>
 
               <section className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="text-lg font-semibold mb-4">Desconto</h2>
-                <RadioGroup value={discountId} onValueChange={setDiscountId} className="space-y-2">
-                  {DISCOUNTS.map((d) => (
-                    <label key={d.id} htmlFor={`disc-${d.id}`}
-                      className={cn("flex items-center justify-between rounded-xl border bg-background p-3 cursor-pointer",
-                        discountId === d.id ? "border-primary" : "border-border")}>
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem id={`disc-${d.id}`} value={d.id} />
-                        <span className="text-sm">{d.label}</span>
-                      </div>
-                    </label>
-                  ))}
-                </RadioGroup>
+                <button
+                  type="button"
+                  onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
+                  className={cn("flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
+                    discountId === "meeting" ? "border-primary bg-primary/10" : "border-border")}>
+                  <span className={cn("h-4 w-4 rounded-full border-2 shrink-0",
+                    discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground")} />
+                  <span className="text-sm">Condição de fechamento da reunião</span>
+                </button>
               </section>
 
             </div>

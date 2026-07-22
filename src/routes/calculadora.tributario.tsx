@@ -165,30 +165,20 @@ function TributarioPage() {
             </section>
 
             <section className="rounded-2xl border border-border bg-card p-6 space-y-3">
-              <h2 className="text-lg font-semibold">Desconto</h2>
-              {DISCOUNTS.map((d) => {
-                const selected = discountId === d.id;
-                return (
-                  <label
-                    key={d.id}
-                    className={`flex items-center justify-between rounded-xl border p-3 cursor-pointer transition-colors ${
-                      selected ? "border-primary bg-primary/10" : "border-border"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="tributario-discount"
-                        value={d.id}
-                        checked={selected}
-                        onChange={() => setDiscountId(d.id)}
-                        className="accent-[var(--color-primary)]"
-                      />
-                      <span className="text-sm">{d.label}</span>
-                    </div>
-                  </label>
-                );
-              })}
+              <button
+                type="button"
+                onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
+                className={`flex w-full items-center gap-3 rounded-xl border p-3 cursor-pointer text-left transition-colors ${
+                  discountId === "meeting" ? "border-primary bg-primary/10" : "border-border"
+                }`}
+              >
+                <span
+                  className={`h-4 w-4 rounded-full border-2 shrink-0 ${
+                    discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground"
+                  }`}
+                />
+                <span className="text-sm">Condição de fechamento da reunião</span>
+              </button>
             </section>
           </div>
 
