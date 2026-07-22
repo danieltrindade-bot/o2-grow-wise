@@ -31,7 +31,7 @@ export const Route = createFileRoute("/calculadora/coordenador")({
 
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
-  { id: "meeting", label: "Condição de fechamento da reunião", percent: 15 },
+  { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
 ];
 
 const PERFIS: { id: CoordPerfil; label: string; desc: string }[] = [
@@ -178,7 +178,7 @@ function CoordenadorPage() {
                   discountId === "meeting" ? "border-primary bg-primary/10" : "border-border")}>
                 <span className={cn("h-4 w-4 rounded-full border-2 shrink-0",
                   discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground")} />
-                <span className="text-sm">Condição de fechamento da reunião</span>
+                <span className="text-sm">Condição de fechamento na reunião</span>
               </button>
             </section>
           </div>

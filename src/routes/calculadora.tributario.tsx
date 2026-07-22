@@ -50,7 +50,7 @@ function getFaixaLabel(revenue: number): string {
 
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
-  { id: "meeting", label: "Condição de fechamento da reunião", percent: 15 },
+  { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
 ];
 
 const INCLUDES_COMPLETO = [
@@ -177,7 +177,7 @@ function TributarioPage() {
                     discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground"
                   }`}
                 />
-                <span className="text-sm">Condição de fechamento da reunião</span>
+                <span className="text-sm">Condição de fechamento na reunião</span>
               </button>
             </section>
           </div>
