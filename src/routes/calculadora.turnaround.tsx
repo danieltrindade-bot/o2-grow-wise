@@ -28,8 +28,7 @@ export const Route = createFileRoute("/calculadora/turnaround")({
 
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
-  { id: "d7", label: "Pagamento em 7 dias", percent: 7 },
-  { id: "meeting", label: "Fechamento em reunião", percent: 15 },
+  { id: "meeting", label: "Condição de fechamento da reunião", percent: 15 },
 ];
 
 const INCLUDES = [
@@ -130,7 +129,6 @@ function TurnaroundPage() {
                         <RadioGroupItem id={`disc-${d.id}`} value={d.id} />
                         <span className="text-sm">{d.label}</span>
                       </div>
-                      <span className="text-sm font-semibold text-primary">{d.percent}%</span>
                     </label>
                   ))}
                 </RadioGroup>
