@@ -9,7 +9,6 @@ import {
   CreditCard,
   Send,
   Upload,
-  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -177,12 +176,6 @@ interface GenerateAndDriveResponse {
   pdf_link: string | null;
 }
 
-interface Socio {
-  nome: string;
-  cpf: string;
-  email: string;
-}
-
 type SignerAction = "SIGN" | "SIGN_AS_A_WITNESS";
 
 interface Signer {
@@ -241,14 +234,6 @@ function formatCNPJ(v: string): string {
   if (d.length <= 12)
     return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
   return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
-}
-
-function formatCPF(v: string): string {
-  const d = v.replace(/\D/g, "").slice(0, 11);
-  if (d.length <= 3) return d;
-  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
-  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
-  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
 }
 
 /** Parse a money string typed as "12000" or "12.000,00" into a number (reais). */
@@ -373,11 +358,6 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
   // ── Empresa ──
   const [nomeCliente, setNomeCliente] = useState(clientName);
   const [cnpj, setCnpj] = useState("");
-
-  // ── Sócios (representantes legais da contratante) ──
-  const [socios, setSocios] = useState<Socio[]>([
-    { nome: "", cpf: "", email: "" },
-  ]);
   const [cep, setCep] = useState("");
   const [cepData, setCepData] = useState<CepData | null>(null);
   const [cepLoading, setCepLoading] = useState(false);
@@ -629,13 +609,6 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
       nome_cliente: nomeCliente.trim(),
       cnpj,
       endereco_empresa: enderecoEmpresa,
-      socios: socios
-        .filter((s) => s.nome.trim())
-        .map((s) => ({
-          nome: s.nome.trim(),
-          cpf: s.cpf.replace(/\D/g, ""),
-          email: s.email.trim(),
-        })),
       servicos: selectedKeys,
       formato,
       ref_num: refNum || "0000",
@@ -719,12 +692,8 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
     }
   }
 
-  const temEmailAssinante =
-    emailContratante.trim() !== "" ||
-    socios.some((s) => s.nome.trim() && s.email.trim());
-
   async function handleAutentique() {
-    if (!temEmailAssinante) return;
+    if (!emailContratante.trim()) return;
     setAutStatus({ type: "loading" });
     setSigningLink("");
     setSignatures([]);
@@ -744,25 +713,12 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
         );
         bytes = { b64: docx.b64, filename: docx.filename };
       }
-      const sociosSigners: Signer[] = socios
-        .filter((s) => s.nome.trim() && s.email.trim())
-        .map((s) => ({
-          name: s.nome.trim(),
-          email: s.email.trim(),
-          action: "SIGN" as const,
-        }));
       const signers: Signer[] = [
-        // Sócios com e-mail assinam pela contratante; sem nenhum, cai no
-        // e-mail avulso do contratante (comportamento anterior).
-        ...(sociosSigners.length
-          ? sociosSigners
-          : [
-              {
-                name: nomeCliente.trim(),
-                email: emailContratante.trim(),
-                action: "SIGN" as const,
-              },
-            ]),
+        {
+          name: nomeCliente.trim(),
+          email: emailContratante.trim(),
+          action: "SIGN" as const,
+        },
         ...o2Signers.map((s) => ({ ...s, email: s.email.trim() })),
       ].filter((s) => s.email !== "");
 
@@ -773,8 +729,7 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
           file_bytes_b64: bytes.b64,
           filename: bytes.filename,
           doc_name: `Contrato Direto - ${nomeCliente.trim()} & O2 Inc`,
-          email_contratante:
-            emailContratante.trim() || sociosSigners[0]?.email || "",
+          email_contratante: emailContratante.trim(),
           nome_contratante: nomeCliente.trim(),
           signers,
           sandbox: autSandbox,
@@ -1494,25 +1449,13 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
           <h3 className="text-sm font-semibold mb-3">Condições gerais</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Período de contrato</Label>
-              <Select value={vigencia} onValueChange={setVigencia}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="12">12 meses (padrão)</SelectItem>
-                  <SelectItem value="6">
-                    6 meses — permanência mínima com multa
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {vigencia === "6" && (
-                <p className="text-xs text-muted-foreground">
-                  O contrato sai com permanência mínima de 6 meses e multa de
-                  50% do valor restante em rescisão antecipada; o quadro
-                  resumo troca "Aviso prévio" por "Permanência mínima".
-                </p>
-              )}
+              <Label>Vigência (meses)</Label>
+              <Input
+                type="number"
+                min={1}
+                value={vigencia}
+                onChange={(e) => setVigencia(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Data do contrato</Label>
@@ -1524,22 +1467,11 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
             </div>
             <div className="md:col-span-2 space-y-2">
               <Label>Foro</Label>
-              <Select value={foro} onValueChange={setForo}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Comarca de São Paulo/SP">
-                    Comarca de São Paulo/SP
-                  </SelectItem>
-                  <SelectItem value="Comarca de Porto Alegre/RS">
-                    Comarca de Porto Alegre/RS
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Define também o local da assinatura no fim do contrato.
-              </p>
+              <Input
+                value={foro}
+                onChange={(e) => setForo(e.target.value)}
+                placeholder="Comarca de São Paulo/SP"
+              />
             </div>
           </div>
         </section>
@@ -1608,92 +1540,6 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
                 </div>
               </>
             )}
-          </div>
-        </section>
-
-        <div className="border-t border-border" />
-
-        {/* Sócios / representantes legais */}
-        <section>
-          <h3 className="text-sm font-semibold mb-1">Dados dos Sócios</h3>
-          <p className="text-xs text-muted-foreground mb-3">
-            Representantes legais da contratante. Constam no contrato e, com
-            e-mail preenchido, entram como signatários na Autentique.
-          </p>
-          <div className="space-y-3">
-            {socios.map((s, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr_auto] gap-2 md:items-end"
-              >
-                <div className="space-y-2">
-                  {i === 0 && <Label>Nome do sócio</Label>}
-                  <Input
-                    value={s.nome}
-                    onChange={(e) =>
-                      setSocios((prev) => {
-                        const next = [...prev];
-                        next[i] = { ...next[i], nome: e.target.value };
-                        return next;
-                      })
-                    }
-                    placeholder="Ex: João da Silva"
-                  />
-                </div>
-                <div className="space-y-2">
-                  {i === 0 && <Label>CPF</Label>}
-                  <Input
-                    value={s.cpf}
-                    onChange={(e) =>
-                      setSocios((prev) => {
-                        const next = [...prev];
-                        next[i] = { ...next[i], cpf: formatCPF(e.target.value) };
-                        return next;
-                      })
-                    }
-                    placeholder="XXX.XXX.XXX-XX"
-                  />
-                </div>
-                <div className="space-y-2">
-                  {i === 0 && <Label>E-mail (assinatura)</Label>}
-                  <Input
-                    type="email"
-                    value={s.email}
-                    onChange={(e) =>
-                      setSocios((prev) => {
-                        const next = [...prev];
-                        next[i] = { ...next[i], email: e.target.value };
-                        return next;
-                      })
-                    }
-                    placeholder="socio@empresa.com.br"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSocios((prev) =>
-                      prev.length > 1
-                        ? prev.filter((_, j) => j !== i)
-                        : [{ nome: "", cpf: "", email: "" }],
-                    )
-                  }
-                  className="shrink-0 mb-2 text-muted-foreground hover:text-destructive"
-                  aria-label="Remover sócio"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setSocios((prev) => [...prev, { nome: "", cpf: "", email: "" }])
-              }
-            >
-              <Plus className="mr-1 h-3 w-3" /> Adicionar sócio
-            </Button>
           </div>
         </section>
 
@@ -1857,56 +1703,21 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
                 <div className="rounded-xl border border-border bg-background p-4 space-y-3">
                   <p className="text-sm font-medium">Enviar para Assinatura</p>
                   <div className="space-y-3">
-                    {/* Contratante: sócios preenchidos assinam pela empresa;
-                        sem sócios, e-mail avulso do contratante */}
-                    {socios.some((s) => s.nome.trim()) ? (
-                      socios
-                        .map((s, i) => ({ ...s, i }))
-                        .filter((s) => s.nome.trim())
-                        .map((s) => (
-                          <div
-                            key={s.i}
-                            className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-2 md:items-center"
-                          >
-                            <div>
-                              <Label>{s.nome.trim()}</Label>
-                              <p className="text-xs text-muted-foreground">
-                                {ACTION_LABEL.SIGN} — sócio
-                              </p>
-                            </div>
-                            <Input
-                              type="email"
-                              value={s.email}
-                              onChange={(e) =>
-                                setSocios((prev) => {
-                                  const next = [...prev];
-                                  next[s.i] = {
-                                    ...next[s.i],
-                                    email: e.target.value,
-                                  };
-                                  return next;
-                                })
-                              }
-                              placeholder="socio@empresa.com.br"
-                            />
-                          </div>
-                        ))
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-2 md:items-center">
-                        <div>
-                          <Label>{nomeCliente.trim() || "Contratante"}</Label>
-                          <p className="text-xs text-muted-foreground">
-                            {ACTION_LABEL.SIGN}
-                          </p>
-                        </div>
-                        <Input
-                          type="email"
-                          value={emailContratante}
-                          onChange={(e) => setEmailContratante(e.target.value)}
-                          placeholder="cliente@empresa.com.br"
-                        />
+                    {/* Contratante */}
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-2 md:items-center">
+                      <div>
+                        <Label>{nomeCliente.trim() || "Contratante"}</Label>
+                        <p className="text-xs text-muted-foreground">
+                          {ACTION_LABEL.SIGN}
+                        </p>
                       </div>
-                    )}
+                      <Input
+                        type="email"
+                        value={emailContratante}
+                        onChange={(e) => setEmailContratante(e.target.value)}
+                        placeholder="cliente@empresa.com.br"
+                      />
+                    </div>
 
                     {/* O2 signers */}
                     {o2Signers.map((signer, i) => (
@@ -1945,7 +1756,7 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
                   <Button
                     onClick={handleAutentique}
                     disabled={
-                      !temEmailAssinante || autStatus.type === "loading"
+                      !emailContratante.trim() || autStatus.type === "loading"
                     }
                     size="sm"
                     className="bg-primary text-primary-foreground hover:bg-primary/90"

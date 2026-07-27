@@ -22,7 +22,6 @@ import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
-import { ContractGenerator } from "@/components/ContractGenerator";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 
 export const Route = createFileRoute("/calculadora/coordenador")({
@@ -63,7 +62,6 @@ function CoordenadorPage() {
   const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
   const [discountId, setDiscountId] = useState("none");
   const [showPrices, setShowPrices] = useState(false);
-  const [showContract, setShowContract] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
 
   useEffect(() => {
@@ -258,18 +256,11 @@ function CoordenadorPage() {
                   <Download className="mr-2 h-4 w-4" /> Exportar PDF
                 </Button>
                 <Button
-                  onClick={() => setShowContract(!showContract)}
-                  className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
-                  variant="outline"
-                >
-                  <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
-                </Button>
-                <Button
                   onClick={() => setShowDireto(!showDireto)}
                   className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
                   variant="outline"
                 >
-                  <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                  <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                 </Button>
               </div>
             ) : (
@@ -297,14 +288,6 @@ function CoordenadorPage() {
           </aside>
         </div>
 
-        <ContractGenerator
-          modelo="Coordenador as a Service"
-          valorSetup={String(Math.round(setupComDesconto * 100))}
-          valorMensal={String(Math.round(mensalComDesconto * 100))}
-          qtdParcelasSetup={12}
-          expanded={showContract}
-          onExpandedChange={setShowContract}
-        />
 
         <DiretoContractGenerator
           defaultServico="coordenador"

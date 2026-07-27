@@ -17,7 +17,6 @@ import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
-import { ContractGenerator } from "@/components/ContractGenerator";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { CronogramaImplantacao } from "@/components/CronogramaImplantacao";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
@@ -72,7 +71,6 @@ function CalculadoraBPOPage() {
   const BPO_MINIMUM = 3187;
   const valorComDesconto = Math.max(BPO_MINIMUM, valorMensalTotal * (1 - discount.percent / 100));
   const [showPrices, setShowPrices] = useState(false);
-  const [showContract, setShowContract] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
 
   return (
@@ -228,18 +226,11 @@ function CalculadoraBPOPage() {
                       <Download className="mr-2 h-4 w-4" /> Exportar PDF
                     </Button>
                     <Button
-                      onClick={() => setShowContract(!showContract)}
-                      className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
-                      variant="outline"
-                    >
-                      <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
-                    </Button>
-                    <Button
                       onClick={() => setShowDireto(!showDireto)}
                       className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
                       variant="outline"
                     >
-                      <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                      <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                     </Button>
                   </div>
                 ) : (
@@ -254,18 +245,6 @@ function CalculadoraBPOPage() {
             </aside>
           </div>
 
-          <ContractGenerator
-            modelo="BPO Financeiro"
-            clientName={clientName || state.companyName}
-            valorMensal={String(Math.round(valorMensalBPO * 100))}
-            valorSetup={data.setup ? String(Math.round(Number(data.setup.installment_value) * Number(data.setup.installments) * 100)) : undefined}
-            qtdParcelasSetup={data.setup ? Number(data.setup.installments) : 12}
-            volContasReceber={contasReceberDia * (data.settings.dias_uteis ?? 22)}
-            volContasPagar={contasPagarDia * (data.settings.dias_uteis ?? 22)}
-            qtdBancos={bancos}
-            expanded={showContract}
-            onExpandedChange={setShowContract}
-          />
 
           <DiretoContractGenerator
             defaultServico="bpo"

@@ -21,7 +21,6 @@ import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
-import { ContractGenerator } from "@/components/ContractGenerator";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
 
@@ -107,7 +106,6 @@ function CalculadoraCFOPage() {
   const setupParcela = setupComDesconto / 12;
   const totalMensal = finalRecorrencia + setupParcela;
   const [showPrices, setShowPrices] = useState(false);
-  const [showContract, setShowContract] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
 
   return (
@@ -282,18 +280,11 @@ function CalculadoraCFOPage() {
                         <Download className="mr-2 h-4 w-4" /> Exportar PDF
                       </Button>
                       <Button
-                        onClick={() => setShowContract(!showContract)}
-                        className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
-                        variant="outline"
-                      >
-                        <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
-                      </Button>
-                      <Button
                         onClick={() => setShowDireto(!showDireto)}
                         className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
                         variant="outline"
                       >
-                        <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                        <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                       </Button>
                     </div>
                   </div>
@@ -311,14 +302,6 @@ function CalculadoraCFOPage() {
             </aside>
           </div>
 
-          <ContractGenerator
-            modelo="CFO Enterprise"
-            valorMensal={String(Math.round(finalRecorrencia * 100))}
-            valorSetup={String(Math.round(setupComDesconto * 100))}
-            qtdParcelasSetup={12}
-            expanded={showContract}
-            onExpandedChange={setShowContract}
-          />
 
           <DiretoContractGenerator
             defaultServico="cfo"

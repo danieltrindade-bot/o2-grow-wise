@@ -22,7 +22,6 @@ import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
-import { ContractGenerator } from "@/components/ContractGenerator";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 
 export const Route = createFileRoute("/calculadora/oxy")({
@@ -73,7 +72,6 @@ function OxyPage() {
   const parcela = totalComDesconto / 12;
   const animatedParcela = useCountUp(parcela);
   const [showPrices, setShowPrices] = useState(false);
-  const [showContract, setShowContract] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
 
   return (
@@ -222,18 +220,11 @@ function OxyPage() {
                     <Download className="mr-2 h-4 w-4" /> Exportar PDF
                   </Button>
                   <Button
-                    onClick={() => setShowContract(!showContract)}
-                    className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
-                    variant="outline"
-                  >
-                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
-                  </Button>
-                  <Button
                     onClick={() => setShowDireto(!showDireto)}
                     className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
                     variant="outline"
                   >
-                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                   </Button>
                 </div>
               ) : (
@@ -261,13 +252,6 @@ function OxyPage() {
             </aside>
           </div>
 
-          <ContractGenerator
-            modelo="SaaS Oxy + Gênio"
-            valorSetup={String(Math.round(totalComDesconto * 100))}
-            qtdParcelasSetup={12}
-            expanded={showContract}
-            onExpandedChange={setShowContract}
-          />
 
           <DiretoContractGenerator
             defaultServico="oxy"

@@ -201,7 +201,7 @@ function EstrategicoPage() {
                     className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
                     variant="outline"
                   >
-                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                   </Button>
                 </div>
               ) : (

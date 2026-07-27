@@ -19,7 +19,6 @@ import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
-import { ContractGenerator } from "@/components/ContractGenerator";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 
 export const Route = createFileRoute("/calculadora/assessoria")({
@@ -74,7 +73,6 @@ function AssessoriaPage() {
   const valorFinal = Math.max(ASSESSORIA_MINIMUM, valorMensal * (1 - discount.percent / 100));
   const animatedFinal = useCountUp(valorFinal);
   const [showPrices, setShowPrices] = useState(false);
-  const [showContract, setShowContract] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
 
   return (
@@ -202,18 +200,11 @@ function AssessoriaPage() {
                     <Download className="mr-2 h-4 w-4" /> Exportar PDF
                   </Button>
                   <Button
-                    onClick={() => setShowContract(!showContract)}
-                    className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
-                    variant="outline"
-                  >
-                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
-                  </Button>
-                  <Button
                     onClick={() => setShowDireto(!showDireto)}
                     className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
                     variant="outline"
                   >
-                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato Direto
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                   </Button>
                 </div>
               ) : (
@@ -241,13 +232,6 @@ function AssessoriaPage() {
             </aside>
           </div>
 
-          <ContractGenerator
-            modelo="Assessoria Financeira"
-            clientName={state.companyName}
-            valorMensal={String(Math.round(valorFinal * 100))}
-            expanded={showContract}
-            onExpandedChange={setShowContract}
-          />
 
           <DiretoContractGenerator
             defaultServico="assessoria"
