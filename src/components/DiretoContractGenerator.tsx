@@ -1512,11 +1512,22 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
             </div>
             <div className="md:col-span-2 space-y-2">
               <Label>Foro</Label>
-              <Input
-                value={foro}
-                onChange={(e) => setForo(e.target.value)}
-                placeholder="Comarca de São Paulo/SP"
-              />
+              <Select value={foro} onValueChange={setForo}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Comarca de São Paulo/SP">
+                    Comarca de São Paulo/SP
+                  </SelectItem>
+                  <SelectItem value="Comarca de Porto Alegre/RS">
+                    Comarca de Porto Alegre/RS
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Define também o local da assinatura no fim do contrato.
+              </p>
             </div>
           </div>
         </section>
