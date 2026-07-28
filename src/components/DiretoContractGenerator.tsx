@@ -324,7 +324,6 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
 
   // ── Formato / referência ──
   const [formato, setFormato] = useState<"completo" | "order">("completo");
-  const [refNum, setRefNum] = useState("0000");
   const [rascunho, setRascunho] = useState(false);
   const [masterNum, setMasterNum] = useState("001");
   const [masterData, setMasterData] = useState("29/06/2026");
@@ -638,7 +637,7 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
         })),
       servicos: selectedKeys,
       formato,
-      ref_num: refNum || "0000",
+      ref_num: "0000",
       ref_status: rascunho ? "RASCUNHO" : "",
       master_num: masterNum || "001",
       master_data: masterData || "29/06/2026",
@@ -991,24 +990,14 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
             </label>
           </RadioGroup>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div className="space-y-2">
-              <Label>Nº de referência</Label>
-              <Input
-                value={refNum}
-                onChange={(e) => setRefNum(e.target.value)}
-                placeholder="0000"
+          <div className="mt-4">
+            <label className="flex items-center gap-2 cursor-pointer text-sm">
+              <Checkbox
+                checked={rascunho}
+                onCheckedChange={(c) => setRascunho(c === true)}
               />
-            </div>
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer text-sm">
-                <Checkbox
-                  checked={rascunho}
-                  onCheckedChange={(c) => setRascunho(c === true)}
-                />
-                Marcar como rascunho
-              </label>
-            </div>
+              Marcar como rascunho
+            </label>
           </div>
 
           {formato === "order" && (
