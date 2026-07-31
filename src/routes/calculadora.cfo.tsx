@@ -31,7 +31,6 @@ export const Route = createFileRoute("/calculadora/cfo")({
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
   { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
-  { id: "baiuca", label: "Exclusivo Baiuca do Miguel com 25% de desconto", percent: 25 },
 ];
 
 
@@ -181,19 +180,16 @@ function CalculadoraCFOPage() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-6 space-y-2">
-                {DISCOUNTS.filter((d) => d.id !== "none").map((d) => (
-                  <button
-                    key={d.id}
-                    type="button"
-                    onClick={() => setDiscountId(discountId === d.id ? "none" : d.id)}
-                    className={cn("flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
-                      discountId === d.id ? "border-primary bg-primary/10" : "border-border")}>
-                    <span className={cn("h-4 w-4 rounded-full border-2 shrink-0",
-                      discountId === d.id ? "border-primary bg-primary" : "border-muted-foreground")} />
-                    <span className="text-sm">{d.label}</span>
-                  </button>
-                ))}
+              <section className="rounded-2xl border border-border bg-card p-6">
+                <button
+                  type="button"
+                  onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
+                  className={cn("flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
+                    discountId === "meeting" ? "border-primary bg-primary/10" : "border-border")}>
+                  <span className={cn("h-4 w-4 rounded-full border-2 shrink-0",
+                    discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground")} />
+                  <span className="text-sm">Condição de fechamento na reunião</span>
+                </button>
               </section>
 
             </div>
