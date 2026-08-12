@@ -23,6 +23,8 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
+import { BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
 
 export const Route = createFileRoute("/calculadora/oxy")({
   component: OxyPage,
@@ -93,6 +95,26 @@ function OxyPage() {
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
         {rules && (<>
+          <div className="mb-6">
+            <CollapsibleSection
+              eyebrow="Benefício"
+              title="Setup + Oxy + Gênio"
+              subtitle="12 parcelas — incluído no valor mensal"
+            >
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Setup — o que inclui</p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                {BPO_SETUP_DELIVERABLES.map((d) => (
+                  <li key={d} className="flex items-start gap-2 text-sm">
+                    <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary bg-primary/15 shrink-0">
+                      <Check className="h-3 w-3 text-primary" />
+                    </span>
+                    <span>{d}</span>
+                  </li>
+                ))}
+              </ul>
+            </CollapsibleSection>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
             <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
