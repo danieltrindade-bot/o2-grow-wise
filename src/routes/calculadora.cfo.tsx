@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Download, FileText } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText } from "lucide-react";
 import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,8 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
+import { BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
 
 export const Route = createFileRoute("/calculadora/cfo")({
   component: CalculadoraCFOPage,
@@ -129,6 +131,26 @@ function CalculadoraCFOPage() {
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
         {data && (<>
+          <div className="mb-6">
+            <CollapsibleSection
+              eyebrow="Benefício"
+              title="Setup + Oxy + Gênio"
+              subtitle="12 parcelas no cartão — incluído no valor mensal"
+            >
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Setup — o que inclui</p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                {BPO_SETUP_DELIVERABLES.map((d) => (
+                  <li key={d} className="flex items-start gap-2 text-sm">
+                    <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary bg-primary/15 shrink-0">
+                      <Check className="h-3 w-3 text-primary" />
+                    </span>
+                    <span>{d}</span>
+                  </li>
+                ))}
+              </ul>
+            </CollapsibleSection>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <section className="rounded-2xl border border-border bg-card p-7">
@@ -271,7 +293,14 @@ function CalculadoraCFOPage() {
                             roi: { lossMinMonthly, investmentMonthly: totalMensal },
                             scope: SERVICE_DETAILS.cfo.deliverables,
                             scopeIntro: SERVICE_DETAILS.cfo.what,
-                            stages: SERVICE_DETAILS.cfo.stages,
+                            stages: [
+                              {
+                                title: "Setup — o que inclui",
+                                description: "Entregáveis da implantação, incluindo parametrização da Oxy e Agente Gênio.",
+                                items: BPO_SETUP_DELIVERABLES,
+                              },
+                              ...(SERVICE_DETAILS.cfo.stages ?? []),
+                            ],
                             stagesTitle: "Escopo detalhado — CFO as a Service",
                           })
                         }
