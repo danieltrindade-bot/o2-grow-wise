@@ -20,6 +20,8 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
+import { ProposalActions } from "@/components/ProposalActions";
+import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
 
 export const Route = createFileRoute("/calculadora/turnaround")({
   component: TurnaroundPage,
@@ -74,6 +76,19 @@ function TurnaroundPage() {
   const animatedFinal = useCountUp(valorFinal);
   const [showPrices, setShowPrices] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
+
+  const buildProposalModel = (closing?: ClosingOffer): ProposalModel => ({
+    client: { name: state.companyName || "Cliente", monthlyRevenue, cnpjCount },
+    services: [
+      proposalService("turnaround", "Turnaround", valorMensal, {
+        notIncluded: SERVICE_DETAILS.turnaround.notIncluded,
+      }),
+    ],
+    closing,
+  });
+
+  const suggestedClosing: ClosingOffer | undefined =
+    discount.percent > 0 ? { monthly: valorFinal, setupTotal: 0, installments: 12 } : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -241,6 +256,11 @@ function TurnaroundPage() {
                     >
                       <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                     </Button>
+                    <ProposalActions
+                      buildModel={buildProposalModel}
+                      suggestedClosing={suggestedClosing}
+                      suggestionLabel={discount.label}
+                    />
                   </div>
                 ) : (
                   <div className="mt-4">

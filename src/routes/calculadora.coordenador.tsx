@@ -37,6 +37,8 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
+import { ProposalActions } from "@/components/ProposalActions";
+import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
 
 export const Route = createFileRoute("/calculadora/coordenador")({
   component: CoordenadorPage,
@@ -108,6 +110,33 @@ function CoordenadorPage() {
   const setupComDesconto = setupRes.total * (1 - discount.percent / 100);
   const parcela12x = setupComDesconto / 12;
   const mensalComDesconto = Math.max(COORD_MENSAL_MINIMUM, fase2 * (1 - discount.percent / 100));
+
+  // A proposta ancora no valor de tabela (sem desconto). O desconto selecionado
+  // vira a condição especial de fechamento, para o cliente ver o de-para.
+  const buildProposalModel = (closing?: ClosingOffer): ProposalModel => ({
+    client: {
+      name: state.companyName || "Cliente",
+      monthlyRevenue,
+      cnpjCount,
+      profile: `${perfilInfo.label} · complexidade ${COORD_NIVEL_LABEL[complexidade.nivel]}`,
+    },
+    services: [
+      proposalService("coordenador", "Coordenador as a Service", fase2, {
+        notIncluded: SERVICE_DETAILS.coordenador.notIncluded,
+      }),
+    ],
+    setup: {
+      label: "Estruturação Financeira (Setup inicial)",
+      total: setupRes.total,
+      installments: 12,
+    },
+    closing,
+  });
+
+  const suggestedClosing: ClosingOffer | undefined =
+    discount.percent > 0
+      ? { monthly: mensalComDesconto, setupTotal: setupComDesconto, installments: 12 }
+      : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -345,6 +374,11 @@ function CoordenadorPage() {
                     >
                       <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                     </Button>
+                    <ProposalActions
+                      buildModel={buildProposalModel}
+                      suggestedClosing={suggestedClosing}
+                      suggestionLabel={discount.label}
+                    />
                   </div>
                 ) : (
                   <div className="mt-4">

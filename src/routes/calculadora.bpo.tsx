@@ -18,6 +18,8 @@ import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
+import { ProposalActions } from "@/components/ProposalActions";
+import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
 import { CronogramaImplantacao } from "@/components/CronogramaImplantacao";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { bpoImplantacaoStages, BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
@@ -80,6 +82,26 @@ function CalculadoraBPOPage() {
   const valorComDesconto = Math.max(BPO_MINIMUM, valorMensalTotal * (1 - discount.percent / 100));
   const [showPrices, setShowPrices] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
+
+  // O setup do BPO entra embutido na mensalidade, então a proposta não tem
+  // bloco de setup separado.
+  const buildProposalModel = (closing?: ClosingOffer): ProposalModel => ({
+    client: {
+      name: clientName || state.companyName || "Cliente",
+      profile: `${funcionarios} funcionários · ${bancos} bancos`,
+    },
+    services: [
+      proposalService("bpo", "BPO Financeiro", valorMensalTotal, {
+        notIncluded: SERVICE_DETAILS.bpo.notIncluded,
+      }),
+    ],
+    closing,
+  });
+
+  const suggestedClosing: ClosingOffer | undefined =
+    discount.percent > 0
+      ? { monthly: valorComDesconto, setupTotal: 0, installments: 12 }
+      : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -308,6 +330,11 @@ function CalculadoraBPOPage() {
                       >
                         <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                       </Button>
+                      <ProposalActions
+                        buildModel={buildProposalModel}
+                        suggestedClosing={suggestedClosing}
+                        suggestionLabel={discount.label}
+                      />
                     </div>
                   ) : (
                     <Button

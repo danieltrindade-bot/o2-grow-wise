@@ -22,6 +22,8 @@ import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
+import { ProposalActions } from "@/components/ProposalActions";
+import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
 import { calcSetupPriceFromRules, type SegmentType } from "@/lib/pricing-shared";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
@@ -34,6 +36,7 @@ const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
   { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
 ];
+
 
 
 function lookupCFOBase(rules: CFOBaseRule[], annualRevenue: number): number {
@@ -109,6 +112,33 @@ function CalculadoraCFOPage() {
   const totalMensal = finalRecorrencia + setupParcela;
   const [showPrices, setShowPrices] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
+
+  // A proposta ancora no valor de tabela (sem desconto). O desconto selecionado
+  // vira a condição especial de fechamento, para o cliente ver o de-para.
+  const buildProposalModel = (closing?: ClosingOffer): ProposalModel => ({
+    client: {
+      name: state.companyName || "Cliente",
+      monthlyRevenue,
+      cnpjCount,
+      profile: `${cf.label} · ${cnpjCount > 1 ? `${cnpjCount} CNPJs` : "CNPJ único"}`,
+    },
+    services: [
+      proposalService("cfo", "CFO as a Service", recorrenciaSemDesconto, {
+        notIncluded: SERVICE_DETAILS.cfo.notIncluded,
+      }),
+    ],
+    setup: {
+      label: "Estruturação Financeira (Setup inicial)",
+      total: setupResult.total,
+      installments: 12,
+    },
+    closing,
+  });
+
+  const suggestedClosing: ClosingOffer | undefined =
+    discount.percent > 0
+      ? { monthly: finalRecorrencia, setupTotal: setupComDesconto, installments: 12 }
+      : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -315,6 +345,11 @@ function CalculadoraCFOPage() {
                       >
                         <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                       </Button>
+                      <ProposalActions
+                        buildModel={buildProposalModel}
+                        suggestedClosing={suggestedClosing}
+                        suggestionLabel={discount.label}
+                      />
                     </div>
                   </div>
                 ) : (
