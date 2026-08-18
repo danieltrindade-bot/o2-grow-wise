@@ -7,10 +7,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { calcSetupPriceFromRules, perfilFromInputs, coordComplexidade, COORD_MENSAL, COORD_MENSAL_MINIMUM, COORD_NIVEL_LABEL, formatBRL, type CoordPerfil, type SegmentType } from "@/lib/pricing-shared";
+import {
+  calcSetupPriceFromRules,
+  perfilFromInputs,
+  coordComplexidade,
+  COORD_MENSAL,
+  COORD_MENSAL_MINIMUM,
+  COORD_NIVEL_LABEL,
+  formatBRL,
+  type CoordPerfil,
+  type SegmentType,
+} from "@/lib/pricing-shared";
 import { useCoordenadorPricing } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -35,8 +49,16 @@ const DISCOUNTS = [
 
 const PERFIS: { id: CoordPerfil; label: string; desc: string }[] = [
   { id: "essencial", label: "Essencial", desc: "Até 3 colab. · 1 CNPJ · só Financeiro" },
-  { id: "estruturado", label: "Estruturado", desc: "4–8 colab. · 1–2 CNPJs · Financeiro + 1 departamento" },
-  { id: "integrado", label: "Integrado", desc: "9+ colab. · Multi-CNPJ · Financeiro + Compras + Faturamento" },
+  {
+    id: "estruturado",
+    label: "Estruturado",
+    desc: "4–8 colab. · 1–2 CNPJs · Financeiro + 1 departamento",
+  },
+  {
+    id: "integrado",
+    label: "Integrado",
+    desc: "9+ colab. · Multi-CNPJ · Financeiro + Compras + Faturamento",
+  },
 ];
 
 const INCLUDES = [
@@ -90,12 +112,22 @@ function CoordenadorPage() {
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
       <div className="mx-auto max-w-5xl">
-        <Link to="/servicos" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-2">
+        <Link
+          to="/servicos"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-2"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar aos Serviços
         </Link>
-        <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "Coordenador as a Service" }]} />
+        <Breadcrumbs
+          items={[{ label: "Serviços", to: "/servicos" }, { label: "Coordenador as a Service" }]}
+        />
         <div className="mb-8">
-          <h1 className="font-bold tracking-[0.005em]" style={{ fontSize: "clamp(28px, 4vw, 48px)" }}>Coordenador as a Service</h1>
+          <h1
+            className="font-bold tracking-[0.005em]"
+            style={{ fontSize: "clamp(28px, 4vw, 48px)" }}
+          >
+            Coordenador as a Service
+          </h1>
         </div>
 
         <ProductPresentation serviceKey="coordenador" title="Coordenador as a Service" />
@@ -105,202 +137,260 @@ function CoordenadorPage() {
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}
 
-        {data && (<>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <section className="rounded-2xl border border-border bg-card p-7 space-y-4">
-              <h2 className="text-lg font-semibold">Parâmetros</h2>
-              <div className="space-y-2">
-                <Label>Faturamento mensal</Label>
-                <CurrencyInput value={monthlyRevenue} onValueChange={setMonthlyRevenue} />
+        {data && (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <section className="rounded-2xl border border-border bg-card p-7 space-y-4">
+                  <h2 className="text-lg font-semibold">Parâmetros</h2>
+                  <div className="space-y-2">
+                    <Label>Faturamento mensal</Label>
+                    <CurrencyInput value={monthlyRevenue} onValueChange={setMonthlyRevenue} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      Número de funcionários <InfoTooltip text={FUNC_TOOLTIP} />
+                    </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={employees}
+                      onChange={(e) => setEmployees(Math.max(1, Number(e.target.value) || 1))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      Quantidade de CNPJs <InfoTooltip text={CNPJ_TOOLTIP} />
+                    </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={cnpjCount}
+                      onChange={(e) =>
+                        setCnpjCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      Tipo de segmento <InfoTooltip text={TOOLTIPS.segmento} />
+                    </Label>
+                    <Select
+                      value={segmentType}
+                      onValueChange={(v) => setSegmentType(v as SegmentType)}
+                      disabled={cnpjCount === 1}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mesmo">Mesmo segmento</SelectItem>
+                        <SelectItem value="correlato">Correlato</SelectItem>
+                        <SelectItem value="diferente">Diferente</SelectItem>
+                        <SelectItem value="muito_diferente">Muito diferente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {cnpjCount === 1 && (
+                      <p className="text-xs text-muted-foreground">Disponível com 2+ CNPJs</p>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-primary/10 border border-primary/40 p-3">
+                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">
+                        Perfil de valor
+                      </p>
+                      <p className="text-base font-semibold mt-0.5">{perfilInfo.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{perfilInfo.desc}</p>
+                    </div>
+                    <div className="rounded-xl bg-card border border-border p-3">
+                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground">
+                        Complexidade
+                      </p>
+                      <p className="text-base font-semibold mt-0.5">
+                        {COORD_NIVEL_LABEL[complexidade.nivel]}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {complexidade.reasons.length
+                          ? complexidade.reasons.join(" · ")
+                          : "1 CNPJ · faturamento < R$ 500k/mês"}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="rounded-2xl border border-border bg-card p-7">
+                  <button
+                    type="button"
+                    onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
+                      discountId === "meeting" ? "border-primary bg-primary/10" : "border-border",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "h-4 w-4 rounded-full border-2 shrink-0",
+                        discountId === "meeting"
+                          ? "border-primary bg-primary"
+                          : "border-muted-foreground",
+                      )}
+                    />
+                    <span className="text-sm">Condição de fechamento na reunião</span>
+                  </button>
+                </section>
               </div>
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  Número de funcionários <InfoTooltip text={FUNC_TOOLTIP} />
-                </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={employees}
-                  onChange={(e) => setEmployees(Math.max(1, Number(e.target.value) || 1))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  Quantidade de CNPJs <InfoTooltip text={CNPJ_TOOLTIP} />
-                </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={cnpjCount}
-                  onChange={(e) => setCnpjCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  Tipo de segmento <InfoTooltip text={TOOLTIPS.segmento} />
-                </Label>
-                <Select value={segmentType} onValueChange={(v) => setSegmentType(v as SegmentType)} disabled={cnpjCount === 1}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mesmo">Mesmo segmento</SelectItem>
-                    <SelectItem value="correlato">Correlato</SelectItem>
-                    <SelectItem value="diferente">Diferente</SelectItem>
-                    <SelectItem value="muito_diferente">Muito diferente</SelectItem>
-                  </SelectContent>
-                </Select>
-                {cnpjCount === 1 && <p className="text-xs text-muted-foreground">Disponível com 2+ CNPJs</p>}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-primary/10 border border-primary/40 p-3">
-                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Perfil de valor</p>
-                  <p className="text-base font-semibold mt-0.5">{perfilInfo.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{perfilInfo.desc}</p>
-                </div>
-                <div className="rounded-xl bg-card border border-border p-3">
-                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground">Complexidade</p>
-                  <p className="text-base font-semibold mt-0.5">{COORD_NIVEL_LABEL[complexidade.nivel]}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {complexidade.reasons.length ? complexidade.reasons.join(" · ") : "1 CNPJ · faturamento < R$ 500k/mês"}
-                  </p>
-                </div>
-              </div>
-            </section>
 
-            <section className="rounded-2xl border border-border bg-card p-7">
-              <button
-                type="button"
-                onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
-                className={cn("flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
-                  discountId === "meeting" ? "border-primary bg-primary/10" : "border-border")}>
-                <span className={cn("h-4 w-4 rounded-full border-2 shrink-0",
-                  discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground")} />
-                <span className="text-sm">Condição de fechamento na reunião</span>
-              </button>
-            </section>
-          </div>
-
-          <aside className="rounded-2xl border-2 border-primary bg-card p-7"
-                 style={{ backgroundColor: "color-mix(in oklab, var(--color-primary) 6%, var(--card))" }}>
-            <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Investimento</p>
-            {showPrices ? (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <Row label="Perfil" value={perfilInfo.label} />
-                <Row label="Setup (valor único)" value={formatBRL(setupComDesconto)} bold />
-
-                <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
-                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">Setup · 12x no cartão</p>
-                  <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
-                    {formatBRL(parcela12x)}<span className="text-sm font-normal text-primary/70">/mês</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Valor total: {formatBRL(setupComDesconto)}
-                  </p>
-                </div>
-
-                <div className="mt-3 rounded-xl bg-card border border-border p-5">
-                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground">Mensalidade · recorrência</p>
-                  <p className="text-2xl md:text-3xl font-bold mt-1 tabular-nums">
-                    {formatBRL(mensalComDesconto)}<span className="text-sm font-normal text-muted-foreground">/mês</span>
-                  </p>
-                  {discount.percent > 0 && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Desconto {discount.percent}%: -{formatBRL(fase2 - mensalComDesconto)}/mês (de {formatBRL(fase2)})
-                    </p>
-                  )}
-                </div>
-
-                <RoiPanel investmentMonthly={mensalComDesconto + parcela12x} />
-
-                <div className="mt-5">
-                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground mb-2">Inclui</p>
-                  <ul className="space-y-1.5">
-                    {INCLUDES.map((i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                        <span>{i}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <Button
-                  onClick={() =>
-                    exportCalculatorPDF({
-                      service: "Coordenador as a Service",
-                      clientName: state.companyName,
-                      monthlyRevenue,
-                      rows: [
-                        ["Perfil", perfilInfo.label],
-                        ["Complexidade", COORD_NIVEL_LABEL[complexidade.nivel]],
-                        ["Funcionários", String(employees)],
-                        ["CNPJs", String(cnpjCount)],
-                        ["Setup (valor único)", formatBRL(setupComDesconto)],
-                        ["Setup (12x)", formatBRL(parcela12x)],
-                        ...(discount.percent > 0
-                          ? [[`Desconto (${discount.percent}%)`, `-${formatBRL(fase2 - mensalComDesconto)}/mês`] as [string, string]]
-                          : []),
-                        ["Mensalidade", formatBRL(mensalComDesconto)],
-                      ],
-                      finalLabel: "Mensalidade",
-                      finalValue: formatBRL(mensalComDesconto),
-                      scope: SERVICE_DETAILS.coordenador.deliverables,
-                      scopeIntro: SERVICE_DETAILS.coordenador.what,
-                      notIncluded: SERVICE_DETAILS.coordenador.notIncluded,
-                      roi: { lossMinMonthly, investmentMonthly: mensalComDesconto + parcela12x },
-                    })
-                  }
-                  className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  <Download className="mr-2 h-4 w-4" /> Exportar PDF
-                </Button>
-                <Button
-                  onClick={() => setShowDireto(!showDireto)}
-                  className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
-                  variant="outline"
-                >
-                  <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
-                </Button>
-              </div>
-            ) : (
-              <div className="mt-4">
-                <Row label="Perfil" value={perfilInfo.label} />
-                <div className="mt-5">
-                  <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground mb-2">Inclui</p>
-                  <ul className="space-y-1.5">
-                    {INCLUDES.map((i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                        <span>{i}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Button
-                  onClick={() => setShowPrices(true)}
-                  className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
-                >
+              <aside
+                className="rounded-2xl border-2 border-primary bg-card p-7"
+                style={{
+                  backgroundColor: "color-mix(in oklab, var(--color-primary) 6%, var(--card))",
+                }}
+              >
+                <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">
                   Investimento
-                </Button>
-              </div>
-            )}
-          </aside>
-        </div>
+                </p>
+                {showPrices ? (
+                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <Row label="Perfil" value={perfilInfo.label} />
+                    <Row label="Setup (valor único)" value={formatBRL(setupComDesconto)} bold />
 
+                    <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
+                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-primary">
+                        Setup · 12x no cartão
+                      </p>
+                      <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
+                        {formatBRL(parcela12x)}
+                        <span className="text-sm font-normal text-primary/70">/mês</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Valor total: {formatBRL(setupComDesconto)}
+                      </p>
+                    </div>
 
-        <DiretoContractGenerator
-          defaultServico="coordenador"
-          clientName={state.companyName}
-          valorSetupReais={Math.round(setupComDesconto)}
-          valorMensalReais={Math.round(mensalComDesconto)}
-          expanded={showDireto}
-          onExpandedChange={setShowDireto}
-        />
-        </>)}
+                    <div className="mt-3 rounded-xl bg-card border border-border p-5">
+                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground">
+                        Mensalidade · recorrência
+                      </p>
+                      <p className="text-2xl md:text-3xl font-bold mt-1 tabular-nums">
+                        {formatBRL(mensalComDesconto)}
+                        <span className="text-sm font-normal text-muted-foreground">/mês</span>
+                      </p>
+                      {discount.percent > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Desconto {discount.percent}%: -{formatBRL(fase2 - mensalComDesconto)}/mês
+                          (de {formatBRL(fase2)})
+                        </p>
+                      )}
+                    </div>
+
+                    <RoiPanel investmentMonthly={mensalComDesconto + parcela12x} />
+
+                    <div className="mt-5">
+                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground mb-2">
+                        Inclui
+                      </p>
+                      <ul className="space-y-1.5">
+                        {INCLUDES.map((i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                            <span>{i}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <Button
+                      onClick={() =>
+                        exportCalculatorPDF({
+                          service: "Coordenador as a Service",
+                          clientName: state.companyName,
+                          monthlyRevenue,
+                          rows: [
+                            ["Perfil", perfilInfo.label],
+                            ["Complexidade", COORD_NIVEL_LABEL[complexidade.nivel]],
+                            ["Funcionários", String(employees)],
+                            ["CNPJs", String(cnpjCount)],
+                            ["Setup (valor único)", formatBRL(setupComDesconto)],
+                            ["Setup (12x)", formatBRL(parcela12x)],
+                            ...(discount.percent > 0
+                              ? [
+                                  [
+                                    `Desconto (${discount.percent}%)`,
+                                    `-${formatBRL(fase2 - mensalComDesconto)}/mês`,
+                                  ] as [string, string],
+                                ]
+                              : []),
+                            ["Mensalidade", formatBRL(mensalComDesconto)],
+                          ],
+                          finalLabel: "Mensalidade",
+                          finalValue: formatBRL(mensalComDesconto),
+                          scope: SERVICE_DETAILS.coordenador.deliverables,
+                          scopeIntro: SERVICE_DETAILS.coordenador.what,
+                          notIncluded: SERVICE_DETAILS.coordenador.notIncluded,
+                          roi: {
+                            lossMinMonthly,
+                            investmentMonthly: mensalComDesconto + parcela12x,
+                          },
+                        })
+                      }
+                      className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      <Download className="mr-2 h-4 w-4" /> Exportar PDF
+                    </Button>
+                    <Button
+                      onClick={() => setShowDireto(!showDireto)}
+                      className="w-full mt-3 bg-card border border-border text-foreground hover:border-primary/60"
+                      variant="outline"
+                    >
+                      <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-4">
+                    <Row label="Perfil" value={perfilInfo.label} />
+                    <div className="mt-5">
+                      <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground mb-2">
+                        Inclui
+                      </p>
+                      <ul className="space-y-1.5">
+                        {INCLUDES.map((i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                            <span>{i}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <Button
+                      onClick={() => setShowPrices(true)}
+                      className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Investimento
+                    </Button>
+                  </div>
+                )}
+              </aside>
+            </div>
+
+            <DiretoContractGenerator
+              defaultServico="coordenador"
+              clientName={state.companyName}
+              valorSetupReais={Math.round(setupComDesconto)}
+              valorMensalReais={Math.round(mensalComDesconto)}
+              expanded={showDireto}
+              onExpandedChange={setShowDireto}
+            />
+          </>
+        )}
       </div>
 
-      <MobilePriceSummary label="Mensalidade" value={formatBRL(mensalComDesconto)} visible={showPrices} onReveal={() => setShowPrices(true)} />
+      <MobilePriceSummary
+        label="Mensalidade"
+        value={formatBRL(mensalComDesconto)}
+        visible={showPrices}
+        onReveal={() => setShowPrices(true)}
+      />
     </div>
   );
 }
