@@ -143,8 +143,8 @@ export function useAssessoriaPricing() {
       const settings = settingsArr[0] ?? {
         id: "",
         cnpj_adjustment: 500,
-        min_price: 4000,
-        max_price: 6000,
+        min_price: 5500,
+        max_price: 9500,
       };
       return { rules, settings };
     },

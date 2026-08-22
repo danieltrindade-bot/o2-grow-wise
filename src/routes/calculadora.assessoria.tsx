@@ -29,7 +29,7 @@ export const Route = createFileRoute("/calculadora/assessoria")({
 
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
-  { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
+  { id: "meeting", label: "Condição de fechamento na reunião", percent: 10 },
 ];
 
 const INCLUDES = [
@@ -71,7 +71,8 @@ function AssessoriaPage() {
   const baseP = Number(tier?.base_price ?? 0);
   const valorMensal = Math.min(maxP, Math.max(minP, baseP + ajusteCnpj));
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const ASSESSORIA_MINIMUM = 4000;
+  // Piso de tabela 5.500 com gatilho de 10% ⇒ nunca abaixo de 4.950.
+  const ASSESSORIA_MINIMUM = 4950;
   const valorFinal = Math.max(ASSESSORIA_MINIMUM, valorMensal * (1 - discount.percent / 100));
   const animatedFinal = useCountUp(valorFinal);
   const [showPrices, setShowPrices] = useState(false);

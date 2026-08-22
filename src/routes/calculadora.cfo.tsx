@@ -34,8 +34,11 @@ export const Route = createFileRoute("/calculadora/cfo")({
 
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
-  { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
+  { id: "meeting", label: "Condição de fechamento na reunião", percent: 10 },
 ];
+
+// Piso de tabela da recorrência completa (inclui governança); o desconto incide depois.
+const CFO_MINIMUM = 8411;
 
 
 
@@ -98,7 +101,10 @@ function CalculadoraCFOPage() {
   }, [data, governanceType]);
 
   const subtotalRecorrencia = basePrice * cnpjMultiplier * cf.factor;
-  const recorrenciaSemDesconto = subtotalRecorrencia * (1 + segmentAdj / 100) + governanceFee;
+  const recorrenciaSemDesconto = Math.max(
+    CFO_MINIMUM,
+    subtotalRecorrencia * (1 + segmentAdj / 100) + governanceFee,
+  );
 
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
   const finalRecorrencia = recorrenciaSemDesconto * (1 - discount.percent / 100);
