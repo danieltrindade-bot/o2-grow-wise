@@ -40,7 +40,7 @@ const DISCOUNTS = [
 const OXY_SETUP_FLOOR = 8000;
 
 const INCLUDES = [
-  "Plataforma Oxy (dados em tempo real)",
+  "Plataforma Oxy",
   "Agente IA Gênio",
   "Implantação completa",
 ];
