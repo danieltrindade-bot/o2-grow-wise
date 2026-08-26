@@ -46,7 +46,7 @@ const SERVICES: ServiceCard[] = [
   {
     id: "oxy",
     name: "Oxy + Gênio",
-    description: "Plataforma de dados em tempo real + Agente IA para automação financeira",
+    description: "Plataforma de dados financeiros + Agente IA para automação financeira",
     to: "/calculadora/oxy",
     Icon: Bot,
   },

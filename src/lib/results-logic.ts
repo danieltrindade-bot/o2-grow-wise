@@ -318,7 +318,7 @@ function pickTagline(key: ProductKey, fin: DimensionAnalysis, com: DimensionAnal
     case "cfo":
       return "Gestão financeira executiva para transformação completa da empresa";
     case "oxy":
-      return "Dados em tempo real e IA para decisões mais rápidas e precisas";
+      return "Dados e IA para decisões mais rápidas e precisas";
     case "coordenador":
       return "Coordenação dedicada para organizar seus processos financeiros";
   }

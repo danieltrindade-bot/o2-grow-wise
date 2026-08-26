@@ -98,9 +98,9 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
     ],
   },
   oxy: {
-    what: "Plataforma de dados financeiros em tempo real combinada com Agente de IA. Automatiza conciliação, gera alertas inteligentes e entrega visibilidade instantânea sobre a saúde financeira da empresa.",
+    what: "Plataforma de dados financeiros combinada com Agente de IA. Automatiza conciliação, gera alertas inteligentes e entrega visibilidade sobre a saúde financeira da empresa.",
     deliverables: [
-      "Plataforma Oxy com dados em tempo real",
+      "Plataforma Oxy",
       "Agente IA Gênio para automações",
       "Conciliação bancária automatizada",
       "Alertas inteligentes de anomalias",
