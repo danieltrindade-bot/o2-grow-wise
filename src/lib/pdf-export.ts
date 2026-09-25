@@ -339,8 +339,7 @@ export async function exportCalculatorPDF(input: CalcPDFInput) {
 
       doc.setFontSize(8.5);
       for (const item of stage.items) {
-        doc.setTextColor(...GREEN);
-        doc.text("✓", 22, sy);
+        drawCheck(doc, 22, sy);
         doc.setTextColor(...LIGHT_GRAY);
         doc.text(item, 30, sy);
         sy += 5.5;

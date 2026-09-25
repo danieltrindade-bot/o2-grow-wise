@@ -336,12 +336,19 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
     valorSetupReais != null ? String(valorSetupReais) : "",
   );
   const [primeiraCobranca, setPrimeiraCobranca] = useState("D+30");
-  const [mrr, setMrr] = useState<Record<string, string>>(() => {
-    const init: Record<string, string> = {};
-    if (valorMensalReais != null) init[defaultServico] = String(valorMensalReais);
-    return init;
-  });
-  const [valorPontual, setValorPontual] = useState<Record<string, string>>({});
+  // Serviços pontuais (Diagnóstico, Valuation) recebem o valor da calculadora
+  // em valorPontual; os recorrentes, em mrr.
+  const defaultIsPontual = META[defaultServico].pontual;
+  const [mrr, setMrr] = useState<Record<string, string>>(() =>
+    valorMensalReais != null && !defaultIsPontual
+      ? { [defaultServico]: String(valorMensalReais) }
+      : {},
+  );
+  const [valorPontual, setValorPontual] = useState<Record<string, string>>(() =>
+    valorMensalReais != null && defaultIsPontual
+      ? { [defaultServico]: String(valorMensalReais) }
+      : {},
+  );
   const [bpoLancamentos, setBpoLancamentos] = useState("6");
   const [bpoContas, setBpoContas] = useState("2");
 
@@ -428,9 +435,10 @@ export function DiretoContractGenerator(props: DiretoContractGeneratorProps) {
   }, [valorSetupReais]);
 
   useEffect(() => {
-    if (valorMensalReais != null)
-      setMrr((prev) => ({ ...prev, cfo: String(valorMensalReais) }));
-  }, [valorMensalReais]);
+    if (valorMensalReais == null) return;
+    const setter = defaultIsPontual ? setValorPontual : setMrr;
+    setter((prev) => ({ ...prev, [defaultServico]: String(valorMensalReais) }));
+  }, [valorMensalReais, defaultServico, defaultIsPontual]);
 
   useEffect(() => {
     if (!expanded) return;
