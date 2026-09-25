@@ -8,6 +8,7 @@ import {
   Scale,
   RefreshCw,
   Target,
+  Gem,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
@@ -24,7 +25,7 @@ interface ServiceCard {
   id: string;
   name: string;
   description: string;
-  to: "/calculadora/bpo" | "/calculadora/cfo" | "/calculadora/oxy" | "/calculadora/assessoria" | "/calculadora/coordenador" | "/calculadora/tributario" | "/calculadora/turnaround" | "/calculadora/estrategico";
+  to: "/calculadora/bpo" | "/calculadora/cfo" | "/calculadora/oxy" | "/calculadora/assessoria" | "/calculadora/coordenador" | "/calculadora/tributario" | "/calculadora/turnaround" | "/calculadora/estrategico" | "/calculadora/valuation";
   Icon: typeof Briefcase;
 }
 
@@ -84,6 +85,13 @@ const SERVICES: ServiceCard[] = [
     description: "Diagnóstico aprofundado do negócio com análise de maturidade e plano de ação priorizado",
     to: "/calculadora/estrategico",
     Icon: Target,
+  },
+  {
+    id: "valuation",
+    name: "Valuation",
+    description: "Laudo técnico do valor da empresa por DCF e múltiplos: M&A, captação, sucessão ou venda",
+    to: "/calculadora/valuation",
+    Icon: Gem,
   },
 ];
 

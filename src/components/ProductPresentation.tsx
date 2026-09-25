@@ -233,6 +233,75 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
       "Melhoria integrada dos resultados econômico-financeiros e operacionais, aumentando a eficiência e sinergia entre todas as áreas da empresa.",
     ],
   },
+  valuation: {
+    what: "Valorize a história que você dedicou tempo e energia e maximize o valor do seu negócio através de um trabalho técnico e profissional de Valuation. Projeto de até 60 dias, com emissão de laudo técnico.",
+    deliverables: [
+      "Análise de Relatórios Contábeis",
+      "Estudo de Mercado, Benchmarks e Pares",
+      "Entendimento do Planejamento Estratégico",
+      "Modelagem Financeira (DCF e Múltiplos)",
+      "Avaliação Patrimonial Contábil e Gerencial",
+      "Emissão do Laudo Técnico de Valuation",
+    ],
+    stages: [
+      {
+        title: "Análise de Relatórios Contábeis",
+        description: "Revisão detalhada dos demonstrativos financeiros da empresa",
+        items: [
+          "Revisão de DRE, Balanço Patrimonial, Fluxo de Caixa, etc.",
+          "Identificação da saúde financeira e dos pontos de atenção",
+        ],
+      },
+      {
+        title: "Estudo de Mercado, Benchmarks e Pares",
+        description: "Comparação da empresa com concorrentes diretos e indiretos",
+        items: [
+          "Uso de benchmarks financeiros e operacionais do mercado",
+          "Identificação de empresas similares (pares) para balizar o valuation",
+        ],
+      },
+      {
+        title: "Entendimento do Planejamento Estratégico",
+        description: "Reuniões com os sócios sobre a visão e os objetivos de longo prazo",
+        items: [
+          "Compreensão da visão e dos objetivos de longo prazo da empresa",
+          "Projeção do crescimento e das metas futuras no valuation",
+        ],
+      },
+      {
+        title: "Modelagem Financeira (DCF e Múltiplos)",
+        description: "Projeções financeiras detalhadas para determinar o valor justo",
+        items: [
+          "Fluxo de Caixa Descontado (DCF)",
+          "Avaliação por Múltiplos",
+          "Valor justo da empresa com base em diferentes cenários",
+        ],
+      },
+      {
+        title: "Avaliação Patrimonial Contábil e Gerencial",
+        description: "Verificação do valor dos ativos e passivos da empresa",
+        items: [
+          "Visão contábil, a partir do balanço",
+          "Visão gerencial, a valor de mercado dos ativos (imóveis, máquinas, etc.)",
+        ],
+      },
+      {
+        title: "Emissão do Laudo Técnico de Valuation",
+        description: "Relatório técnico formal com a avaliação completa da empresa",
+        items: [
+          "Avaliação completa e detalhada da empresa",
+          "Justificativa do valor encontrado com base nas análises anteriores",
+        ],
+      },
+    ],
+    results: [
+      "Tomada de decisão estratégica",
+      "Preparação para Fusões e Aquisições",
+      "Captação de Investimentos",
+      "Mudança na estrutura societária",
+      "Maximização do valor de uma venda",
+    ],
+  },
   turnaround: {
     what: "Garantimos a sobrevivência e a sustentabilidade dos negócios, através de captação de recursos, repactuação de passivos, gestão e controladoria. Projeto de 12 meses com equipe sênior (Partner, CFO e Analista) para recuperar o equilíbrio operacional e financeiro da empresa.",
     deliverables: [
@@ -347,7 +416,9 @@ export function ProductPresentation({ serviceKey, title }: { serviceKey: string;
           <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
             {serviceKey === "assessoria"
               ? "Jornada de Maturidade — 5 estágios de evolução"
-              : "Escopo — Pilares de entrega"}
+              : serviceKey === "valuation"
+                ? "Detalhamento do escopo — até 60 dias"
+                : "Escopo — Pilares de entrega"}
           </p>
           <div className="space-y-2">
             {detail.stages!.map((stage, i) => (

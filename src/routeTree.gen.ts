@@ -15,6 +15,7 @@ import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as CalculadoraValuationRouteImport } from './routes/calculadora.valuation'
 import { Route as CalculadoraTurnaroundRouteImport } from './routes/calculadora.turnaround'
 import { Route as CalculadoraTributarioRouteImport } from './routes/calculadora.tributario'
 import { Route as CalculadoraOxyRouteImport } from './routes/calculadora.oxy'
@@ -53,6 +54,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculadoraValuationRoute = CalculadoraValuationRouteImport.update({
+  id: '/calculadora/valuation',
+  path: '/calculadora/valuation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalculadoraTurnaroundRoute = CalculadoraTurnaroundRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/calculadora/oxy': typeof CalculadoraOxyRoute
   '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/calculadora/turnaround': typeof CalculadoraTurnaroundRoute
+  '/calculadora/valuation': typeof CalculadoraValuationRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/calculadora/oxy': typeof CalculadoraOxyRoute
   '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/calculadora/turnaround': typeof CalculadoraTurnaroundRoute
+  '/calculadora/valuation': typeof CalculadoraValuationRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/calculadora/oxy': typeof CalculadoraOxyRoute
   '/calculadora/tributario': typeof CalculadoraTributarioRoute
   '/calculadora/turnaround': typeof CalculadoraTurnaroundRoute
+  '/calculadora/valuation': typeof CalculadoraValuationRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/calculadora/oxy'
     | '/calculadora/tributario'
     | '/calculadora/turnaround'
+    | '/calculadora/valuation'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/calculadora/oxy'
     | '/calculadora/tributario'
     | '/calculadora/turnaround'
+    | '/calculadora/valuation'
     | '/admin'
   id:
     | '__root__'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/calculadora/oxy'
     | '/calculadora/tributario'
     | '/calculadora/turnaround'
+    | '/calculadora/valuation'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   CalculadoraOxyRoute: typeof CalculadoraOxyRoute
   CalculadoraTributarioRoute: typeof CalculadoraTributarioRoute
   CalculadoraTurnaroundRoute: typeof CalculadoraTurnaroundRoute
+  CalculadoraValuationRoute: typeof CalculadoraValuationRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -267,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculadora/valuation': {
+      id: '/calculadora/valuation'
+      path: '/calculadora/valuation'
+      fullPath: '/calculadora/valuation'
+      preLoaderRoute: typeof CalculadoraValuationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calculadora/turnaround': {
@@ -350,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalculadoraOxyRoute: CalculadoraOxyRoute,
   CalculadoraTributarioRoute: CalculadoraTributarioRoute,
   CalculadoraTurnaroundRoute: CalculadoraTurnaroundRoute,
+  CalculadoraValuationRoute: CalculadoraValuationRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
