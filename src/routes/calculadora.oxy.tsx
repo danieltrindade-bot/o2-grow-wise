@@ -83,9 +83,6 @@ function OxyPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar aos Serviços
         </Link>
         <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "Oxy + Gênio" }]} />
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Oxy + Gênio — Plataforma de Dados + IA</h1>
-        </div>
 
         <ProductPresentation serviceKey="oxy" title="Oxy + Gênio" />
 

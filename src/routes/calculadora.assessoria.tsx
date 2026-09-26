@@ -103,9 +103,6 @@ function AssessoriaPage() {
         <Breadcrumbs
           items={[{ label: "Serviços", to: "/servicos" }, { label: "Assessoria Estratégica" }]}
         />
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Assessoria Estratégica</h1>
-        </div>
 
         <ProductPresentation serviceKey="assessoria" title="Assessoria Estratégica" />
 

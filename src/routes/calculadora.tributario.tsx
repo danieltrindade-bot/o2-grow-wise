@@ -102,14 +102,8 @@ function TributarioPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar aos Serviços
         </Link>
         <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "Diagnóstico Tributário" }]} />
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Diagnóstico e Organização Tributária</h1>
-          <p className="text-muted-foreground mt-2">Adequação à Reforma Tributária (EC 132/2023 + LC 214/2025)</p>
-        </div>
 
-        <div className="mb-6">
-          <ProductPresentation serviceKey="tributario" title="Diagnóstico e Organização Tributária" />
-        </div>
+        <ProductPresentation serviceKey="tributario" title="Diagnóstico e Organização Tributária" />
 
         <LossSummaryPanel />
 

@@ -65,7 +65,7 @@ export function ScopeFrame({ serviceKey, title }: { serviceKey: string; title: s
       src={`/escopos/${serviceKey}.html`}
       title={`Escopo do serviço: ${title}`}
       scrolling="no"
-      className="block w-full rounded-2xl border border-border overflow-hidden"
+      className="mb-6 block w-full rounded-2xl border border-border overflow-hidden"
       style={{ height }}
     />
   );

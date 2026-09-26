@@ -115,21 +115,9 @@ function CalculadoraBPOPage() {
           items={[{ label: "Serviços", to: "/servicos" }, { label: "BPO Financeiro" }]}
         />
 
-        <div className="mb-8">
-          <h1
-            className="font-bold tracking-[0.005em]"
-            style={{ fontSize: "clamp(28px, 4vw, 48px)" }}
-          >
-            Calculadora — BPO Financeiro
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Configure os parâmetros para calcular o valor mensal da operação.
-          </p>
-        </div>
+        <ProductPresentation serviceKey="bpo" title="BPO Financeiro" />
 
         <LossSummaryPanel />
-
-        <ProductPresentation serviceKey="bpo" title="BPO Financeiro" />
 
         {isLoading && <CalcLoadingSkeleton />}
         {error && <ErrorState error={error} retry={() => refetch()} />}

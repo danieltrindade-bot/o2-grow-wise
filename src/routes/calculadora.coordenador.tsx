@@ -150,14 +150,6 @@ function CoordenadorPage() {
         <Breadcrumbs
           items={[{ label: "Serviços", to: "/servicos" }, { label: "Coordenador as a Service" }]}
         />
-        <div className="mb-8">
-          <h1
-            className="font-bold tracking-[0.005em]"
-            style={{ fontSize: "clamp(28px, 4vw, 48px)" }}
-          >
-            Coordenador as a Service
-          </h1>
-        </div>
 
         <ProductPresentation serviceKey="coordenador" title="Coordenador as a Service" />
 

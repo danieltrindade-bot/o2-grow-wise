@@ -100,12 +100,6 @@ function TurnaroundPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar aos Serviços
         </Link>
         <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "Turnaround" }]} />
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Turnaround</h1>
-          <p className="text-muted-foreground mt-2">
-            Configure os parâmetros para precificar a mensalidade. Projeto de 12 meses.
-          </p>
-        </div>
 
         <ProductPresentation serviceKey="turnaround" title="Turnaround" />
 

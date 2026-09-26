@@ -154,10 +154,6 @@ function CalculadoraCFOPage() {
         </Link>
         <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "CFO as a Service" }]} />
 
-        <div className="mb-8">
-          <h1 className="font-bold tracking-[0.005em]" style={{ fontSize: "clamp(28px, 4vw, 48px)" }}>Calculadora — CFO as a Service</h1>
-          <p className="text-muted-foreground mt-2">Configure os parâmetros para precificar mensalidade e setup.</p>
-        </div>
 
         <ProductPresentation serviceKey="cfo" title="CFO as a Service" />
 
