@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, ChevronDown, PlayCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SERVICE_DETAILS, type ScopePillar, type ScopeNote, type ServiceDetail } from "@/lib/service-scopes";
+import { SCOPE_HTML_KEYS, ScopeFrame } from "./ScopeFrame";
 
 export { SERVICE_DETAILS };
 export type { ServiceDetail };
@@ -133,6 +134,8 @@ function PhasesBlock({ phases }: { phases: NonNullable<ServiceDetail["phases"]> 
 }
 
 export function ProductPresentation({ serviceKey, title }: { serviceKey: string; title: string }) {
+  if (SCOPE_HTML_KEYS.has(serviceKey)) return <ScopeFrame serviceKey={serviceKey} title={title} />;
+
   const detail = SERVICE_DETAILS[serviceKey];
   if (!detail) return null;
 

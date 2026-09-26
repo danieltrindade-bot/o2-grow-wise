@@ -20,7 +20,6 @@ import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresen
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { ProposalActions } from "@/components/ProposalActions";
 import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
-import { CronogramaImplantacao } from "@/components/CronogramaImplantacao";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { bpoImplantacaoStages, BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
 
@@ -138,14 +137,6 @@ function CalculadoraBPOPage() {
         {data && pacote && (
           <>
             <div className="space-y-6 mb-6">
-              <CollapsibleSection
-                eyebrow="Implantação"
-                title="Cronograma de implantação"
-                subtitle="Kick-off → Semanas 3 e 4 · 30 dias"
-              >
-                <CronogramaImplantacao />
-              </CollapsibleSection>
-
               {data.setup && (
                 <CollapsibleSection
                   eyebrow="Benefício"

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="O2 Inc — BPO Financeiro. Escopo, implantação e próximos passos.">
+<title>BPO Financeiro — O2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* ===== Design System O2 · sempre dark ===== */
+  :root{
+    --bg:#0A0A0A; --card:#111111; --surface:#1A1A1A;
+    --line:#1E1E1E; --line-2:#2A2A2A;
+    --fg:#FFFFFF; --fg-2:rgba(255,255,255,.90); --muted:#A0A0A0; --muted-2:#6E6E6E; --muted-3:#4A4A4A;
+    --green:#00E85F; --green-dim:rgba(0,232,95,.08); --green-line:rgba(0,232,95,.30);
+    --warn:#EAB308; --warn-dim:rgba(234,179,8,.07); --warn-line:rgba(234,179,8,.30);
+    --r:12px; --r-card:16px; --r-lg:18px;
+    --head:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;
+    --body:"Inter",-apple-system,"Segoe UI",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+    --w:1180px;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);
+    font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;hyphens:none;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+
+  h1,h2,h3,.disp{font-family:var(--head);text-transform:uppercase;line-height:.94;
+    letter-spacing:-.005em;font-weight:800;margin:0;text-wrap:balance;}
+  h1{font-size:clamp(42px,6vw,76px);}
+  h2{font-size:clamp(34px,4.4vw,56px);}
+  h3{font-size:clamp(21px,2.2vw,26px);}
+  p{margin:0;text-wrap:pretty;}
+  .g{color:var(--green);}
+  .lead{color:var(--muted);font-size:17px;max-width:60ch;margin-top:16px;}
+
+  .wrap{max-width:var(--w);margin:0 auto;padding-inline:24px;}
+  section{padding-block:84px;border-top:1px solid var(--line);scroll-margin-top:118px;}
+  main > section:first-of-type{border-top:none;padding-top:64px;}
+  @media (max-width:760px){section{padding-block:58px;}}
+
+  .eyebrow{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:16px;font-weight:500;}
+  .eyebrow .idx{color:var(--muted-3);}
+  .eyebrow .bar{flex:none;width:20px;height:1px;background:var(--green);opacity:.6;}
+
+  /* ---- topbar ---- */
+  .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;
+    background:rgba(10,10,10,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+  .topbar .inner{max-width:var(--w);margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo .mark{width:26px;height:26px;border-radius:50%;border:3px solid var(--green);position:relative;flex:none;}
+  .logo .mark::after{content:"";position:absolute;inset:4px;border-radius:50%;border:2.5px solid var(--green);}
+  .logo .wm{font-family:var(--head);font-size:21px;font-weight:800;text-transform:uppercase;letter-spacing:.01em;}
+  .logo small{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted-2);align-self:flex-end;padding-bottom:4px;}
+  .prod{font-family:var(--head);font-size:22px;font-weight:800;letter-spacing:.01em;text-transform:uppercase;color:var(--fg);
+    border-left:1px solid var(--line-2);padding-left:16px;margin-left:6px;line-height:1;}
+  .prod span{color:var(--green);}
+  .hero{margin-bottom:48px;padding-bottom:40px;border-bottom:1px solid var(--line);}
+  .hero .tag{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+    color:#052A12;background:var(--green);padding:7px 14px;border-radius:999px;}
+  .hero h1{margin-top:18px;font-size:clamp(34px,4.4vw,56px);}
+  @media (max-width:560px){.prod{display:none;}}
+  .spacer{flex:1 1 auto;}
+  .modeswitch{display:flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;}
+  .modeswitch button{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    background:none;border:0;color:var(--muted);padding:8px 15px;border-radius:999px;cursor:pointer;transition:color .15s;}
+  .modeswitch button:hover{color:var(--fg);}
+  .modeswitch button[aria-pressed="true"]{background:var(--green);color:#052A12;font-weight:500;}
+  :focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:4px;}
+
+  .secnav{border-bottom:1px solid var(--line);background:rgba(10,10,10,.92);backdrop-filter:blur(14px);
+    position:sticky;top:calc(env(safe-area-inset-top,0px) + 55px);z-index:45;}
+  .secnav .inner{max-width:var(--w);margin:0 auto;padding:0 24px;display:flex;overflow-x:auto;scrollbar-width:none;}
+  .secnav .inner::-webkit-scrollbar{display:none;}
+  .secnav a{flex:none;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted-2);text-decoration:none;padding:13px 16px;white-space:nowrap;
+    border-bottom:1px solid transparent;transition:color .15s,border-color .15s;}
+  .secnav a:hover{color:var(--fg);border-bottom-color:var(--green);}
+  .secnav a .n{color:var(--muted-3);margin-right:8px;}
+
+  /* ---- escopo ---- */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;}
+  @media (max-width:1000px){.pillars{grid-template-columns:1fr;}}
+  .pillar{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:30px 26px 26px;display:flex;flex-direction:column;position:relative;overflow:hidden;
+    transition:border-color .18s;}
+  .pillar:hover{border-color:var(--green-line);}
+  .pillar::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
+  .pillar .n{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--green);}
+  .pillar h3{margin-top:12px;}
+  .pillar .promise{color:var(--fg-2);font-size:15.5px;margin-top:12px;padding-bottom:22px;
+    border-bottom:1px solid var(--line);}
+  .items{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:16px;}
+  .items li{display:grid;grid-template-columns:16px 1fr;gap:12px;align-items:start;}
+  .items .tick{color:var(--green);font-size:13px;line-height:1.5;}
+  .items .t{font-size:15.5px;font-weight:600;line-height:1.35;}
+  .items .s{display:block;color:var(--muted);font-size:13.5px;margin-top:3px;line-height:1.4;}
+
+  /* ---- fases ---- */
+  .phases{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;}
+  @media (max-width:1000px){.phases{grid-template-columns:1fr;}}
+  .phase{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:30px 26px 26px;display:flex;flex-direction:column;position:relative;overflow:hidden;
+    transition:border-color .18s;}
+  .phase:hover{border-color:var(--green-line);}
+  .phase::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
+  .phase .n{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--green);text-transform:uppercase;}
+  .phase h3{margin-top:12px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+  .phase ul{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:14px;}
+  .phase li{color:var(--fg-2);font-size:15.5px;line-height:1.4;display:grid;
+    grid-template-columns:16px 1fr;gap:12px;align-items:start;}
+  .phase li::before{content:"";width:9px;height:1px;background:var(--green);margin-top:11px;}
+  .phase .out{margin-top:auto;padding-top:22px;border-top:1px solid var(--line);
+    font-size:15.5px;color:var(--fg);line-height:1.4;font-weight:600;}
+  .phase ul + .out{margin-top:24px;}
+  .phase .out span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--green);margin-bottom:8px;font-weight:400;}
+
+  .callout{margin-top:26px;border:1px solid var(--green-line);background:var(--green-dim);
+    border-radius:var(--r-card);padding:22px 26px;font-size:15px;color:var(--fg-2);line-height:1.55;max-width:88ch;}
+  .callout b{color:var(--green);font-weight:600;}
+  .callout.warnbox{border-color:var(--warn-line);background:var(--warn-dim);}
+  .callout.warnbox b{color:var(--warn);}
+  .callout.neutral{border-color:var(--line-2);background:var(--card);}
+  .callout.neutral b{color:var(--fg);}
+  .callout .tagline{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+  .callout.warnbox .tagline{color:var(--warn);}
+  .callout.neutral .tagline{color:var(--muted-2);}
+  .callout ul{margin:8px 0 0;padding-left:18px;}
+  .callout li{margin-top:4px;}
+
+  /* ---- tabela preço (closer) ---- */
+  .tbl{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;}
+  .tbl th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);
+    text-align:left;padding:10px 10px;border-bottom:1px solid var(--warn-line);font-weight:400;}
+  .tbl td{padding:11px 10px;border-bottom:1px solid var(--line);color:var(--fg-2);vertical-align:top;}
+  .tbl td:first-child b{color:var(--fg);}
+  .tbl td small{display:block;color:var(--muted);font-size:12.5px;}
+  .tblwrap{overflow-x:auto;}
+
+  /* ---- passos ---- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:40px;}
+  @media (max-width:800px){.steps{grid-template-columns:1fr;}}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:26px 24px;
+    position:relative;overflow:hidden;}
+  .step::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);opacity:.5;}
+  .step .n{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--green);text-transform:uppercase;}
+  .step h3{margin-top:12px;}
+  .step p{color:var(--muted);font-size:14.5px;margin-top:10px;line-height:1.45;}
+
+  .closing{margin-top:40px;border:1px solid var(--green-line);border-radius:var(--r-lg);
+    background:linear-gradient(150deg,rgba(0,232,95,.11),var(--card) 62%);padding:40px 34px;
+    display:flex;gap:30px;align-items:center;flex-wrap:wrap;}
+  .closing .txt{flex:1 1 400px;min-width:0;}
+  .closing .txt p{color:var(--muted);font-size:15px;margin-top:12px;max-width:50ch;}
+  .closing .sig{flex:none;font-size:13.5px;color:var(--muted-2);line-height:1.8;
+    border-left:1px solid var(--green-line);padding-left:26px;}
+  .closing .sig b{display:block;color:var(--fg);font-weight:600;font-size:15px;}
+  @media (max-width:760px){.closing{padding:30px 24px;}.closing .sig{border-left:none;padding-left:0;
+    border-top:1px solid var(--green-line);padding-top:18px;}}
+
+  footer{border-top:1px solid var(--line);padding-block:38px 52px;}
+  footer .tag{font-family:var(--head);font-size:26px;text-transform:uppercase;letter-spacing:.01em;
+    color:var(--muted);margin-bottom:12px;}
+  footer .fine{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-3);}
+
+  body:not(.closer) .only-closer{display:none!important;}
+  body.closer .only-client{display:none!important;}
+  .tbl.gtbl th{border-bottom-color:var(--green-line);}
+  .tbl.gtbl td:last-child{color:var(--fg);}
+  .callout.neutral .tbl{margin-top:4px;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="inner">
+    <div class="logo">
+      <span class="mark"></span>
+      <span class="wm">O2</span>
+      <small>INC.</small>
+    </div>
+    <div class="prod"><span>BPO</span> Financeiro</div>
+    <div class="spacer"></div>
+    
+  </div>
+</header>
+
+<nav class="secnav" aria-label="Seções">
+  <div class="inner">
+    <a href="#escopo"><span class="n">01</span>O que faz</a>
+    <a href="#implantacao"><span class="n">02</span>Implantação</a>
+    <a href="#passos"><span class="n">03</span>Próximos passos</a>
+  </div>
+</nav>
+
+<main>
+  <!-- 01 · ESCOPO -->
+  <section id="escopo">
+    <div class="wrap">
+      <div class="hero">
+        <span class="tag">Escopo do serviço</span>
+        <h1><span class="g">BPO</span> Financeiro</h1>
+      </div>
+      <div class="eyebrow"><span class="idx">01</span><span class="bar"></span>Escopo</div>
+      <h2>O que a O2 faz<br><span class="g">e o que você passa a ter</span></h2>
+      <p class="lead">A rotina financeira executada todo dia, com dado confiável e no prazo, sem aumentar o seu quadro.</p>
+
+      <div class="pillars">
+        <article class="pillar">
+          <span class="n">01</span>
+          <h3>Contas a pagar</h3>
+          <p class="promise">Tudo lançado, agendado e no seu controle.</p>
+          <ul class="items">
+            <li><span class="tick">✓</span><span><span class="t">Lançamento no ERP</span><span class="s">Cada conta com a data de vencimento</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Organização do cronograma financeiro</span><span class="s">O que vence na semana, no mês e no ano</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Agendamentos bancários</span><span class="s">Nas datas que você define, para você aprovar</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Folha no ERP e agendada</span><span class="s">Inclusão e agendamento do pagamento</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Padronização do envio de documentos</span><span class="s">Como e quando cada conta chega</span></span></li>
+          </ul>
+        </article>
+
+        <article class="pillar">
+          <span class="n">02</span>
+          <h3>Contas a receber e conciliação</h3>
+          <p class="promise">Saber o que entrou, todo dia.</p>
+          <ul class="items">
+            <li><span class="tick">✓</span><span><span class="t">Identificação de recebimentos</span><span class="s">Inclusive das maquininhas e adquirentes</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Baixas e ERP atualizado</span><span class="s">Receber em dia no sistema</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Conciliação bancária recorrente</span><span class="s">Extrato e ERP batendo, saldo incluso</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Relatório de inadimplência</span><span class="s">Quem deve, quanto e desde quando</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Ajustes operacionais no ERP</span><span class="s">Inconsistências corrigidas no caminho</span></span></li>
+          </ul>
+        </article>
+
+        <article class="pillar">
+          <span class="n">03</span>
+          <h3>Rotina, relatórios e fechamento</h3>
+          <p class="promise">O mês fechado e os números à mão.</p>
+          <ul class="items">
+            <li><span class="tick">✓</span><span><span class="t">Ritual semanal de alinhamento</span><span class="s">Agenda fixa com você, o ano todo</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Relatório de contas a pagar</span><span class="s">No recorte que você pedir</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Relatório de contas a receber</span><span class="s">O que está para entrar</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Relatório de fluxo de caixa</span><span class="s">Entradas e saídas em um só lugar</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Fechamento mensal até o dia 10</span><span class="s">ERP pronto para a contabilidade</span></span></li>
+            <li><span class="tick">✓</span><span><span class="t">Atualização da plataforma Oxy</span><span class="s">Seus números visíveis ao fim de cada ciclo</span></span></li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout neutral">
+        <span class="tagline">Como o trabalho acontece</span>
+        <b>A O2 executa, você decide.</b> O que pagar e quando continua sendo decisão da empresa. O acesso ao banco e ao ERP é nomeado, no nome de quem executa, com registro de tudo o que foi feito, e serve para agendar e consultar. <b>A aprovação do pagamento fica sempre com os donos da conta.</b>
+      </div>
+
+      
+    </div>
+  </section>
+
+  <!-- 02 · IMPLANTAÇÃO -->
+  <section id="implantacao">
+    <div class="wrap">
+      <div class="eyebrow"><span class="idx">02</span><span class="bar"></span>Implantação</div>
+      <h2>Em 30 dias,<br><span class="g">a rotina rodando</span></h2>
+      <p class="lead">O começo é sobre comunicação: combinar como cada documento chega. Com isso definido, a execução não trava.</p>
+
+      <div class="phases">
+        <div class="phase">
+          <span class="n">Kick-off e semana 1</span>
+          <h3>Mapeamento</h3>
+          <ul>
+            <li><span>Responsáveis, escopo e canais definidos</span></li>
+            <li><span>Acessos ao ERP e aos bancos</span></li>
+            <li><span>Contas fixas, fornecedores, tributos, folha e empréstimos</span></li>
+            <li><span>Recebimentos e clientes mapeados</span></li>
+          </ul>
+          <div class="out"><span>Entregável</span>Rotina financeira mapeada e envio de documentos combinado.</div>
+        </div>
+        <div class="phase">
+          <span class="n">Semana 2</span>
+          <h3>Estruturação</h3>
+          <ul>
+            <li><span>Cadastros e plano de contas revisados</span></li>
+            <li><span>ERP estruturado para a operação</span></li>
+            <li><span>Datas de envio e padrão documental</span></li>
+            <li><span>Fluxos de pagar e receber desenhados</span></li>
+          </ul>
+          <div class="out"><span>Entregável</span>ERP e fluxos prontos para operar.</div>
+        </div>
+        <div class="phase">
+          <span class="n">Semanas 3 e 4</span>
+          <h3>Operação assistida</h3>
+          <ul>
+            <li><span>Lançamentos e conciliações com supervisão</span></li>
+            <li><span>Fluxo de caixa atualizado</span></li>
+            <li><span>Inconsistências corrigidas</span></li>
+            <li><span>Reunião de fechamento e agendas recorrentes</span></li>
+          </ul>
+          <div class="out"><span>Entregável</span>Rotina estável e aprovada. Operação recorrente começa.</div>
+        </div>
+      </div>
+
+      <div class="callout neutral">
+        <span class="tagline">Equipe interna × BPO Financeiro</span>
+        <div class="tblwrap">
+          <table class="tbl gtbl">
+            <thead><tr><th>Equipe interna</th><th>BPO Financeiro O2</th></tr></thead>
+            <tbody>
+              <tr><td>Salário CLT + encargos</td><td>Mensalidade fixa</td></tr>
+              <tr><td>Férias e 13º salário</td><td>Sem custo adicional</td></tr>
+              <tr><td>Rescisões</td><td>Sem passivo trabalhista</td></tr>
+              <tr><td>Ausências param a operação</td><td>Continuidade garantida</td></tr>
+              <tr><td>Conhecimento na cabeça de uma pessoa</td><td>Processo documentado</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      
+    </div>
+  </section>
+
+  <!-- 03 · PRÓXIMOS PASSOS -->
+  <section id="passos">
+    <div class="wrap">
+      <div class="eyebrow"><span class="idx">03</span><span class="bar"></span>Próximos passos</div>
+      <h2>O caminho<br><span class="g">até o kick-off</span></h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="n">Etapa 01</div>
+          <h3>Documentação</h3>
+          <p>Documentos da empresa, a relação de CNPJs e as contas bancárias que entram no escopo.</p>
+        </div>
+        <div class="step">
+          <div class="n">Etapa 02</div>
+          <h3>Assinatura</h3>
+          <p>Contrato assinado e pagamento inicial confirmado. É o que ativa o projeto.</p>
+        </div>
+        <div class="step">
+          <div class="n">Etapa 03</div>
+          <h3>Kick-off</h3>
+          <p>O time de BPO apresenta a metodologia, define responsáveis e canais e solicita os acessos ao ERP e aos bancos.</p>
+        </div>
+      </div>
+
+      <div class="closing">
+        <div class="txt">
+          <h3>Financeiro atrasado<br><span class="g">é decisão tomada no escuro</span></h3>
+          <p>Quanto antes os acessos estiverem liberados, antes a sua rotina financeira passa a rodar em dia, todo dia.</p>
+        </div>
+        
+      </div>
+
+      
+      
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="tag">Compreender pessoas, oxigenar negócios.</div>
+      <div class="fine">O2 Inc. · BPO Financeiro · Documento comercial · Confidencial</div>
+    </div>
+  </footer>
+</main>
+
+
+</body>
+</html>
