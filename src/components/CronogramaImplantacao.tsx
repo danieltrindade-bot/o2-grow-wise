@@ -9,7 +9,7 @@ export function CronogramaImplantacao() {
 
       <div className="mt-4 h-0.5 rounded bg-gradient-to-r from-primary to-primary/20 mx-1" />
 
-      <div className="mt-4 grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         {BPO_CRONOGRAMA.map((etapa) => (
           <div key={etapa.label} className="relative rounded-xl border border-border bg-background/50 p-4">
             <span className="absolute -top-1.5 left-4 h-3 w-3 rounded-full bg-primary ring-4 ring-card" />
@@ -22,13 +22,18 @@ export function CronogramaImplantacao() {
                 </li>
               ))}
             </ul>
+            {etapa.deliverable && (
+              <p className="mt-3 border-t border-border pt-2.5 text-[12px] leading-snug text-foreground/80">
+                <span className="font-semibold text-primary">Entregável:</span> {etapa.deliverable}
+              </p>
+            )}
           </div>
         ))}
       </div>
 
       <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-primary/40 bg-primary/10 p-3.5 text-sm leading-relaxed text-foreground/90">
         <span>
-          <strong className="text-primary">Depois:</strong> operação recorrente — execução disciplinada das rotinas,
+          <strong className="text-primary">Depois:</strong> operação recorrente, com execução disciplinada das rotinas,
           atualização das informações e acompanhamento contínuo.
         </span>
       </div>

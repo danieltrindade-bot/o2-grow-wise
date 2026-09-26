@@ -13,6 +13,7 @@ import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
+import { ProductPresentation } from "@/components/ProductPresentation";
 
 export const Route = createFileRoute("/calculadora/tributario")({
   component: TributarioPage,
@@ -104,6 +105,10 @@ function TributarioPage() {
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Diagnóstico e Organização Tributária</h1>
           <p className="text-muted-foreground mt-2">Adequação à Reforma Tributária (EC 132/2023 + LC 214/2025)</p>
+        </div>
+
+        <div className="mb-6">
+          <ProductPresentation serviceKey="tributario" title="Diagnóstico e Organização Tributária" />
         </div>
 
         <LossSummaryPanel />

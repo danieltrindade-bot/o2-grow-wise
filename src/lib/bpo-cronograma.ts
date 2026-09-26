@@ -4,61 +4,45 @@ export interface CronogramaEtapa {
   label: string;
   title: string;
   items: string[];
+  deliverable?: string;
 }
 
 export const BPO_CRONOGRAMA_INTRO =
-  "Implantação em 30 dias após a reunião de Kickoff, com reuniões unificadas de Setup + BPO.";
+  "Implantação em 30 dias após o kick-off. O começo é sobre comunicação: combinar como cada documento chega. Com isso definido, a execução não trava.";
 
 export const BPO_CRONOGRAMA: CronogramaEtapa[] = [
   {
-    label: "Kickoff",
-    title: "Alinhamento",
+    label: "Kick-off e semana 1",
+    title: "Mapeamento",
     items: [
-      "Metodologia O2",
-      "Responsáveis e escopo",
-      "Canais de comunicação",
-      "Acessos: sistemas, ERP e bancos",
+      "Responsáveis, escopo e canais definidos",
+      "Acessos ao ERP e aos bancos",
+      "Contas fixas, fornecedores, tributos, folha e empréstimos",
+      "Recebimentos e clientes mapeados",
     ],
-  },
-  {
-    label: "Semana 1",
-    title: "Mapeamento financeiro",
-    items: [
-      "Contas fixas, tributos e folha",
-      "Fornecedores e recebimentos recorrentes",
-      "Empréstimos e clientes",
-      "Padrão de envio de documentos (48h antes)",
-    ],
+    deliverable: "Rotina financeira mapeada e envio de documentos combinado.",
   },
   {
     label: "Semana 2",
-    title: "Estruturação dos processos",
+    title: "Estruturação",
     items: [
-      "Revisão de cadastros e plano de contas",
-      "Estruturação do ERP",
-      "Padronização documental",
-      "Fluxos de contas a pagar e a receber",
+      "Cadastros e plano de contas revisados",
+      "ERP estruturado para a operação",
+      "Datas de envio e padrão documental",
+      "Fluxos de pagar e receber desenhados",
     ],
+    deliverable: "ERP e fluxos prontos para operar.",
   },
   {
-    label: "Semana 3",
+    label: "Semanas 3 e 4",
     title: "Operação assistida",
     items: [
-      "Operação com supervisão",
-      "Primeiros lançamentos e conciliações",
-      "Atualização do fluxo de caixa",
-      "Gargalos e ações corretivas",
+      "Lançamentos e conciliações com supervisão",
+      "Fluxo de caixa atualizado",
+      "Inconsistências corrigidas",
+      "Reunião de fechamento e agendas recorrentes",
     ],
-  },
-  {
-    label: "Semana 4",
-    title: "Estabilização",
-    items: [
-      "Validar estabilidade operacional",
-      "Aprovar rotina recorrente",
-      "Revisão financeira e ERP atualizado",
-      "Agendas recorrentes pré-agendadas",
-    ],
+    deliverable: "Rotina estável e aprovada. Operação recorrente começa.",
   },
 ];
 
@@ -82,8 +66,8 @@ export const BPO_SETUP_DELIVERABLES = [
 
 export function bpoCronogramaStages(): CalcPDFStage[] {
   return BPO_CRONOGRAMA.map((etapa) => ({
-    title: `${etapa.label} — ${etapa.title}`,
-    description: "",
+    title: `${etapa.label}: ${etapa.title}`,
+    description: etapa.deliverable ?? "",
     items: etapa.items,
   }));
 }

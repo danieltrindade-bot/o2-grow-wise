@@ -141,7 +141,7 @@ function CalculadoraBPOPage() {
               <CollapsibleSection
                 eyebrow="Implantação"
                 title="Cronograma de implantação"
-                subtitle="Kickoff → Semana 4 · 30 dias"
+                subtitle="Kick-off → Semanas 3 e 4 · 30 dias"
               >
                 <CronogramaImplantacao />
               </CollapsibleSection>

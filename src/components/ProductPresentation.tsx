@@ -1,357 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, PlayCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SERVICE_DETAILS, type ScopePillar, type ScopeNote, type ServiceDetail } from "@/lib/service-scopes";
 
-interface ServiceDetail {
-  what: string;
-  deliverables: string[];
-  notIncluded?: string[];
-  stages?: { title: string; description: string; items: string[] }[];
-  results?: string[];
+export { SERVICE_DETAILS };
+export type { ServiceDetail };
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">{children}</p>;
 }
 
-export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
-  bpo: {
-    what: "Terceirização operacional das rotinas financeiras do dia a dia — contas a pagar, contas a receber e conciliação bancária — com execução padronizada e atualização contínua do ERP e da plataforma Oxy. Garante organização, previsibilidade e controle, liberando a gestão para focar em estratégia e crescimento.",
-    deliverables: [
-      "Lançamento e atualização financeira no ERP",
-      "Contas a pagar",
-      "Contas a receber",
-      "Conciliação bancária recorrente",
-      "Ritual semanal de alinhamento das atividades",
-      "Relatório de inadimplência",
-      "Relatório de contas a pagar",
-      "Relatório de contas a receber",
-      "Relatório de fluxo de caixa",
-      "Organização do cronograma financeiro",
-      "Padronização de envio de documentos",
-      "Agendamentos bancários",
-      "Ajustes operacionais no ERP e processos",
-      "Atualização da plataforma Oxy",
-    ],
-    notIncluded: [
-      "Análise estratégica financeira / análise Oxy",
-      "Planejamento financeiro",
-      "Gestão estratégica de caixa",
-      "Análise de indicadores financeiros",
-      "Gestão de gastos e redução de custos",
-      "Definição de metas financeiras",
-      "Emissão de nota fiscal",
-      "Entrada de nota fiscal",
-      "Execução contábil e fiscal",
-      "Folha de pagamento",
-      "Cobrança de clientes",
-      "Negociação com inadimplentes",
-      "Emissão de boletos",
-      "Aprovação de pagamentos em bancos",
-    ],
-  },
-  cfo: {
-    what: "Inteligência financeira executiva para empresas que precisam de visão estratégica sem contratar um diretor financeiro em tempo integral. Define direção, prioridades, metas e indicadores de performance.",
-    deliverables: [
-      "Planejamento financeiro e orçamentário",
-      "Análise de margem e rentabilidade",
-      "Gestão de capital de giro e endividamento",
-      "Indicadores de performance (KPIs financeiros)",
-      "Governança financeira e reporte executivo",
-      "Forecast de caixa 30/60/90 dias",
-      "Acompanhamento de metas e desvios",
-    ],
-    stages: [
-      {
-        title: "Gestão Financeira Estratégica Contínua",
-        description: "Suporte executivo de alto nível para a gestão financeira estratégica, com acompanhamento diário e rituais de governança",
-        items: [
-          "Disponibilidade diária",
-          "Reunião Fixa semanal",
-          "Comitê Estratégico Mensal",
-          "Report semanal do status do projeto O2 Inc.",
-        ],
-      },
-      {
-        title: "Análise e Planejamento Avançado",
-        description: "Construção e análise de relatórios financeiros complexos e auxílio no planejamento orçamentário e estratégico de negócios",
-        items: [
-          "Construção e Análise do DRE",
-          "Construção e Análise do Fluxo de Caixa",
-          "Construção e Análise do Ciclo Financeiro",
-          "Análise de relatórios financeiros",
-          "Auxílio na construção do Planejamento orçamentário",
-          "Análise estratégica de negócios",
-        ],
-      },
-      {
-        title: "Suporte Estratégico para o Negócio",
-        description: "Orientação em reestruturação de passivos, captação de recursos, e coordenação de melhorias, atuando como um parceiro estratégico",
-        items: [
-          "Interlocução com a Contabilidade",
-          "Suporte na captação de Recursos",
-          "Suporte na Reestruturação dos Passivos",
-          "Coordenação de planos de ação para melhoria de processos e de resultado financeiro",
-          "Suporte na implementação das melhorias no ERP",
-          "Suporte na construção e treinamento da equipe financeira",
-          "Acompanhamento da Implementação Plataforma Oxy",
-        ],
-      },
-    ],
-  },
-  oxy: {
-    what: "Plataforma de dados financeiros combinada com Agente de IA. Automatiza conciliação, gera alertas inteligentes e entrega visibilidade sobre a saúde financeira da empresa.",
-    deliverables: [
-      "Plataforma Oxy",
-      "Agente IA Gênio para automações",
-      "Conciliação bancária automatizada",
-      "Alertas inteligentes de anomalias",
-      "Dashboards customizados",
-      "Implantação completa e treinamento",
-    ],
-  },
-  assessoria: {
-    what: "Jornada de maturidade financeira com acompanhamento especializado. Evolui a empresa por estágios — da fundação financeira básica até a gestão estratégica completa.",
-    deliverables: [
-      "Diagnóstico estratégico aprofundado",
-      "DRE Gerencial e Fluxo de Caixa Realizado",
-      "Estruturação de centros de custo",
-      "Análise de margem por produto/cliente",
-      "Planejamento orçamentário",
-      "Acompanhamento mensal personalizado",
-    ],
-    stages: [
-      {
-        title: "G1 — Fundação",
-        description: "Construir a base: dados confiáveis e primeiros relatórios reais",
-        items: [
-          "DRE Gerencial Estruturada com visão por unidade de negócio",
-          "Fluxo de Caixa Realizado mensal estruturado",
-          "Calendário Fiscal Implantado",
-        ],
-      },
-      {
-        title: "G2 — Reativa → Controlada",
-        description: "Projeção de caixa e controle do ciclo financeiro",
-        items: [
-          "Fluxo de Caixa Projetado 30–60 dias",
-          "DRE Mensal com Análise de Variação",
-          "Controle AP/AR + Ciclo Financeiro (PMR/PMP/PME)",
-          "Rotina de fechamento mensal até D+5",
-        ],
-      },
-      {
-        title: "G3 — Controlada",
-        description: "Margem, rentabilidade e ponto de equilíbrio",
-        items: [
-          "Análise de Capital de Giro (NCG)",
-          "PMR, PMP, PME monitorados mensalmente",
-          "Ponto de Equilíbrio mensal calculado",
-          "Rentabilidade por tipo de produto/serviço e por cliente",
-        ],
-      },
-      {
-        title: "G4 — Gerencial",
-        description: "Orçamento, KPIs e controle estratégico",
-        items: [
-          "Orçamento Anual Formalizado com premissas documentadas",
-          "Análise orçado vs. realizado (BvA) mensal",
-          "Análise de alavancagem operacional (GAO)",
-          "Painel de KPIs — Dashboard Gerencial",
-        ],
-      },
-      {
-        title: "G5 — Estratégica",
-        description: "Modelagem de longo prazo e governança",
-        items: [
-          "Modelagem Financeira 3–5 anos (3 cenários)",
-          "Material pronto para mesa de crédito e investidores",
-          "BSC Anual / OKR Trimestral",
-          "Governança estratégica implantada",
-        ],
-      },
-    ],
-  },
-  coordenador: {
-    what: "Coordenação operacional do financeiro para promover processos eficientes e execução consistente. É a ponte entre o dia a dia e a estratégia, transformando plano em execução e implementando padrões para que a operação rode com previsibilidade.",
-    deliverables: [
-      "Diagnóstico de pessoas e processos financeiros",
-      "Padronização de rotinas críticas (CP, CR, Conciliação)",
-      "Criação de checklists operacionais",
-      "Ritual semanal de alinhamento com equipe",
-      "Acompanhamento de 2 fechamentos de mês",
-      "Relatório de aderência e governança",
-      "Indicador de Maturidade Operacional",
-    ],
-    notIncluded: [
-      "Execução contábil/fiscal",
-      "Implantação técnica de ERP",
-      "Auditoria formal",
-    ],
-    stages: [
-      {
-        title: "Diagnóstico de Pessoas e Processos Financeiros",
-        description: "Mapeia como os pagamentos, centros de custo e o canal de urgências estão sendo operados, identificando gargalos, riscos e oportunidades de padronização",
-        items: [
-          "Mapeamento completo dos papéis e responsabilidades do time financeiro",
-          "Diagnóstico do processo de contas a pagar e centros de custo por evento",
-          "Identificação de riscos operacionais no canal de urgências",
-          "Hipóteses de melhorias e quick wins com impacto imediato",
-        ],
-      },
-      {
-        title: "Padronização de Rotinas e Criação de Processos",
-        description: "Transforma as decisões que hoje dependem do fundador em processos documentados, checklists e políticas que o time executa de forma autônoma e consistente",
-        items: [
-          "Criação de checklists para abertura, execução e fechamento financeiro de eventos",
-          "Padronização do processo de aprovação de pagamentos por alçada",
-        ],
-      },
-      {
-        title: "Rituais de Acompanhamento e Indicador de Maturidade Operacional",
-        description: "Implanta rituais semanais e mensais que garantem que os processos sejam seguidos com consistência, com medição objetiva da evolução da maturidade operacional",
-        items: [
-          "Ritual semanal de alinhamento das atividades financeiras",
-          "Inspeção por amostragem de lançamentos e documentos",
-          "Indicador de Maturidade Operacional com nota quantitativa por processo",
-          "Relatório de aderência e recomendações de continuidade",
-        ],
-      },
-    ],
-  },
-  estrategico: {
-    what: "Entregamos uma análise profunda e completa do seu negócio, identificando oportunidades de melhoria em todas as áreas essenciais, para levar sua empresa ao próximo nível, com mais controle e lucratividade.",
-    deliverables: [
-      "Análise histórica do desempenho financeiro e operacional da sua empresa",
-      "Avaliação detalhada de 10 áreas-chave: financeiro, tecnologia, planejamento, contábil, controladoria, fiscal, comercial, marketing, societário e capital humano",
-      "Identificação clara de pontos fortes, gargalos e oportunidades de crescimento",
-      "Construção e detalhamento de plano de ação prático para reverter situações críticas e potencializar fortalezas do negócio",
-      "Construção de simulação projetando resultado com as melhorias sugeridas",
-    ],
-    results: [
-      "Identificação profissional dos problemas atuais em todas as áreas do negócio.",
-      "Maior clareza para tomar decisões com base em dados fidedignos e não em sentimentos.",
-      "Plano de ação técnico e calculado para implementação de melhorias operacionais, financeiras, comerciais e de gestão.",
-      "Melhoria integrada dos resultados econômico-financeiros e operacionais, aumentando a eficiência e sinergia entre todas as áreas da empresa.",
-    ],
-  },
-  valuation: {
-    what: "Valorize a história que você dedicou tempo e energia e maximize o valor do seu negócio através de um trabalho técnico e profissional de Valuation. Projeto de até 60 dias, com emissão de laudo técnico.",
-    deliverables: [
-      "Análise de Relatórios Contábeis",
-      "Estudo de Mercado, Benchmarks e Pares",
-      "Entendimento do Planejamento Estratégico",
-      "Modelagem Financeira (DCF e Múltiplos)",
-      "Avaliação Patrimonial Contábil e Gerencial",
-      "Emissão do Laudo Técnico de Valuation",
-    ],
-    stages: [
-      {
-        title: "Análise de Relatórios Contábeis",
-        description: "Revisão detalhada dos demonstrativos financeiros da empresa",
-        items: [
-          "Revisão de DRE, Balanço Patrimonial, Fluxo de Caixa, etc.",
-          "Identificação da saúde financeira e dos pontos de atenção",
-        ],
-      },
-      {
-        title: "Estudo de Mercado, Benchmarks e Pares",
-        description: "Comparação da empresa com concorrentes diretos e indiretos",
-        items: [
-          "Uso de benchmarks financeiros e operacionais do mercado",
-          "Identificação de empresas similares (pares) para balizar o valuation",
-        ],
-      },
-      {
-        title: "Entendimento do Planejamento Estratégico",
-        description: "Reuniões com os sócios sobre a visão e os objetivos de longo prazo",
-        items: [
-          "Compreensão da visão e dos objetivos de longo prazo da empresa",
-          "Projeção do crescimento e das metas futuras no valuation",
-        ],
-      },
-      {
-        title: "Modelagem Financeira (DCF e Múltiplos)",
-        description: "Projeções financeiras detalhadas para determinar o valor justo",
-        items: [
-          "Fluxo de Caixa Descontado (DCF)",
-          "Avaliação por Múltiplos",
-          "Valor justo da empresa com base em diferentes cenários",
-        ],
-      },
-      {
-        title: "Avaliação Patrimonial Contábil e Gerencial",
-        description: "Verificação do valor dos ativos e passivos da empresa",
-        items: [
-          "Visão contábil, a partir do balanço",
-          "Visão gerencial, a valor de mercado dos ativos (imóveis, máquinas, etc.)",
-        ],
-      },
-      {
-        title: "Emissão do Laudo Técnico de Valuation",
-        description: "Relatório técnico formal com a avaliação completa da empresa",
-        items: [
-          "Avaliação completa e detalhada da empresa",
-          "Justificativa do valor encontrado com base nas análises anteriores",
-        ],
-      },
-    ],
-    results: [
-      "Tomada de decisão estratégica",
-      "Preparação para Fusões e Aquisições",
-      "Captação de Investimentos",
-      "Mudança na estrutura societária",
-      "Maximização do valor de uma venda",
-    ],
-  },
-  turnaround: {
-    what: "Garantimos a sobrevivência e a sustentabilidade dos negócios, através de captação de recursos, repactuação de passivos, gestão e controladoria. Projeto de 12 meses com equipe sênior (Partner, CFO e Analista) para recuperar o equilíbrio operacional e financeiro da empresa.",
-    deliverables: [
-      "Clareza na estratégia de recuperação do negócio",
-      "Captação de recursos estratégicos",
-      "Credibilidade fortalecida",
-      "Ponto de equilíbrio operacional",
-      "Ponto de equilíbrio financeiro",
-      "Perspectiva de retomada de crescimento",
-      "Mitigação de riscos de pausa fabril",
-    ],
-    stages: [
-      {
-        title: "Gestão e Controladoria",
-        description: "Estruturação da controladoria e da tomada de decisão lastreada em dados fidedignos",
-        items: [
-          "Orientação e auxílio na elaboração de plano de contas",
-          "Orientação e auxílio na elaboração de fluxo de caixa",
-          "Acompanhamento da apuração e análise do resultado do negócio",
-          "Otimizar a tomada de decisão, lastreando opiniões em dados fidedignos",
-          "Acompanhamento de indicadores gerenciais de controladoria",
-          "Reuniões periódicas de alinhamento e evolução do projeto",
-        ],
-      },
-      {
-        title: "Assessoria na Captação de Recursos",
-        description: "Viabilização de operações financeiras estratégicas junto a bancos e instituições financeiras",
-        items: [
-          "Diagnóstico das necessidades de crédito da empresa com base em documentação atualizada",
-          "Análise do ciclo operacional e ciclo financeiro",
-          "Análise do indicador financeiro de necessidade de capital de giro",
-          "Análise do endividamento junto a bancos e instituições financeiras",
-          "Fechamento de contratos",
-        ],
-      },
-      {
-        title: "Repactuação de Passivos",
-        description: "Mapeamento e renegociação do endividamento com base na capacidade real de desembolso",
-        items: [
-          "Mapeamento de endividamento da empresa",
-          "Diagnóstico financeiro e contábil",
-          "Análise da necessidade de capital de giro",
-          "Projeção de fluxo de caixa e capacidade de desembolso",
-          "Mapeamento dos agentes financeiros",
-          "Fechamento de contratos de renegociação",
-        ],
-      },
-    ],
-  },
-};
+function NoteBox({ note }: { note: ScopeNote }) {
+  return (
+    <div className="rounded-xl bg-background/50 border border-border p-4">
+      <p className="text-xs uppercase tracking-wider text-primary mb-1">{note.title}</p>
+      <p className="text-sm leading-relaxed text-muted-foreground">{note.text}</p>
+    </div>
+  );
+}
+
+function PillarCard({ pillar, index }: { pillar: ScopePillar; index: number }) {
+  return (
+    <div className="rounded-xl border border-border bg-background/50 p-4">
+      <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-bold">
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <p className="font-semibold text-sm leading-tight mt-3">{pillar.title}</p>
+      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{pillar.subtitle}</p>
+      <ul className="mt-3 space-y-2">
+        {pillar.items.map((item) => (
+          <li key={item.label} className="flex items-start gap-2">
+            <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <span className="text-sm leading-snug">
+              {item.label}
+              <span className="block text-xs text-muted-foreground">{item.detail}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function StageCard({ stage, index, badge }: { stage: { title: string; description: string; items: string[] }; index: number; badge?: string }) {
   const [open, setOpen] = useState(false);
@@ -398,28 +89,84 @@ function StageCard({ stage, index, badge }: { stage: { title: string; descriptio
   );
 }
 
+function PhasesBlock({ phases }: { phases: NonNullable<ServiceDetail["phases"]> }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={cn("rounded-xl border bg-background/50 overflow-hidden transition-colors", open ? "border-primary" : "border-border")}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className="w-full flex items-center gap-4 p-4 text-left hover:bg-primary/5 transition-colors"
+      >
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm leading-tight">{phases.title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{phases.intro}</p>
+        </div>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200", open && "rotate-180")} />
+      </button>
+      <div className={cn("grid transition-all duration-200 ease-in-out", open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
+        <div className="overflow-hidden">
+          <div className="border-t border-border p-4 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {phases.steps.map((step) => (
+                <div key={step.title} className="rounded-xl border border-border bg-card p-4">
+                  <p className="font-mono text-[12px] font-bold uppercase tracking-[0.1em] text-primary">{step.label}</p>
+                  <p className="mt-1 text-sm font-semibold leading-tight">{step.title}</p>
+                  <ul className="mt-2 space-y-1">
+                    {step.items.map((item) => (
+                      <li key={item} className="text-[13px] leading-snug text-muted-foreground">{item}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 border-t border-border pt-2 text-[12px] leading-snug text-foreground/80">
+                    <span className="font-semibold text-primary">Entregável:</span> {step.deliverable}
+                  </p>
+                </div>
+              ))}
+            </div>
+            {phases.note && <NoteBox note={phases.note} />}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ProductPresentation({ serviceKey, title }: { serviceKey: string; title: string }) {
   const detail = SERVICE_DETAILS[serviceKey];
   if (!detail) return null;
 
-  const hasStages = detail.stages && detail.stages.length > 0;
+  const hasPillars = !!detail.pillars?.length;
+  const hasStages = !hasPillars && !!detail.stages?.length;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6">
-      <div className="rounded-xl bg-background/50 border border-border p-4 mb-5">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">O que é — {title}</p>
+    <section className="rounded-2xl border border-border bg-card p-6 space-y-5">
+      <div className="rounded-xl bg-background/50 border border-border p-4">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">O que é: {title}</p>
         <p className="text-sm leading-relaxed">{detail.what}</p>
       </div>
 
-      {hasStages ? (
-        <div className="mb-4">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
+      {hasPillars && (
+        <div>
+          <Eyebrow>O que a O2 faz e o que você passa a ter</Eyebrow>
+          {detail.pillarsIntro && <p className="text-sm text-muted-foreground -mt-1 mb-3">{detail.pillarsIntro}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {detail.pillars!.map((p, i) => (
+              <PillarCard key={p.title} pillar={p} index={i} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {hasStages && (
+        <div>
+          <Eyebrow>
             {serviceKey === "assessoria"
-              ? "Jornada de Maturidade — 5 estágios de evolução"
+              ? "Jornada de maturidade: 5 estágios de evolução"
               : serviceKey === "valuation"
-                ? "Detalhamento do escopo — até 60 dias"
-                : "Escopo — Pilares de entrega"}
-          </p>
+                ? "Detalhamento do escopo: até 60 dias"
+                : "Escopo: pilares de entrega"}
+          </Eyebrow>
           <div className="space-y-2">
             {detail.stages!.map((stage, i) => (
               <StageCard
@@ -431,9 +178,11 @@ export function ProductPresentation({ serviceKey, title }: { serviceKey: string;
             ))}
           </div>
         </div>
-      ) : (
-        <div className="mb-4">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Escopo — O que entrega</p>
+      )}
+
+      {!hasPillars && !hasStages && (
+        <div>
+          <Eyebrow>Escopo: o que entrega</Eyebrow>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {detail.deliverables.map((d) => (
               <li key={d} className="flex items-start gap-2 text-sm">
@@ -445,9 +194,92 @@ export function ProductPresentation({ serviceKey, title }: { serviceKey: string;
         </div>
       )}
 
+      {detail.notes?.map((n) => <NoteBox key={n.title} note={n} />)}
+
+      {detail.team && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {detail.team.map((m) => (
+            <div key={m.role} className="rounded-xl border border-border bg-background/50 p-4">
+              <p className="text-sm font-semibold text-primary">{m.role}</p>
+              <p className="text-sm text-muted-foreground mt-0.5 leading-snug">{m.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {detail.areas && (
+        <div className="border-t border-border pt-4">
+          <Eyebrow>{detail.areas.title}</Eyebrow>
+          <p className="text-sm text-muted-foreground -mt-1 mb-3">{detail.areas.intro}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {detail.areas.items.map((a, i) => (
+              <div key={a} className="rounded-lg border border-border bg-background/50 px-3 py-2 text-sm">
+                <span className="font-mono text-xs text-primary mr-1.5">{String(i + 1).padStart(2, "0")}</span>
+                {a}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {detail.modalities && (
+        <div className="border-t border-border pt-4">
+          <Eyebrow>{detail.modalities.title}</Eyebrow>
+          <p className="text-sm text-muted-foreground -mt-1 mb-3">{detail.modalities.intro}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {detail.modalities.options.map((m) => (
+              <div key={m.name} className="rounded-xl border border-border bg-background/50 p-4">
+                <p className="text-xs uppercase tracking-wider text-primary">{m.tag}</p>
+                <p className="text-sm font-semibold mt-1">{m.name}</p>
+                <p className="text-sm text-muted-foreground mt-1 leading-snug">{m.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {detail.comparison && (
+        <div className="border-t border-border pt-4">
+          <Eyebrow>{detail.comparison.title}</Eyebrow>
+          <div className="rounded-xl border border-border overflow-hidden text-sm">
+            <div className="grid grid-cols-2 bg-background/50 font-semibold">
+              <p className="p-3 text-muted-foreground">{detail.comparison.headers[0]}</p>
+              <p className="p-3 text-primary">{detail.comparison.headers[1]}</p>
+            </div>
+            {detail.comparison.rows.map(([a, b]) => (
+              <div key={a} className="grid grid-cols-2 border-t border-border">
+                <p className="p-3 text-muted-foreground">{a}</p>
+                <p className="p-3 flex items-start gap-2">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  {b}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {detail.video && (
+        <a
+          href={detail.video.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 rounded-xl border border-border bg-background/50 p-4 hover:border-primary/60 transition-colors"
+        >
+          <PlayCircle className="h-8 w-8 text-primary shrink-0" />
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-semibold">{detail.video.title}</span>
+            <span className="block text-xs text-muted-foreground">{detail.video.text}</span>
+          </span>
+          <span className="text-xs text-primary shrink-0">Assistir no YouTube ↗</span>
+        </a>
+      )}
+
+      {detail.phases && <PhasesBlock phases={detail.phases} />}
+
       {detail.results && detail.results.length > 0 && (
-        <div className="border-t border-border pt-4 mb-4">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Resultados esperados</p>
+        <div className="border-t border-border pt-4">
+          <Eyebrow>Resultados esperados</Eyebrow>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {detail.results.map((r) => (
               <div key={r} className="rounded-xl border border-border bg-background/50 p-4 flex items-start gap-2.5">
@@ -467,6 +299,29 @@ export function ProductPresentation({ serviceKey, title }: { serviceKey: string;
               <span key={n} className="text-xs text-muted-foreground bg-secondary rounded-full px-3 py-1">{n}</span>
             ))}
           </div>
+        </div>
+      )}
+
+      {detail.nextSteps && (
+        <div className="border-t border-border pt-4">
+          <Eyebrow>Próximos passos: o caminho até o kick-off</Eyebrow>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {detail.nextSteps.map((s, i) => (
+              <div key={s.title} className="rounded-xl border border-border bg-background/50 p-4">
+                <p className="font-mono text-[12px] font-bold uppercase tracking-[0.1em] text-primary">
+                  Etapa {String(i + 1).padStart(2, "0")}
+                </p>
+                <p className="text-sm font-semibold mt-1">{s.title}</p>
+                <p className="text-sm text-muted-foreground mt-1 leading-snug">{s.text}</p>
+              </div>
+            ))}
+          </div>
+          {detail.cta && (
+            <div className="mt-3 rounded-xl border border-primary/40 bg-primary/10 p-4">
+              <p className="text-sm font-semibold">{detail.cta.title}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{detail.cta.text}</p>
+            </div>
+          )}
         </div>
       )}
     </section>

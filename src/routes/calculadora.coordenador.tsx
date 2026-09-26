@@ -64,10 +64,10 @@ const PERFIS: { id: CoordPerfil; label: string; desc: string }[] = [
 ];
 
 const INCLUDES = [
-  "Coordenador financeiro dedicado",
-  "Gestão de equipe financeira",
-  "Processos e controles",
-  "Reporte executivo",
+  "Diagnóstico de pessoas e processos",
+  "Processos padronizados",
+  "Ritual semanal e Indicador de Maturidade",
+  "Estruturação financeira com a plataforma",
 ];
 
 const FUNC_TOOLTIP =

@@ -33,9 +33,9 @@ const DISCOUNTS = [
 ];
 
 const INCLUDES = [
-  "Jornada de maturidade financeira",
-  "Acompanhamento personalizado",
-  "Diagnóstico estratégico aprofundado",
+  "Jornada de maturidade financeira em 5 estágios",
+  "Entregas próprias a cada 90 dias",
+  "Início no estágio em que a empresa está hoje",
 ];
 
 function lookupTier(rules: AssessoriaRule[], monthlyRevenue: number): AssessoriaRule | null {
