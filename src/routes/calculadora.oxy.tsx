@@ -16,6 +16,7 @@ import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-u
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { RoiPanel } from "@/components/RoiPanel";
+import { LucroRealPanel } from "@/components/LucroRealPanel";
 import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
@@ -196,6 +197,7 @@ function OxyPage() {
                   </div>
 
                   <RoiPanel investmentMonthly={parcela} />
+                  <LucroRealPanel lines={[{ label: "Parcela no cartão", value: parcela, suffix: "/mês" }, { label: "Valor total do projeto", value: totalComDesconto }]} />
 
                   <div className="mt-5">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Inclui</p>

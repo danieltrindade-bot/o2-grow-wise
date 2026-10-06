@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { formatBRL } from "@/lib/pricing-shared";
+import { LucroRealPanel } from "@/components/LucroRealPanel";
 import { useEstrategicoPricing, type EstrategicoRule } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -133,6 +134,7 @@ function EstrategicoPage() {
                       {formatBRL(animatedFinal)}
                     </p>
                   </div>
+                  <LucroRealPanel lines={[{ label: "Valor total", value: valorFinal }]} />
 
                   <div className="mt-4 grid grid-cols-1 gap-3">
                     <div className="rounded-xl border border-border bg-background p-4">

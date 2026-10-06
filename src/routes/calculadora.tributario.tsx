@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { formatBRL } from "@/lib/pricing-shared";
+import { LucroRealPanel } from "@/components/LucroRealPanel";
 import { useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
@@ -212,6 +213,7 @@ function TributarioPage() {
                     Total: {formatBRL(total6mComDesconto)} em 12x
                   </p>
                 </div>
+                <LucroRealPanel lines={[{ label: "Parcela no cartão", value: parcela12x, suffix: "/mês" }, { label: "Total do projeto", value: total6mComDesconto }]} />
 
                 <div className="mt-5">
                   <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Inclui</p>

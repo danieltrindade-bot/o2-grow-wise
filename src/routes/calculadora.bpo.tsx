@@ -13,6 +13,7 @@ import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { RoiPanel } from "@/components/RoiPanel";
+import { LucroRealPanel } from "@/components/LucroRealPanel";
 import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
@@ -275,6 +276,7 @@ function CalculadoraBPOPage() {
                         </p>
                       </div>
                       <RoiPanel investmentMonthly={valorComDesconto} />
+                      <LucroRealPanel lines={[{ label: "Valor final mensal", value: valorComDesconto, suffix: "/mês" }]} />
                       <Button
                         onClick={() =>
                           exportCalculatorPDF({

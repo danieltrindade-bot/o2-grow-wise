@@ -16,6 +16,7 @@ import { CalcLoadingSkeleton, ErrorState } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
 import { RoiPanel } from "@/components/RoiPanel";
+import { LucroRealPanel } from "@/components/LucroRealPanel";
 import { useDiagnosticLoss } from "@/lib/roi";
 import { Row } from "@/components/calc-row";
 import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
@@ -302,6 +303,7 @@ function CalculadoraCFOPage() {
                         </div>
                       </div>
                       <RoiPanel investmentMonthly={totalMensal} />
+                      <LucroRealPanel lines={[{ label: "Investimento mensal total", value: totalMensal, suffix: "/mês" }, { label: "Setup total", value: setupComDesconto }]} />
                       <Button
                         onClick={() =>
                           exportCalculatorPDF({
