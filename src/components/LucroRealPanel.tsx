@@ -54,45 +54,38 @@ export function LucroRealPanel({ lines }: { lines: LucroRealLine[] }) {
           </p>
 
           <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card text-xs">
-            <div className="grid grid-cols-3 gap-2 border-b border-border px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 border-b border-border px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
               <span />
-              <span className="text-right">Presumido</span>
-              <span className="text-right text-primary">Lucro Real</span>
+              <span className="whitespace-nowrap text-right">Presumido</span>
+              <span className="whitespace-nowrap text-right text-primary">Lucro Real</span>
             </div>
             {lines.map((line) => {
               const benefit = line.value * LUCRO_REAL_RATE;
-              const s = line.suffix ?? "";
               return (
                 <div key={line.label} className="border-b border-border last:border-b-0 px-3 py-2 space-y-1">
                   <p className="font-medium">{line.label}</p>
-                  <div className="grid grid-cols-3 gap-2 tabular-nums">
-                    <span className="text-muted-foreground">Valor cobrado</span>
-                    <span className="text-right">{formatBRL(line.value)}</span>
-                    <span className="text-right">{formatBRL(line.value)}</span>
+                  <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 tabular-nums">
+                    <span className="text-muted-foreground">Cobrado</span>
+                    <span className="whitespace-nowrap text-right">{formatBRL(line.value)}</span>
+                    <span className="whitespace-nowrap text-right">{formatBRL(line.value)}</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 tabular-nums">
-                    <span className="text-muted-foreground">IRPJ/CSLL ({pctRate}%)</span>
-                    <span className="text-right">{formatBRL(0)}</span>
-                    <span className="text-right text-primary">({formatBRL(benefit)})</span>
+                  <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 tabular-nums">
+                    <span className="text-muted-foreground">IRPJ/CSLL</span>
+                    <span className="whitespace-nowrap text-right">{formatBRL(0)}</span>
+                    <span className="whitespace-nowrap text-right text-primary">({formatBRL(benefit)})</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 tabular-nums font-bold">
-                    <span>Investimento real</span>
-                    <span className="text-right">
-                      {formatBRL(line.value)}
-                      {s}
-                    </span>
-                    <span className="text-right text-primary">
-                      {formatBRL(line.value - benefit)}
-                      {s}
-                    </span>
+                  <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 tabular-nums font-bold">
+                    <span>Custo real</span>
+                    <span className="whitespace-nowrap text-right">{formatBRL(line.value)}</span>
+                    <span className="whitespace-nowrap text-right text-primary">{formatBRL(line.value - benefit)}</span>
                   </div>
                 </div>
               );
             })}
-            <div className="grid grid-cols-3 gap-2 bg-muted/40 px-3 py-2 font-mono text-[10px] uppercase tracking-wider">
-              <span className="text-muted-foreground">% do valor cobrado</span>
-              <span className="text-right">100%</span>
-              <span className="text-right text-primary font-bold">{pctNet}%</span>
+            <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 bg-muted/40 px-3 py-2 font-mono text-[10px] uppercase tracking-wider">
+              <span className="text-muted-foreground">% do cobrado</span>
+              <span className="whitespace-nowrap text-right">100%</span>
+              <span className="whitespace-nowrap text-right text-primary font-bold">{pctNet}%</span>
             </div>
           </div>
 
