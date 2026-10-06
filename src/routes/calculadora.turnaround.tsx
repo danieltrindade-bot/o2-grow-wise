@@ -194,7 +194,7 @@ function TurnaroundPage() {
                     </div>
 
                     <RoiPanel investmentMonthly={valorFinal} />
-                    <LucroRealPanel lines={[{ label: "Investimento mensal", value: valorFinal, suffix: "/mês" }]} />
+                    <LucroRealPanel items={[{ label: "Mensalidade", value: valorFinal }]} suffix="/mês" />
 
                     <div className="mt-5">
                       <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">

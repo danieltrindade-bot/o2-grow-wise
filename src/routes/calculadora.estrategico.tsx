@@ -134,7 +134,7 @@ function EstrategicoPage() {
                       {formatBRL(animatedFinal)}
                     </p>
                   </div>
-                  <LucroRealPanel lines={[{ label: "Valor total", value: valorFinal }]} />
+                  <LucroRealPanel items={[{ label: "Valor total", value: valorFinal }]} />
 
                   <div className="mt-4 grid grid-cols-1 gap-3">
                     <div className="rounded-xl border border-border bg-background p-4">

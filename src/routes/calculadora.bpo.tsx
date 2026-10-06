@@ -276,7 +276,7 @@ function CalculadoraBPOPage() {
                         </p>
                       </div>
                       <RoiPanel investmentMonthly={valorComDesconto} />
-                      <LucroRealPanel lines={[{ label: "Valor final mensal", value: valorComDesconto, suffix: "/mês" }]} />
+                      <LucroRealPanel items={[{ label: "Valor mensal", value: valorComDesconto }]} suffix="/mês" />
                       <Button
                         onClick={() =>
                           exportCalculatorPDF({

@@ -307,7 +307,7 @@ function CoordenadorPage() {
                     </div>
 
                     <RoiPanel investmentMonthly={mensalComDesconto + parcela12x} />
-                    <LucroRealPanel lines={[{ label: "Investimento mensal (mensalidade + setup 12x)", value: mensalComDesconto + parcela12x, suffix: "/mês" }, { label: "Setup total", value: setupComDesconto }]} />
+                    <LucroRealPanel items={[{ label: "Mensalidade", value: mensalComDesconto }, { label: "Setup 12x", value: parcela12x }]} suffix="/mês" />
 
                     <div className="mt-5">
                       <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground mb-2">

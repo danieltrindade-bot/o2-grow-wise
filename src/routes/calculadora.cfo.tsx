@@ -303,7 +303,7 @@ function CalculadoraCFOPage() {
                         </div>
                       </div>
                       <RoiPanel investmentMonthly={totalMensal} />
-                      <LucroRealPanel lines={[{ label: "Investimento mensal total", value: totalMensal, suffix: "/mês" }, { label: "Setup total", value: setupComDesconto }]} />
+                      <LucroRealPanel items={[{ label: "Recorrência", value: finalRecorrencia }, { label: "Setup 12x", value: setupParcela }]} suffix="/mês" />
                       <Button
                         onClick={() =>
                           exportCalculatorPDF({

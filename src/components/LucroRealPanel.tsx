@@ -4,24 +4,34 @@ import { formatBRL } from "@/lib/format";
 
 export const LUCRO_REAL_RATE = 0.34;
 
-export interface LucroRealLine {
+export interface LucroRealItem {
   label: string;
   value: number;
-  suffix?: string;
 }
 
 export function lucroRealNet(value: number): number {
   return value * (1 - LUCRO_REAL_RATE);
 }
 
-export function LucroRealPanel({ lines }: { lines: LucroRealLine[] }) {
-  const [open, setOpen] = useState(false);
-  const main = lines[0];
-  if (!main || main.value <= 0) return null;
+const ROW = "grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 px-3 py-2 tabular-nums";
+const NUM = "whitespace-nowrap text-right";
 
+interface LucroRealPanelProps {
+  /** Parcelas que somam o valor cobrado no período (sem repetir valores). */
+  items: LucroRealItem[];
+  suffix?: string;
+  /** Total do projeto exibido só como referência, fora da soma. */
+  projectTotal?: number;
+}
+
+export function LucroRealPanel({ items, suffix = "", projectTotal }: LucroRealPanelProps) {
+  const [open, setOpen] = useState(false);
+  const total = items.reduce((sum, i) => sum + i.value, 0);
+  if (total <= 0) return null;
+
+  const benefit = total * LUCRO_REAL_RATE;
   const pctNet = Math.round((1 - LUCRO_REAL_RATE) * 100);
   const pctRate = Math.round(LUCRO_REAL_RATE * 100);
-  const suffix = main.suffix ?? "";
 
   return (
     <div className="mt-5">
@@ -40,10 +50,10 @@ export function LucroRealPanel({ lines }: { lines: LucroRealLine[] }) {
       {open && (
         <div className="mt-3 rounded-xl border border-primary bg-primary/10 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <p className="text-base font-bold leading-snug">
-            Você paga {formatBRL(main.value)}
+            Você paga {formatBRL(total)}
             {suffix}. A O2 custa{" "}
             <span className="text-primary">
-              {formatBRL(lucroRealNet(main.value))}
+              {formatBRL(lucroRealNet(total))}
               {suffix}
             </span>
             .
@@ -54,40 +64,41 @@ export function LucroRealPanel({ lines }: { lines: LucroRealLine[] }) {
           </p>
 
           <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card text-xs">
-            <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 border-b border-border px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            <div className={`${ROW} border-b border-border font-mono text-[10px] uppercase tracking-wider text-muted-foreground`}>
               <span />
-              <span className="whitespace-nowrap text-right">Presumido</span>
-              <span className="whitespace-nowrap text-right text-primary">Lucro Real</span>
+              <span className={NUM}>Presumido</span>
+              <span className={`${NUM} text-primary`}>Lucro Real</span>
             </div>
-            {lines.map((line) => {
-              const benefit = line.value * LUCRO_REAL_RATE;
-              return (
-                <div key={line.label} className="border-b border-border last:border-b-0 px-3 py-2 space-y-1">
-                  <p className="font-medium">{line.label}</p>
-                  <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 tabular-nums">
-                    <span className="text-muted-foreground">Cobrado</span>
-                    <span className="whitespace-nowrap text-right">{formatBRL(line.value)}</span>
-                    <span className="whitespace-nowrap text-right">{formatBRL(line.value)}</span>
-                  </div>
-                  <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 tabular-nums">
-                    <span className="text-muted-foreground">IRPJ/CSLL</span>
-                    <span className="whitespace-nowrap text-right">{formatBRL(0)}</span>
-                    <span className="whitespace-nowrap text-right text-primary">({formatBRL(benefit)})</span>
-                  </div>
-                  <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 tabular-nums font-bold">
-                    <span>Custo real</span>
-                    <span className="whitespace-nowrap text-right">{formatBRL(line.value)}</span>
-                    <span className="whitespace-nowrap text-right text-primary">{formatBRL(line.value - benefit)}</span>
-                  </div>
-                </div>
-              );
-            })}
-            <div className="grid grid-cols-[minmax(0,1fr)_6rem_6rem] gap-x-2 bg-muted/40 px-3 py-2 font-mono text-[10px] uppercase tracking-wider">
+            {items.map((item) => (
+              <div key={item.label} className={`${ROW} border-b border-border`}>
+                <span className="text-muted-foreground">{item.label}</span>
+                <span className={NUM}>{formatBRL(item.value)}</span>
+                <span className={NUM}>{formatBRL(item.value)}</span>
+              </div>
+            ))}
+            <div className={`${ROW} border-b border-border`}>
+              <span className="text-muted-foreground">IRPJ/CSLL ({pctRate}%)</span>
+              <span className={NUM}>{formatBRL(0)}</span>
+              <span className={`${NUM} text-primary`}>({formatBRL(benefit)})</span>
+            </div>
+            <div className={`${ROW} border-b border-border font-bold`}>
+              <span>Custo real{suffix}</span>
+              <span className={NUM}>{formatBRL(total)}</span>
+              <span className={`${NUM} text-primary`}>{formatBRL(total - benefit)}</span>
+            </div>
+            <div className={`${ROW} bg-muted/40 font-mono text-[10px] uppercase tracking-wider`}>
               <span className="text-muted-foreground">% do cobrado</span>
-              <span className="whitespace-nowrap text-right">100%</span>
-              <span className="whitespace-nowrap text-right text-primary font-bold">{pctNet}%</span>
+              <span className={NUM}>100%</span>
+              <span className={`${NUM} text-primary font-bold`}>{pctNet}%</span>
             </div>
           </div>
+
+          {projectTotal != null && projectTotal > 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Valor total do projeto: {formatBRL(projectTotal)}. No Lucro Real, custo real de{" "}
+              <span className="font-medium text-primary">{formatBRL(lucroRealNet(projectTotal))}</span>.
+            </p>
+          )}
 
           <p className="mt-2 text-[9px] leading-tight text-muted-foreground/70">
             Estimativa: IRPJ 25% + CSLL 9% sobre despesa dedutível. O benefício só se realiza se a
