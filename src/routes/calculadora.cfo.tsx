@@ -334,7 +334,7 @@ function CalculadoraCFOPage() {
                         suggestedClosing={suggestedClosing}
                         suggestionLabel={discount.label}
                         renderer={renderCFOProposalHTML}
-                        description="Documento em HTML no formato de proposta da O2: tese, escopo em três frentes, primeiros 30 dias e investimento aberto, para enviar direto ao cliente."
+                        description="Documento em HTML no formato de proposta da O2: tese, escopo em três frentes e investimento aberto, para enviar direto ao cliente."
                       />
                     </div>
                   </div>

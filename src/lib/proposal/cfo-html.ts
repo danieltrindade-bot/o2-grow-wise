@@ -1,5 +1,5 @@
 // Proposta do CFO as a Service em HTML autocontido, no formato das propostas
-// de turnaround (hero, tese, escopo em frentes, primeiros 30 dias e
+// de turnaround (hero, tese, escopo em frentes e
 // investimento). Não depende de transcrição: o ponto de partida sai dos dados
 // da calculadora, e as dores entram só quando o modelo as fornece.
 //
@@ -142,14 +142,6 @@ const STYLES = `
   .unlock { margin-top: 24px; border-left: 2px solid var(--primary); padding: 4px 0 4px 16px; font-size: 14px; color: var(--muted); max-width: 80ch; }
   .unlock strong { color: var(--fg); }
 
-  .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 40px; }
-  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
-  .step { background: var(--card-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; position: relative; }
-  .step::after { content: ""; position: absolute; top: 0; left: 16px; width: 26px; height: 2px; background: var(--primary); border-radius: 2px; }
-  .step .lb { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary); margin: 8px 0 4px; }
-  .step .tt { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-  .step ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-  .step li { font-size: 11.5px; color: var(--muted); }
 
   .price-card { margin-top: 44px; border: 1px solid var(--primary-line); border-radius: var(--radius); background: linear-gradient(180deg, rgba(53,224,124,0.07), var(--card) 60%); padding: 38px; display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; }
   @media (max-width: 860px) { .price-card { grid-template-columns: 1fr; padding: 28px; } }
@@ -209,7 +201,6 @@ const STYLES = `
     .grid-2, .price-card { grid-template-columns: 1fr 1fr !important; }
     .pillars, .kpis, .next { grid-template-columns: repeat(3, 1fr) !important; }
     .bridge { grid-template-columns: 1fr 1fr !important; }
-    .steps { grid-template-columns: repeat(5, 1fr) !important; }
     .team { grid-template-columns: repeat(4, 1fr) !important; }
     .wrap { padding: 0 32px; }
   }
@@ -228,59 +219,6 @@ const REVEAL_SCRIPT = `
     rows.forEach((r) => r.classList.add('in'));
   }
 `;
-
-const FIRST_30_DAYS = [
-  {
-    label: "Kickoff",
-    title: "Alinhamento",
-    items: [
-      "Responsáveis e rituais definidos",
-      "Acessos ao ERP e aos bancos",
-      "Contador no circuito",
-      "Canais de comunicação",
-    ],
-  },
-  {
-    label: "Semana 1",
-    title: "Levantamento",
-    items: [
-      "Estudo da empresa e do ERP",
-      "Extratos e contratos de dívida",
-      "Relatórios do contador",
-      "Pré-análise do plano de contas",
-    ],
-  },
-  {
-    label: "Semana 2",
-    title: "Mapeamento",
-    items: [
-      "Faturamento e recebimento",
-      "Compras, pagamento e conciliação",
-      "Custeio",
-      "Correções apontadas por processo",
-    ],
-  },
-  {
-    label: "Semana 3",
-    title: "Caixa e estrutura",
-    items: [
-      "Fluxo de caixa projetado",
-      "Mapa do endividamento",
-      "Ciclo financeiro e capital de giro",
-      "Integração do ERP com a Oxy iniciada",
-    ],
-  },
-  {
-    label: "Semana 4",
-    title: "Primeiro comitê",
-    items: [
-      "Leitura inicial dos números",
-      "Prioridades dos 90 dias",
-      "Cronograma da Oxy validado",
-      "Agenda de rituais fixada",
-    ],
-  },
-];
 
 function heroSection(m: ProposalModel, c: ProposalComputed, opts: RenderOptions): string {
   const name = esc(m.client.name);
@@ -402,22 +340,6 @@ function scopeSection(m: ProposalModel): string {
   </section>`;
 }
 
-function first30Section(): string {
-  const steps = FIRST_30_DAYS.map(
-    (s) => `<div class="step">
-        <div class="lb">${s.label}</div>
-        <div class="tt">${s.title}</div>
-        <ul>${s.items.map((i) => `<li>${i}</li>`).join("")}</ul>
-      </div>`,
-  ).join("");
-  return `<section class="rv">
-    <div class="eyebrow">Os primeiros 30 dias</div>
-    <h2>Como o trabalho começa</h2>
-    <p class="lead">O primeiro mês organiza a origem e coloca o primeiro número na mesa: onde a empresa ganha, onde o caixa está preso e quais decisões vêm primeiro. Ele termina com o primeiro comitê e as prioridades dos 90 dias aprovadas.</p>
-    <div class="steps">${steps}</div>
-  </section>`;
-}
-
 function investmentSection(m: ProposalModel, c: ProposalComputed): string {
   const current = c.closing ?? c.table;
   const closing = c.closing;
@@ -523,7 +445,6 @@ export function renderCFOProposalHTML(model: ProposalModel, opts: RenderOptions 
   ${startSection(model)}
   ${thesisSection(model)}
   ${scopeSection(model)}
-  ${first30Section()}
   ${investmentSection(model, c)}
   ${nextStepsSection()}
   <footer>
