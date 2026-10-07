@@ -1,7 +1,7 @@
 // Proposta do CFO as a Service em HTML autocontido, no formato das propostas
-// de turnaround (hero, tese, escopo em frentes e
-// investimento). Não depende de transcrição: o ponto de partida sai dos dados
-// da calculadora, e as dores entram só quando o modelo as fornece.
+// de turnaround (hero, tese e escopo em frentes com o investimento ao lado).
+// Não depende de transcrição: o ponto de partida sai dos dados da
+// calculadora, e as dores entram só quando o modelo as fornece.
 //
 // Diferente do renderizador genérico, aqui não há âncora CLT e os valores
 // aparecem abertos, sem botão de revelar.
@@ -122,6 +122,8 @@ const STYLES = `
   .ph-kicker { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; }
   .ph-title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; text-transform: uppercase; }
   .ph-desc { color: var(--muted); font-size: 15px; margin-top: 12px; max-width: 72ch; }
+  .ph-head { display: grid; grid-template-columns: 1.3fr 1fr; gap: 36px; align-items: center; }
+  @media (max-width: 860px) { .ph-head { grid-template-columns: 1fr; gap: 24px; } }
   .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 28px; }
   @media (max-width: 860px) { .pillars { grid-template-columns: 1fr; } }
   .pillar { background: var(--card-2); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
@@ -305,8 +307,13 @@ function thesisSection(m: ProposalModel): string {
   </section>`;
 }
 
-function scopeSection(m: ProposalModel): string {
+function scopeSection(m: ProposalModel, c: ProposalComputed): string {
   const detail = SERVICE_DETAILS.cfo;
+  const current = c.closing ?? c.table;
+  const closing = c.closing;
+  const setup = m.setup;
+  const hasSetup = Boolean(setup && current.setupTotal > 0 && current.installments > 0);
+
   const pillars = (detail.pillars ?? [])
     .map(
       (p, i) => `<div class="pillar">
@@ -318,47 +325,22 @@ function scopeSection(m: ProposalModel): string {
     )
     .join("");
 
-  return `<section class="rv">
-    <div class="eyebrow">O escopo</div>
-    <h2>Três frentes que conversam entre si</h2>
-    <p class="lead">Não adianta ter relatório sem condução: o número fica bonito e nada muda. Nem conduzir sem número confiável: a decisão vira opinião. As três frentes rodam no mesmo plano e na mesma mesa, desde o primeiro mês.</p>
-
-    <div class="phase-card featured">
-      <div class="ph-kicker">Recorrência mensal · CFO sênior dedicado</div>
-      <div class="ph-title">CFO as a Service</div>
-      <p class="ph-desc">A O2 senta ao lado da diretoria da ${esc(m.client.name)} para conduzir a gestão financeira: define direção, prioridades, metas e indicadores, entrega os relatórios que a empresa não tem e transforma a análise em dinheiro no caixa.</p>
+  const cfoCard = `<div class="phase-card featured">
+      <div class="ph-head">
+        <div>
+          ${closing ? `<span class="alt-tag">Condição de fechamento</span>` : ""}
+          <div class="ph-kicker">Recorrência mensal · CFO sênior dedicado</div>
+          <div class="ph-title">CFO as a Service</div>
+          <p class="ph-desc">A O2 senta ao lado da diretoria da ${esc(m.client.name)} para conduzir a gestão financeira: define direção, prioridades, metas e indicadores, entrega os relatórios que a empresa não tem e transforma a análise em dinheiro no caixa.</p>
+        </div>
+        <div class="ph-price">
+          <span class="label">Investimento mensal</span>
+          ${closing && closing.monthlyDiscount > 0 ? `<span class="was money">${brl(c.table.monthly)}</span>` : ""}
+          <span class="val money">${brl(current.monthly)}</span><span class="per">/mês</span>
+          <span class="cond">Recorrência mensal, com aviso prévio de ${c.noticeDays} dias para encerramento.</span>
+        </div>
+      </div>
       <div class="pillars">${pillars}</div>
-    </div>
-
-    <div class="team">
-      <div class="tm"><div class="r">CFO</div><b>Condução e decisão</b><span>diretor financeiro sênior na rotina</span></div>
-      <div class="tm"><div class="r">Oxy</div><b>Dados em um só lugar</b><span>ERP conectado e painéis gerenciais</span></div>
-      <div class="tm"><div class="r">Gênio</div><b>Agente de IA</b><span>automação e alertas do que sai do normal</span></div>
-      <div class="tm"><div class="r">Rituais</div><b>Ritmo de gestão</b><span>disponibilidade diária, reunião semanal, comitê estratégico mensal e registro de toda reunião</span></div>
-    </div>
-    <p class="unlock"><strong>O que destrava:</strong> um número em que a diretoria acredita, um fluxo de caixa que avisa o aperto antes de apertar, uma dívida com custo conhecido e um ritmo de decisão que não depende de urgência para acontecer.</p>
-  </section>`;
-}
-
-function investmentSection(m: ProposalModel, c: ProposalComputed): string {
-  const current = c.closing ?? c.table;
-  const closing = c.closing;
-  const setup = m.setup;
-  const hasSetup = Boolean(setup && current.setupTotal > 0 && current.installments > 0);
-
-  const monthlyCard = `<div class="price-card">
-      <div class="what">
-        ${closing ? `<span class="alt-tag">Condição de fechamento</span>` : ""}
-        <div class="k">CFO as a Service · mensal</div>
-        <h3>Condução, clareza e resultado no caixa</h3>
-        <p>As três frentes, os rituais de acompanhamento e a Oxy com o Gênio, com o CFO responsável pela direção financeira da ${esc(m.client.name)}.</p>
-      </div>
-      <div class="ph-price">
-        <span class="label">Investimento mensal</span>
-        ${closing && closing.monthlyDiscount > 0 ? `<span class="was money">${brl(c.table.monthly)}</span>` : ""}
-        <span class="val money">${brl(current.monthly)}</span><span class="per">/mês</span>
-        <span class="cond">Recorrência mensal, com aviso prévio de ${c.noticeDays} dias para encerramento.</span>
-      </div>
     </div>`;
 
   const deliverables = setup?.deliverables ?? [];
@@ -375,7 +357,7 @@ function investmentSection(m: ProposalModel, c: ProposalComputed): string {
         <span class="label">Investimento</span>
         ${closing && closing.setupDiscount > 0 ? `<span class="was money">${current.installments}× ${brl(c.table.setupTotal / current.installments)}</span>` : ""}
         <span class="val money">${current.installments}× ${brl(current.setupInstallment)}</span><span class="per">no cartão</span>
-        <span class="cond">Total de <strong>${brl(current.setupTotal)}</strong>, diluído nas ${current.installments} primeiras mensalidades.</span>
+        <span class="cond">Diluído nas ${current.installments} primeiras mensalidades.</span>
       </div>
     </div>`
     : "";
@@ -394,10 +376,20 @@ function investmentSection(m: ProposalModel, c: ProposalComputed): string {
       : "";
 
   return `<section class="rv">
-    <div class="eyebrow">Investimento</div>
-    <h2>Um diretor financeiro sênior, sem o custo de um</h2>
-    <p class="lead">O CFO as a Service é uma recorrência mensal. A estruturação inicial, com a Oxy e o Gênio, entra diluída no cartão, para o trabalho começar sem um desembolso de implantação à parte.</p>
-    ${monthlyCard}
+    <div class="eyebrow">O escopo e o investimento</div>
+    <h2>Três frentes que conversam entre si</h2>
+    <p class="lead">Não adianta ter relatório sem condução: o número fica bonito e nada muda. Nem conduzir sem número confiável: a decisão vira opinião. As três frentes rodam no mesmo plano e na mesma mesa, desde o primeiro mês.</p>
+
+    ${cfoCard}
+
+    <div class="team">
+      <div class="tm"><div class="r">CFO</div><b>Condução e decisão</b><span>diretor financeiro sênior na rotina</span></div>
+      <div class="tm"><div class="r">Oxy</div><b>Dados em um só lugar</b><span>ERP conectado e painéis gerenciais</span></div>
+      <div class="tm"><div class="r">Gênio</div><b>Agente de IA</b><span>automação e alertas do que sai do normal</span></div>
+      <div class="tm"><div class="r">Rituais</div><b>Ritmo de gestão</b><span>disponibilidade diária, reunião semanal, comitê estratégico mensal e registro de toda reunião</span></div>
+    </div>
+    <p class="unlock"><strong>O que destrava:</strong> um número em que a diretoria acredita, um fluxo de caixa que avisa o aperto antes de apertar, uma dívida com custo conhecido e um ritmo de decisão que não depende de urgência para acontecer.</p>
+
     ${setupCard}
     ${bridge}
     <p class="inv-foot">Proposta válida por <strong>${c.validityDays} dias</strong> a partir da emissão. Contrato com aviso prévio de ${c.noticeDays} dias para encerramento.${saving}</p>
@@ -444,8 +436,7 @@ export function renderCFOProposalHTML(model: ProposalModel, opts: RenderOptions 
   ${heroSection(model, c, opts)}
   ${startSection(model)}
   ${thesisSection(model)}
-  ${scopeSection(model)}
-  ${investmentSection(model, c)}
+  ${scopeSection(model, c)}
   ${nextStepsSection()}
   <footer>
     <div class="sig">O2 Inc · Compreender pessoas, oxigenar negócios.</div>

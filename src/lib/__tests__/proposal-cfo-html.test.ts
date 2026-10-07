@@ -23,6 +23,7 @@ describe("renderCFOProposalHTML", () => {
     expect(html).toContain("R$ 12.000,00");
     expect(html).toContain("12× R$ 2.000,00");
     expect(html).toContain("R$ 14.000,00");
+    expect(html).not.toContain("R$ 24.000,00");
     expect(html).not.toContain("Revelar investimento");
     expect(html).not.toContain("CLT");
     expect(html).toContain("Outubro de 2026");
