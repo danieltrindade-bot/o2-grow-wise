@@ -1,9 +1,10 @@
 import { loadO2Logo } from "./assets";
-import { renderProposalHTML } from "./html";
+import { renderProposalHTML, type RenderOptions } from "./html";
 import { deriveProposal, shortServiceName, type ProposalModel } from "./model";
 
 export * from "./model";
-export { renderProposalHTML } from "./html";
+export { renderProposalHTML, type RenderOptions } from "./html";
+export { renderCFOProposalHTML } from "./cfo-html";
 export { fileToDataUrl, loadO2Logo, urlToDataUrl } from "./assets";
 export { toCalcPDFInput } from "./to-pdf";
 export { proposalService, PROPOSAL_ROLES, PROPOSAL_SCOPES } from "./scopes";
@@ -17,6 +18,8 @@ function slug(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+export type ProposalRenderer = (model: ProposalModel, opts: RenderOptions) => string;
+
 export function proposalFileName(model: ProposalModel): string {
   const client = slug(model.client.name || "cliente");
   const services = model.services.map((s) => slug(shortServiceName(s.name))).join("-");
@@ -27,9 +30,12 @@ export function proposalFileName(model: ProposalModel): string {
  * Renderiza a proposta e dispara o download do arquivo HTML autocontido.
  * Busca a logo da O2 no momento da geração e a embute como data URL.
  */
-export async function downloadProposalHTML(model: ProposalModel): Promise<void> {
+export async function downloadProposalHTML(
+  model: ProposalModel,
+  render: ProposalRenderer = renderProposalHTML,
+): Promise<void> {
   const logoO2DataUrl = await loadO2Logo();
-  const html = renderProposalHTML(model, { logoO2DataUrl });
+  const html = render(model, { logoO2DataUrl });
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -42,9 +48,12 @@ export async function downloadProposalHTML(model: ProposalModel): Promise<void> 
 }
 
 /** Abre a proposta em uma nova aba, para revisar antes de enviar. */
-export async function previewProposalHTML(model: ProposalModel): Promise<void> {
+export async function previewProposalHTML(
+  model: ProposalModel,
+  render: ProposalRenderer = renderProposalHTML,
+): Promise<void> {
   const logoO2DataUrl = await loadO2Logo();
-  const html = renderProposalHTML(model, { logoO2DataUrl });
+  const html = render(model, { logoO2DataUrl });
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   window.open(url, "_blank", "noopener");

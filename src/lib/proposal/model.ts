@@ -34,6 +34,8 @@ export interface ProposalSetup {
   label: string;
   total: number;
   installments: number;
+  /** Entregáveis do setup, para renderizadores que listam o que está incluído. */
+  deliverables?: string[];
 }
 
 /** Condição especial de fechamento. Ausente quando não há negociação. */

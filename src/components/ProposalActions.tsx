@@ -12,6 +12,7 @@ import {
   previewProposalHTML,
   type ClosingOffer,
   type ProposalModel,
+  type ProposalRenderer,
 } from "@/lib/proposal";
 import { formatBRL } from "@/lib/format";
 
@@ -28,6 +29,10 @@ interface Props {
   suggestionLabel?: string;
   /** Parcelas padrão do setup na condição de fechamento. */
   defaultInstallments?: number;
+  /** Renderizador do HTML. Default: proposta genérica com âncora CLT. */
+  renderer?: ProposalRenderer;
+  /** Texto de apoio sob o título do bloco. */
+  description?: string;
 }
 
 /**
@@ -39,6 +44,8 @@ export function ProposalActions({
   suggestedClosing,
   suggestionLabel,
   defaultInstallments = 12,
+  renderer,
+  description = "Documento em HTML com o design da O2, comparativo com a folha CLT e escopo — para enviar direto ao cliente.",
 }: Props) {
   const [clientName, setClientName] = useState("");
   const [logoDataUrl, setLogoDataUrl] = useState<string>();
@@ -88,8 +95,8 @@ export function ProposalActions({
   async function run(action: "preview" | "download") {
     setBusy(action);
     try {
-      if (action === "preview") await previewProposalHTML(model());
-      else await downloadProposalHTML(model());
+      if (action === "preview") await previewProposalHTML(model(), renderer);
+      else await downloadProposalHTML(model(), renderer);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Falha ao gerar a proposta.");
     } finally {
@@ -101,10 +108,7 @@ export function ProposalActions({
     <div className="mt-4 rounded-lg border border-border bg-card p-4 space-y-4">
       <div>
         <p className="text-sm font-semibold">Proposta para o cliente</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Documento em HTML com o design da O2, comparativo com a folha CLT e escopo — para enviar
-          direto ao cliente.
-        </p>
+        <p className="text-xs text-muted-foreground mt-1">{description}</p>
       </div>
 
       <div className="space-y-2">
