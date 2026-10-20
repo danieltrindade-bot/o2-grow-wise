@@ -20,6 +20,7 @@ import {
   coordComplexidade,
   COORD_MENSAL,
   COORD_MENSAL_MINIMUM,
+  COORD_SETUP_MINIMUM,
   COORD_NIVEL_LABEL,
   formatBRL,
   type CoordPerfil,
@@ -39,6 +40,7 @@ import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresen
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { ProposalActions } from "@/components/ProposalActions";
+import { DiscountOptions } from "@/components/DiscountOptions";
 import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
 
 export const Route = createFileRoute("/calculadora/coordenador")({
@@ -48,6 +50,7 @@ export const Route = createFileRoute("/calculadora/coordenador")({
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
   { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
+  { id: "forca", label: "Força Empresário!", percent: 18 },
 ];
 
 const PERFIS: { id: CoordPerfil; label: string; desc: string }[] = [
@@ -108,7 +111,8 @@ function CoordenadorPage() {
     ? calcSetupPriceFromRules(data, monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
 
-  const setupComDesconto = setupRes.total * (1 - discount.percent / 100);
+  const setupComDesconto =
+    setupRes.total > 0 ? Math.max(COORD_SETUP_MINIMUM, setupRes.total * (1 - discount.percent / 100)) : 0;
   const parcela12x = setupComDesconto / 12;
   const mensalComDesconto = Math.max(COORD_MENSAL_MINIMUM, fase2 * (1 - discount.percent / 100));
 
@@ -242,24 +246,7 @@ function CoordenadorPage() {
                 </section>
 
                 <section className="rounded-2xl border border-border bg-card p-7">
-                  <button
-                    type="button"
-                    onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
-                      discountId === "meeting" ? "border-primary bg-primary/10" : "border-border",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "h-4 w-4 rounded-full border-2 shrink-0",
-                        discountId === "meeting"
-                          ? "border-primary bg-primary"
-                          : "border-muted-foreground",
-                      )}
-                    />
-                    <span className="text-sm">Condição de fechamento na reunião</span>
-                  </button>
+                  <DiscountOptions options={DISCOUNTS} value={discountId} onChange={setDiscountId} />
                 </section>
               </div>
 

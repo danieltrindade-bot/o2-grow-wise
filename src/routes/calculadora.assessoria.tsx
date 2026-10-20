@@ -22,6 +22,7 @@ import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresen
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { ProposalActions } from "@/components/ProposalActions";
+import { DiscountOptions } from "@/components/DiscountOptions";
 import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
 
 export const Route = createFileRoute("/calculadora/assessoria")({
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/calculadora/assessoria")({
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
   { id: "meeting", label: "Condição de fechamento na reunião", percent: 10 },
+  { id: "forca", label: "Força Empresário!", percent: 18 },
 ];
 
 const INCLUDES = [
@@ -73,7 +75,7 @@ function AssessoriaPage() {
   const valorMensal = Math.min(maxP, Math.max(minP, baseP + ajusteCnpj));
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
   // Piso de tabela 5.500 com gatilho de 10% ⇒ nunca abaixo de 4.950.
-  const ASSESSORIA_MINIMUM = 4950;
+  const ASSESSORIA_MINIMUM = 4500;
   const valorFinal = Math.max(ASSESSORIA_MINIMUM, valorMensal * (1 - discount.percent / 100));
   const animatedFinal = useCountUp(valorFinal);
   const [showPrices, setShowPrices] = useState(false);
@@ -139,24 +141,7 @@ function AssessoriaPage() {
                 </section>
 
                 <section className="rounded-2xl border border-border bg-card p-6">
-                  <button
-                    type="button"
-                    onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
-                      discountId === "meeting" ? "border-primary bg-primary/10" : "border-border",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "h-4 w-4 rounded-full border-2 shrink-0",
-                        discountId === "meeting"
-                          ? "border-primary bg-primary"
-                          : "border-muted-foreground",
-                      )}
-                    />
-                    <span className="text-sm">Condição de fechamento na reunião</span>
-                  </button>
+                  <DiscountOptions options={DISCOUNTS} value={discountId} onChange={setDiscountId} />
                 </section>
               </div>
 

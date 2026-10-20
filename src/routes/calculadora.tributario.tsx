@@ -15,6 +15,7 @@ import { Row } from "@/components/calc-row";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { ProductPresentation } from "@/components/ProductPresentation";
+import { DiscountOptions } from "@/components/DiscountOptions";
 
 export const Route = createFileRoute("/calculadora/tributario")({
   component: TributarioPage,
@@ -53,6 +54,7 @@ function getFaixaLabel(revenue: number): string {
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
   { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
+  { id: "forca", label: "Força Empresário!", percent: 18 },
 ];
 
 const INCLUDES_COMPLETO = [
@@ -165,20 +167,7 @@ function TributarioPage() {
             </section>
 
             <section className="rounded-2xl border border-border bg-card p-6 space-y-3">
-              <button
-                type="button"
-                onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
-                className={`flex w-full items-center gap-3 rounded-xl border p-3 cursor-pointer text-left transition-colors ${
-                  discountId === "meeting" ? "border-primary bg-primary/10" : "border-border"
-                }`}
-              >
-                <span
-                  className={`h-4 w-4 rounded-full border-2 shrink-0 ${
-                    discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground"
-                  }`}
-                />
-                <span className="text-sm">Condição de fechamento na reunião</span>
-              </button>
+              <DiscountOptions options={DISCOUNTS} value={discountId} onChange={setDiscountId} />
             </section>
           </div>
 
@@ -239,7 +228,7 @@ function TributarioPage() {
                         ["CNPJs", String(cnpjCount)],
                         ["Mensal", formatBRL(mensal)],
                         ["Total (6 meses)", formatBRL(total6mComDesconto)],
-                        ...(discount.percent > 0 ? [["Desconto", `${discount.percent}% — ${discount.label}`] as [string, string]] : []),
+                        ...(discount.percent > 0 ? [["Desconto", `${discount.percent}% (${discount.label})`] as [string, string]] : []),
                       ],
                       finalLabel: "12x no cartão",
                       finalValue: formatBRL(parcela12x),

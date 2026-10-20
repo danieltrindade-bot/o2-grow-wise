@@ -17,6 +17,7 @@ import { InfoTooltip, TOOLTIPS } from "@/components/InfoTooltip";
 import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
+import { DiscountOptions } from "@/components/DiscountOptions";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { calcValuation, VALUATION_CNPJ_ADDITIONAL, VALUATION_FLOOR } from "@/lib/valuation-pricing";
 
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/calculadora/valuation")({
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
   { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
+  { id: "forca", label: "Força Empresário!", percent: 18 },
 ];
 
 const INCLUDES = [
@@ -106,15 +108,7 @@ function ValuationPage() {
             </section>
 
             <section className="rounded-2xl border border-border bg-card p-6">
-              <button
-                type="button"
-                onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
-                className={cn("flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
-                  discountId === "meeting" ? "border-primary bg-primary/10" : "border-border")}>
-                <span className={cn("h-4 w-4 rounded-full border-2 shrink-0",
-                  discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground")} />
-                <span className="text-sm">Condição de fechamento na reunião</span>
-              </button>
+              <DiscountOptions options={DISCOUNTS} value={discountId} onChange={setDiscountId} />
             </section>
           </div>
 

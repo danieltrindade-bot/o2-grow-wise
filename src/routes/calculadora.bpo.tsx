@@ -22,6 +22,7 @@ import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { ProposalActions } from "@/components/ProposalActions";
 import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
+import { DiscountOptions } from "@/components/DiscountOptions";
 import { bpoImplantacaoStages, BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
 
 export const Route = createFileRoute("/calculadora/bpo")({
@@ -33,6 +34,7 @@ type TierKey = "tier1" | "tier2" | "tier3";
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
   { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
+  { id: "forca", label: "Força Empresário!", percent: 18 },
 ];
 
 function CalculadoraBPOPage() {
@@ -78,7 +80,7 @@ function CalculadoraBPOPage() {
   const valorMensalSetup = data?.setup ? Number(data.setup.installment_value) : 0;
   const valorMensalTotal = valorMensalBPO + (data?.setup?.add_to_monthly ? valorMensalSetup : 0);
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  const BPO_MINIMUM = 3187;
+  const BPO_MINIMUM = 2897;
   const valorComDesconto = Math.max(BPO_MINIMUM, valorMensalTotal * (1 - discount.percent / 100));
   const [showPrices, setShowPrices] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
@@ -217,24 +219,7 @@ function CalculadoraBPOPage() {
                 </section>
 
                 <section className="rounded-2xl border border-border bg-card p-7">
-                  <button
-                    type="button"
-                    onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
-                      discountId === "meeting" ? "border-primary bg-primary/10" : "border-border",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "h-4 w-4 rounded-full border-2 shrink-0",
-                        discountId === "meeting"
-                          ? "border-primary bg-primary"
-                          : "border-muted-foreground",
-                      )}
-                    />
-                    <span className="text-sm">Condição de fechamento na reunião</span>
-                  </button>
+                  <DiscountOptions options={DISCOUNTS} value={discountId} onChange={setDiscountId} />
                 </section>
               </div>
 

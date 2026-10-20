@@ -25,6 +25,7 @@ import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresen
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
+import { DiscountOptions } from "@/components/DiscountOptions";
 import { BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
 
 export const Route = createFileRoute("/calculadora/oxy")({
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/calculadora/oxy")({
 const DISCOUNTS = [
   { id: "none", label: "Sem desconto", percent: 0 },
   { id: "meeting", label: "Condição de fechamento na reunião", percent: 15 },
+  { id: "forca", label: "Força Empresário!", percent: 18 },
 ];
 
 // Oxy: o setup não pode ser vendido abaixo deste piso em nenhum cenário,
@@ -157,15 +159,7 @@ function OxyPage() {
             </section>
 
             <section className="rounded-2xl border border-border bg-card p-6">
-              <button
-                type="button"
-                onClick={() => setDiscountId(discountId === "meeting" ? "none" : "meeting")}
-                className={cn("flex w-full items-center gap-3 rounded-xl border bg-background p-3 cursor-pointer text-left",
-                  discountId === "meeting" ? "border-primary bg-primary/10" : "border-border")}>
-                <span className={cn("h-4 w-4 rounded-full border-2 shrink-0",
-                  discountId === "meeting" ? "border-primary bg-primary" : "border-muted-foreground")} />
-                <span className="text-sm">Condição de fechamento na reunião</span>
-              </button>
+              <DiscountOptions options={DISCOUNTS} value={discountId} onChange={setDiscountId} />
             </section>
             </div>
 

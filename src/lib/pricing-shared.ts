@@ -76,6 +76,9 @@ export const COORD_MENSAL: Record<CoordPerfil, Record<CoordNivel, number>> = {
 // Piso da mensalidade (menor faixa da tabela: Essencial · Baixa).
 export const COORD_MENSAL_MINIMUM = 2546.58;
 
+// Piso do setup do Coordenador, mesmo com desconto.
+export const COORD_SETUP_MINIMUM = 8000;
+
 // Complexidade operacional derivada de multi-CNPJ + volume (faturamento mensal),
 // conforme nota do item 10 ("ajustes por multi-CNPJ, volume, nº de sistemas").
 export function coordComplexidade(
