@@ -84,7 +84,6 @@ function AssessoriaPage() {
   // Piso de tabela 5.500 com gatilho de 10% ⇒ nunca abaixo de 4.950.
   const ASSESSORIA_MINIMUM = 4500;
   const valorFinal = Math.max(ASSESSORIA_MINIMUM, valorMensal * (1 - discount.percent / 100));
-  const animatedFinal = useCountUp(valorFinal);
 
   const setupResult = setupRules
     ? calcSetupPriceFromRules(setupRules, monthlyRevenue, cnpjCount, segmentType)
@@ -92,6 +91,7 @@ function AssessoriaPage() {
   const setupComDesconto = setupResult.total * (1 - discount.percent / 100);
   const setupParcela = setupComDesconto / 12;
   const totalMensal = valorFinal + setupParcela;
+  const animatedTotal = useCountUp(totalMensal);
   const [showPrices, setShowPrices] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
 
@@ -197,6 +197,20 @@ function AssessoriaPage() {
                 <p className="text-xs uppercase tracking-wider text-primary">Investimento mensal</p>
                 {showPrices ? (
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-5">
+                      <p className="text-xs uppercase tracking-wider text-primary">
+                        Valor mensal + setup
+                      </p>
+                      <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
+                        {formatBRL(animatedTotal)}
+                      </p>
+                      <p className="mt-2 text-xs text-primary/70">
+                        Mensalidade {formatBRL(valorFinal)} + setup 12x no cartão{" "}
+                        {formatBRL(setupParcela)}
+                      </p>
+                    </div>
+
+                    <p className="mt-6 text-xs uppercase tracking-wider text-primary">Mensalidade</p>
                     <Row label="Faixa de faturamento" value={tier?.label ?? "—"} />
                     <Row label="Preço base" value={formatBRL(baseP)} />
                     <Row
@@ -214,13 +228,7 @@ function AssessoriaPage() {
                         value={`-${formatBRL(valorMensal - valorFinal)}`}
                       />
                     )}
-
-                    <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
-                      <p className="text-xs uppercase tracking-wider text-primary">Valor mensal</p>
-                      <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
-                        {formatBRL(animatedFinal)}
-                      </p>
-                    </div>
+                    <Row label="Valor mensal" value={formatBRL(valorFinal)} bold />
 
                     <p className="mt-6 text-xs uppercase tracking-wider text-primary">Setup</p>
                     <Row
@@ -232,30 +240,14 @@ function AssessoriaPage() {
                       label="Adicional por segmento"
                       value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"}
                     />
-                    <Row label="Valor total setup" value={formatBRL(setupResult.total)} bold />
+                    <Row label="Valor total setup" value={formatBRL(setupResult.total)} />
                     {discount.percent > 0 && (
                       <Row
                         label={`Desconto (${discount.percent}%)`}
                         value={`-${formatBRL(setupResult.total - setupComDesconto)}`}
                       />
                     )}
-                    <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
-                      <p className="text-xs uppercase tracking-wider text-primary">Setup em 12x no cartão</p>
-                      <p className="text-2xl font-bold text-primary mt-1 tabular-nums">
-                        {formatBRL(setupParcela)}
-                        <span className="text-sm font-normal text-primary/70">/mês</span>
-                      </p>
-                    </div>
-
-                    <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
-                      <p className="text-xs uppercase tracking-wider text-primary">Investimento mensal total</p>
-                      <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
-                        {formatBRL(totalMensal)}
-                      </p>
-                      <p className="mt-2 text-xs text-primary/70">
-                        Mensalidade: {formatBRL(valorFinal)} + Setup 12x no cartão: {formatBRL(setupParcela)}
-                      </p>
-                    </div>
+                    <Row label="Setup em 12x no cartão" value={`${formatBRL(setupParcela)}/mês`} bold />
 
                     <RoiPanel investmentMonthly={totalMensal} />
                     <LucroRealPanel
@@ -376,7 +368,7 @@ function AssessoriaPage() {
       </div>
 
       <MobilePriceSummary
-        label="Investimento mensal total"
+        label="Valor mensal + setup"
         value={formatBRL(totalMensal)}
         visible={showPrices}
         onReveal={() => setShowPrices(true)}
