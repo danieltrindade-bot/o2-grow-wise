@@ -5,10 +5,11 @@ import { useDiagnostic } from "@/context/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { CurrencyInput } from "@/components/ui/currency-input";
-import { formatBRL } from "@/lib/pricing-shared";
-import { useAssessoriaPricing, type AssessoriaRule } from "@/hooks/use-pricing";
+import { calcSetupPriceFromRules, formatBRL, type SegmentType } from "@/lib/pricing-shared";
+import { useAssessoriaPricing, useSetupPricing, type AssessoriaRule } from "@/hooks/use-pricing";
 import { CalcLoadingSkeleton, ErrorState, useCountUp } from "@/components/calc-ui";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { LossSummaryPanel } from "@/components/LossSummaryPanel";
@@ -24,6 +25,7 @@ import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { ProposalActions } from "@/components/ProposalActions";
 import { DiscountOptions } from "@/components/DiscountOptions";
 import { proposalService, type ClosingOffer, type ProposalModel } from "@/lib/proposal";
+import { BPO_SETUP_DELIVERABLES } from "@/lib/bpo-cronograma";
 
 export const Route = createFileRoute("/calculadora/assessoria")({
   component: AssessoriaPage,
@@ -36,9 +38,8 @@ const DISCOUNTS = [
 ];
 
 const INCLUDES = [
-  "Jornada de maturidade financeira em 5 estágios",
-  "Entregas próprias a cada 90 dias",
-  "Início no estágio em que a empresa está hoje",
+  ...(SERVICE_DETAILS.assessoria.pillars ?? []).map((p) => `${p.title}: ${p.subtitle}`),
+  "Setup: estruturação financeira em 12x no cartão",
 ];
 
 function lookupTier(rules: AssessoriaRule[], monthlyRevenue: number): AssessoriaRule | null {
@@ -54,14 +55,20 @@ function AssessoriaPage() {
   const { state } = useDiagnostic();
   const { lossMinMonthly } = useDiagnosticLoss();
   const { data, isLoading, error, refetch } = useAssessoriaPricing();
+  const { data: setupRules } = useSetupPricing();
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [cnpjCount, setCnpjCount] = useState(1);
+  const [segmentType, setSegmentType] = useState<SegmentType>("mesmo");
   const [discountId, setDiscountId] = useState("none");
 
   useEffect(() => {
     if (monthlyRevenue === 0 && state.monthlyRevenue > 0) setMonthlyRevenue(state.monthlyRevenue);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.monthlyRevenue]);
+
+  useEffect(() => {
+    if (cnpjCount === 1 && segmentType !== "mesmo") setSegmentType("mesmo");
+  }, [cnpjCount, segmentType]);
 
   const tier = useMemo(
     () => (data ? lookupTier(data.rules, monthlyRevenue) : null),
@@ -78,6 +85,13 @@ function AssessoriaPage() {
   const ASSESSORIA_MINIMUM = 4500;
   const valorFinal = Math.max(ASSESSORIA_MINIMUM, valorMensal * (1 - discount.percent / 100));
   const animatedFinal = useCountUp(valorFinal);
+
+  const setupResult = setupRules
+    ? calcSetupPriceFromRules(setupRules, monthlyRevenue, cnpjCount, segmentType)
+    : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
+  const setupComDesconto = setupResult.total * (1 - discount.percent / 100);
+  const setupParcela = setupComDesconto / 12;
+  const totalMensal = valorFinal + setupParcela;
   const [showPrices, setShowPrices] = useState(false);
   const [showDireto, setShowDireto] = useState(false);
 
@@ -88,11 +102,17 @@ function AssessoriaPage() {
         notIncluded: SERVICE_DETAILS.assessoria.notIncluded,
       }),
     ],
+    setup: {
+      label: "Estruturação Financeira (Setup inicial)",
+      total: setupResult.total,
+      installments: 12,
+      deliverables: BPO_SETUP_DELIVERABLES,
+    },
     closing,
   });
 
   const suggestedClosing: ClosingOffer | undefined =
-    discount.percent > 0 ? { monthly: valorFinal, setupTotal: 0, installments: 12 } : undefined;
+    discount.percent > 0 ? { monthly: valorFinal, setupTotal: setupComDesconto, installments: 12 } : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -138,6 +158,29 @@ function AssessoriaPage() {
                       }
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      Tipo de segmento <InfoTooltip text={TOOLTIPS.segmento} />
+                    </Label>
+                    <Select
+                      value={segmentType}
+                      onValueChange={(v) => setSegmentType(v as SegmentType)}
+                      disabled={cnpjCount === 1}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mesmo">Mesmo segmento</SelectItem>
+                        <SelectItem value="correlato">Correlato</SelectItem>
+                        <SelectItem value="diferente">Diferente</SelectItem>
+                        <SelectItem value="muito_diferente">Muito diferente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {cnpjCount === 1 && (
+                      <p className="text-xs text-muted-foreground">Disponível com 2+ CNPJs</p>
+                    )}
+                  </div>
                 </section>
 
                 <section className="rounded-2xl border border-border bg-card p-6">
@@ -179,8 +222,49 @@ function AssessoriaPage() {
                       </p>
                     </div>
 
-                    <RoiPanel investmentMonthly={valorFinal} />
-                    <LucroRealPanel items={[{ label: "Mensalidade", value: valorFinal }]} suffix="/mês" />
+                    <p className="mt-6 text-xs uppercase tracking-wider text-primary">Setup</p>
+                    <Row
+                      label="Classificação"
+                      value={setupResult.classification === "padrao" ? "Padrão" : "Complexo"}
+                    />
+                    <Row label="Setup base" value={formatBRL(setupResult.base)} />
+                    <Row
+                      label="Adicional por segmento"
+                      value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"}
+                    />
+                    <Row label="Valor total setup" value={formatBRL(setupResult.total)} bold />
+                    {discount.percent > 0 && (
+                      <Row
+                        label={`Desconto (${discount.percent}%)`}
+                        value={`-${formatBRL(setupResult.total - setupComDesconto)}`}
+                      />
+                    )}
+                    <div className="mt-3 rounded-xl bg-primary/15 border border-primary p-4">
+                      <p className="text-xs uppercase tracking-wider text-primary">Setup em 12x no cartão</p>
+                      <p className="text-2xl font-bold text-primary mt-1 tabular-nums">
+                        {formatBRL(setupParcela)}
+                        <span className="text-sm font-normal text-primary/70">/mês</span>
+                      </p>
+                    </div>
+
+                    <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
+                      <p className="text-xs uppercase tracking-wider text-primary">Investimento mensal total</p>
+                      <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
+                        {formatBRL(totalMensal)}
+                      </p>
+                      <p className="mt-2 text-xs text-primary/70">
+                        Mensalidade: {formatBRL(valorFinal)} + Setup 12x no cartão: {formatBRL(setupParcela)}
+                      </p>
+                    </div>
+
+                    <RoiPanel investmentMonthly={totalMensal} />
+                    <LucroRealPanel
+                      items={[
+                        { label: "Mensalidade", value: valorFinal },
+                        { label: "Setup 12x", value: setupParcela },
+                      ]}
+                      suffix="/mês"
+                    />
 
                     <div className="mt-5">
                       <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
@@ -216,14 +300,23 @@ function AssessoriaPage() {
                                   ] as [string, string],
                                 ]
                               : []),
+                            ["Mensalidade", formatBRL(valorFinal)],
+                            ["Setup (12x no cartão)", formatBRL(setupParcela)],
                           ],
-                          finalLabel: "Valor mensal",
-                          finalValue: formatBRL(valorFinal),
-                          roi: { lossMinMonthly, investmentMonthly: valorFinal },
+                          finalLabel: "Investimento mensal total",
+                          finalValue: formatBRL(totalMensal),
+                          roi: { lossMinMonthly, investmentMonthly: totalMensal },
                           scope: SERVICE_DETAILS.assessoria.deliverables,
                           scopeIntro: SERVICE_DETAILS.assessoria.what,
-                          stages: SERVICE_DETAILS.assessoria.stages,
-                          stagesTitle: "Jornada de Maturidade — 5 estágios de evolução",
+                          stages: [
+                            {
+                              title: "Setup — o que inclui",
+                              description: "Entregáveis da implantação, incluindo parametrização da Oxy e Agente Gênio.",
+                              items: BPO_SETUP_DELIVERABLES,
+                            },
+                            ...(SERVICE_DETAILS.assessoria.stages ?? []),
+                          ],
+                          stagesTitle: "Escopo detalhado — Assessoria Estratégica",
                         })
                       }
                       className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -273,7 +366,7 @@ function AssessoriaPage() {
             <DiretoContractGenerator
               defaultServico="assessoria"
               clientName={state.companyName}
-              valorSetupReais={0}
+              valorSetupReais={Math.round(setupComDesconto)}
               valorMensalReais={Math.round(valorFinal)}
               expanded={showDireto}
               onExpandedChange={setShowDireto}
@@ -283,8 +376,8 @@ function AssessoriaPage() {
       </div>
 
       <MobilePriceSummary
-        label="Valor mensal"
-        value={formatBRL(valorFinal)}
+        label="Investimento mensal total"
+        value={formatBRL(totalMensal)}
         visible={showPrices}
         onReveal={() => setShowPrices(true)}
       />

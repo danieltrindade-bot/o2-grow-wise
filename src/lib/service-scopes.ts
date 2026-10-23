@@ -343,58 +343,6 @@ const TURNAROUND_PILLARS: ScopePillar[] = [
   },
 ];
 
-const ASSESSORIA_STAGES: ScopeStage[] = [
-  {
-    title: "G1 · Fundação",
-    description: "Construir a base: dados confiáveis e primeiros relatórios reais",
-    items: [
-      "DRE gerencial estruturada com visão por unidade de negócio",
-      "Fluxo de caixa realizado mensal estruturado",
-      "Calendário fiscal implantado",
-    ],
-  },
-  {
-    title: "G2 · Reativa → Controlada",
-    description: "Projeção de caixa e controle do ciclo financeiro",
-    items: [
-      "Fluxo de caixa projetado 30 a 60 dias",
-      "DRE mensal com análise de variação",
-      "Controle de contas a pagar e a receber + ciclo financeiro (PMR, PMP, PME)",
-      "Rotina de fechamento mensal até D+5",
-    ],
-  },
-  {
-    title: "G3 · Controlada",
-    description: "Margem, rentabilidade e ponto de equilíbrio",
-    items: [
-      "Análise de capital de giro (NCG)",
-      "PMR, PMP e PME monitorados mensalmente",
-      "Ponto de equilíbrio mensal calculado",
-      "Rentabilidade por produto/serviço e por cliente",
-    ],
-  },
-  {
-    title: "G4 · Gerencial",
-    description: "Orçamento, KPIs e controle estratégico",
-    items: [
-      "Orçamento anual formalizado com premissas documentadas",
-      "Análise orçado × realizado mensal",
-      "Análise de alavancagem operacional (GAO)",
-      "Painel de KPIs · dashboard gerencial",
-    ],
-  },
-  {
-    title: "G5 · Estratégica",
-    description: "Modelagem de longo prazo e governança",
-    items: [
-      "Modelagem financeira de 3 a 5 anos (3 cenários)",
-      "Material pronto para mesa de crédito e investidores",
-      "BSC anual e OKR trimestral",
-      "Governança estratégica implantada",
-    ],
-  },
-];
-
 export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
   bpo: {
     what: "A rotina financeira executada todo dia, com dado confiável e no prazo, sem aumentar o seu quadro.",
@@ -492,22 +440,23 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
     },
   },
   assessoria: {
-    what: "Uma jornada de maturidade financeira em cinco estágios, da base de dados confiáveis à gestão estratégica completa.",
-    deliverables: ASSESSORIA_STAGES.map((s) => `${s.title}: ${s.description}`),
-    stages: ASSESSORIA_STAGES,
-    notes: [
-      {
-        title: "Como funciona",
-        text: "Cada estágio tem 90 dias e entregas próprias. A empresa começa no estágio em que está hoje, e só avança quando a base do anterior está de pé. É isso que faz a evolução durar.",
-      },
-    ],
+    what: "Inteligência financeira executiva para empresas que precisam de visão estratégica sem contratar um diretor financeiro em tempo integral. Define direção, prioridades, metas e indicadores de performance.",
+    pillarsIntro: "Três frentes que rodam juntas desde o primeiro mês.",
+    pillars: CFO_PILLARS,
+    deliverables: pillarLabels(CFO_PILLARS),
+    stages: pillarsToStages(CFO_PILLARS),
+    phases: {
+      title: "Fundação: sem dado confiável, toda decisão vira palpite",
+      intro: "É por isso que a O2 começa pela origem, e não pelo relatório.",
+      steps: fundacaoSteps("à plataforma", "Plataforma operando no seu time."),
+    },
     nextSteps: nextSteps(
       "Documentos da empresa e a relação de CNPJs que entram no escopo.",
-      "O seu assessor entra em contato na primeira semana, confirma o estágio de partida e apresenta o plano dos primeiros 90 dias.",
+      "O seu assessor entra em contato na primeira semana e apresenta o cronograma.",
     ),
     cta: {
-      title: "Empresa que não sabe onde está não sabe para onde ir",
-      text: "Quanto antes o primeiro estágio começar, antes a gestão passa a decidir com número na mesa.",
+      title: "Todo mês sem estrutura é um mês decidido no escuro",
+      text: "Quanto antes os acessos estiverem liberados, antes a primeira decisão sai com dado na mesa.",
     },
   },
   coordenador: {

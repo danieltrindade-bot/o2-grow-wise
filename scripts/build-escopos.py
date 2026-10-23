@@ -5,6 +5,9 @@ Uso: python3 scripts/build-escopos.py <pasta com os "Escopo *.html">
 Mantém o layout de cada HTML e remove só o que é do closer: o seletor
 Apresentação/Closer, os blocos internos (.only-closer), a assinatura (.sig),
 o script do seletor e os campos editáveis.
+
+A Assessoria Estratégica tem o mesmo escopo do CFO: o HTML dela sai do
+"Escopo CFO.html", trocando só o nome do serviço.
 """
 
 import re
@@ -15,7 +18,7 @@ SOURCES = {
     "bpo": "Escopo BPO.html",
     "cfo": "Escopo CFO.html",
     "oxy": "Escopo Oxy+gênio.html",
-    "assessoria": "Escopo Assessoria.html",
+    "assessoria": "Escopo CFO.html",
     "coordenador": "Escopo coordenador.html",
     "estrategico": "Escopo Diagnóstico Estratégico.html",
     "tributario": "Escopo Diagnóstico Tributário.html",
@@ -50,6 +53,22 @@ def to_presentation(html: str) -> str:
     return html
 
 
+ASSESSORIA_RENAMES = [
+    ("<span>CFO</span> as a Service", "<span>Assessoria</span> Estratégica"),
+    ('<span class="g">CFO</span> as a Service', '<span class="g">Assessoria</span> Estratégica'),
+    ("O seu CFO entra em contato", "O seu assessor entra em contato"),
+    ("CFO as a Service", "Assessoria Estratégica"),
+]
+
+
+def as_assessoria(html: str) -> str:
+    for old, new in ASSESSORIA_RENAMES:
+        if old not in html:
+            raise ValueError(f"Escopo CFO.html: não achei '{old}'")
+        html = html.replace(old, new)
+    return html
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         sys.exit(__doc__)
@@ -57,6 +76,8 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     for key, name in SOURCES.items():
         html = to_presentation((src_dir / name).read_text(encoding="utf-8"))
+        if key == "assessoria":
+            html = as_assessoria(html)
         body = html[html.find("<body"):]
         for leftover in ("only-closer", "modeswitch", 'class="sig"', "<script"):
             if leftover in body:

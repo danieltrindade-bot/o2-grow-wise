@@ -18,19 +18,21 @@ export const PROPOSAL_ROLES: Record<string, string> = {
     "Recuperação: reestrutura passivos e resultado para devolver a empresa ao ponto de equilíbrio.",
 };
 
+const CFO_SCOPE: ScopeItem[] = [
+  {
+    label: "Rituais",
+    text: "disponibilidade diária, reunião semanal, comitê estratégico mensal",
+  },
+  { label: "Construção", text: "DRE, Fluxo de Caixa, Ciclo Financeiro, forecast 30/60/90" },
+  { label: "Estratégia", text: "capital de giro, endividamento, margem e rentabilidade" },
+  {
+    label: "Suporte",
+    text: "captação de recursos, reestruturação de passivos, interlocução com a contabilidade",
+  },
+];
+
 export const PROPOSAL_SCOPES: Record<string, ScopeItem[]> = {
-  cfo: [
-    {
-      label: "Rituais",
-      text: "disponibilidade diária, reunião semanal, comitê estratégico mensal",
-    },
-    { label: "Construção", text: "DRE, Fluxo de Caixa, Ciclo Financeiro, forecast 30/60/90" },
-    { label: "Estratégia", text: "capital de giro, endividamento, margem e rentabilidade" },
-    {
-      label: "Suporte",
-      text: "captação de recursos, reestruturação de passivos, interlocução com a contabilidade",
-    },
-  ],
+  cfo: CFO_SCOPE,
   coordenador: [
     { label: "Diagnóstico", text: "pessoas e processos financeiros mapeados de ponta a ponta" },
     { label: "Padronização", text: "rotinas críticas de CP, CR e conciliação, com checklists" },
@@ -55,12 +57,8 @@ export const PROPOSAL_SCOPES: Record<string, ScopeItem[]> = {
       text: "cronograma financeiro, padronização de documentos e atualização da Oxy",
     },
   ],
-  assessoria: [
-    { label: "Diagnóstico", text: "análise estratégica aprofundada do negócio" },
-    { label: "Construção", text: "DRE Gerencial, Fluxo de Caixa Realizado e centros de custo" },
-    { label: "Análise", text: "margem por produto e por cliente" },
-    { label: "Planejamento", text: "orçamento anual e acompanhamento mensal personalizado" },
-  ],
+  // Assessoria Estratégica entrega o mesmo escopo do CFO.
+  assessoria: CFO_SCOPE,
   turnaround: [
     { label: "Estratégia", text: "plano de recuperação do negócio com prioridades claras" },
     { label: "Equilíbrio", text: "ponto de equilíbrio operacional e financeiro" },
