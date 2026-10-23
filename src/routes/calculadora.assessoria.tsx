@@ -88,7 +88,12 @@ function AssessoriaPage() {
   const setupResult = setupRules
     ? calcSetupPriceFromRules(setupRules, monthlyRevenue, cnpjCount, segmentType)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
-  const setupComDesconto = setupResult.total * (1 - discount.percent / 100);
+  // Piso do setup, mesmo com desconto: 10.000 (12x 833,33 no cartão).
+  const ASSESSORIA_SETUP_MINIMUM = 10000;
+  const setupComDesconto = Math.max(
+    ASSESSORIA_SETUP_MINIMUM,
+    setupResult.total * (1 - discount.percent / 100),
+  );
   const setupParcela = setupComDesconto / 12;
   const totalMensal = valorFinal + setupParcela;
   const animatedTotal = useCountUp(totalMensal);
