@@ -246,7 +246,7 @@ function AssessoriaPage() {
                       value={setupResult.surcharge > 0 ? formatBRL(setupResult.surcharge) : "—"}
                     />
                     <Row label="Valor total setup" value={formatBRL(setupResult.total)} />
-                    {discount.percent > 0 && (
+                    {setupComDesconto < setupResult.total && (
                       <Row
                         label={`Desconto (${discount.percent}%)`}
                         value={`-${formatBRL(setupResult.total - setupComDesconto)}`}
