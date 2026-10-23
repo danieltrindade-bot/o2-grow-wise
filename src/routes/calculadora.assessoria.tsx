@@ -81,8 +81,8 @@ function AssessoriaPage() {
   const baseP = Number(tier?.base_price ?? 0);
   const valorMensal = Math.min(maxP, Math.max(minP, baseP + ajusteCnpj));
   const discount = DISCOUNTS.find((d) => d.id === discountId)!;
-  // Piso de tabela 4.800 com o maior desconto (18%) ⇒ nunca abaixo de 3.936.
-  const ASSESSORIA_MINIMUM = 3936;
+  // Piso absoluto da mensalidade, mesmo com desconto.
+  const ASSESSORIA_MINIMUM = 4000;
   const valorFinal = Math.max(ASSESSORIA_MINIMUM, valorMensal * (1 - discount.percent / 100));
 
   const setupResult = setupRules
