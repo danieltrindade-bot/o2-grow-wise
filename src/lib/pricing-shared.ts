@@ -30,11 +30,13 @@ export function lookupBaseFromRules(
   rules: PricingRow[],
   monthlyRevenue: number,
   classification: Classification,
+  inclusiveMax = false,
 ): number {
   if (!rules.length) return 0;
   const sorted = [...rules].sort((a, b) => a.min_revenue - b.min_revenue);
   for (const r of sorted) {
-    if (r.max_revenue === null || monthlyRevenue < Number(r.max_revenue)) {
+    const max = Number(r.max_revenue);
+    if (r.max_revenue === null || monthlyRevenue < max || (inclusiveMax && monthlyRevenue === max)) {
       return Number(classification === "padrao" ? r.price_standard : r.price_complex);
     }
   }
@@ -47,9 +49,10 @@ export function calcSetupPriceFromRules(
   monthlyRevenue: number,
   cnpjCount: number,
   segmentType: SegmentType,
+  inclusiveMax = false,
 ): SetupResult {
   const classification = classifySetup(cnpjCount, segmentType);
-  const base = lookupBaseFromRules(rules, monthlyRevenue, classification);
+  const base = lookupBaseFromRules(rules, monthlyRevenue, classification, inclusiveMax);
   const surcharge = segmentSurcharge(cnpjCount, segmentType);
   return { classification, base, surcharge, total: base + surcharge };
 }

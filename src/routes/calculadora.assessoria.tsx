@@ -85,8 +85,9 @@ function AssessoriaPage() {
   const ASSESSORIA_MINIMUM = 4000;
   const valorFinal = Math.max(ASSESSORIA_MINIMUM, valorMensal * (1 - discount.percent / 100));
 
+  // Na Assessoria o teto da faixa entra nela: 350k ainda é setup de 10k.
   const setupResult = setupRules
-    ? calcSetupPriceFromRules(setupRules, monthlyRevenue, cnpjCount, segmentType)
+    ? calcSetupPriceFromRules(setupRules, monthlyRevenue, cnpjCount, segmentType, true)
     : { classification: "padrao" as const, base: 0, surcharge: 0, total: 0 };
   // Piso do setup, mesmo com desconto: 10.000 (12x 833,33 no cartão).
   const ASSESSORIA_SETUP_MINIMUM = 10000;
