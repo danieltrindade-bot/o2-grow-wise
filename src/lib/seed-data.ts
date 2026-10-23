@@ -22,7 +22,7 @@ import type {
 
 type WithId<T> = T & { id: string };
 
-export const SEED_VERSION = 9;
+export const SEED_VERSION = 10;
 
 // ---------------------------------------------------------------------------
 // Diagnostic Questions (10 questions)
@@ -194,19 +194,19 @@ export const SEED_SETUP_PRICING_RULES: SetupPricingRule[] = [
 // Assessoria Pricing Rules
 // ---------------------------------------------------------------------------
 export const SEED_ASSESSORIA_PRICING_RULES: AssessoriaRule[] = [
-  { id: "apr-1", label: "0 - 400k", min_revenue: 0, max_revenue: 400000, base_price: 5500, sort_order: 1 },
-  { id: "apr-2", label: "400k - 500k", min_revenue: 400000, max_revenue: 500000, base_price: 5900, sort_order: 2 },
-  { id: "apr-3", label: "500k - 1M", min_revenue: 500000, max_revenue: 1000000, base_price: 6500, sort_order: 3 },
-  { id: "apr-4", label: "1M - 2.5M", min_revenue: 1000000, max_revenue: 2500000, base_price: 6900, sort_order: 4 },
-  { id: "apr-5", label: "≥ 2.5M", min_revenue: 2500000, max_revenue: 999999999999, base_price: 7500, sort_order: 5 },
+  { id: "apr-1", label: "0 - 400k", min_revenue: 0, max_revenue: 400000, base_price: 4800, sort_order: 1 },
+  { id: "apr-2", label: "400k - 500k", min_revenue: 400000, max_revenue: 500000, base_price: 5200, sort_order: 2 },
+  { id: "apr-3", label: "500k - 1M", min_revenue: 500000, max_revenue: 1000000, base_price: 5800, sort_order: 3 },
+  { id: "apr-4", label: "1M - 2.5M", min_revenue: 1000000, max_revenue: 2500000, base_price: 6400, sort_order: 4 },
+  { id: "apr-5", label: "≥ 2.5M", min_revenue: 2500000, max_revenue: 999999999999, base_price: 6950, sort_order: 5 },
 ];
 
 // ---------------------------------------------------------------------------
 // Assessoria Settings
 // ---------------------------------------------------------------------------
-// Teto = faixa máxima (7.500) + ajuste máximo de CNPJs (+500 × 4 degraus)
+// Teto = faixa máxima (6.950) + ajuste máximo de CNPJs (+500 × 4 degraus)
 export const SEED_ASSESSORIA_SETTINGS: AssessoriaSettings[] = [
-  { id: "as-1", cnpj_adjustment: 500, min_price: 5500, max_price: 9500 },
+  { id: "as-1", cnpj_adjustment: 500, min_price: 4800, max_price: 8950 },
 ];
 
 // ---------------------------------------------------------------------------
