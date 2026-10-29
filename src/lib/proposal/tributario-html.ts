@@ -132,6 +132,8 @@ function scopeSection(m: ProposalModel, c: ProposalComputed): string {
     )
     .join("");
 
+  const withSuccessFee = !isDiagnosticOnly(m);
+
   const desc = isDiagnosticOnly(m)
     ? `O raio-x do impacto da reforma na ${esc(m.client.name)}, com relatório de recomendações. A execução das adequações fica com o time da empresa.`
     : `Do diagnóstico do impacto à empresa pronta para operar no novo modelo: cadastros, contratos e preço adequados, plano de transição e equipe capacitada.`;
@@ -149,7 +151,7 @@ function scopeSection(m: ProposalModel, c: ProposalComputed): string {
           ${closing && closing.setupDiscount > 0 ? `<span class="was money">${installments}× ${brl(c.table.setupTotal / installments)}</span>` : ""}
           <span class="val money">${installments}× ${brl(current.setupInstallment)}</span><span class="per">no cartão</span>
           <span class="cond">Total de <strong>${brl(current.setupTotal)}</strong> pelo projeto completo, parcelado em ${installments} vezes no cartão de crédito.</span>
-          <span class="cond"><strong>+ ${TRIBUTARIO_SUCCESS_FEE_PCT}% de êxito</strong> sobre o benefício tributário efetivamente obtido, cobrado só se houver resultado.</span>
+          ${withSuccessFee ? `<span class="cond"><strong>+ ${TRIBUTARIO_SUCCESS_FEE_PCT}% de êxito</strong> sobre o benefício tributário efetivamente obtido, cobrado só se houver resultado.</span>` : ""}
         </div>
       </div>
       <div class="pillars">${pillars}</div>
@@ -163,9 +165,9 @@ function scopeSection(m: ProposalModel, c: ProposalComputed): string {
   return `<section class="rv">
     <div class="eyebrow">O escopo e o investimento</div>
     <h2>${isDiagnosticOnly(m) ? "O raio-x da reforma na sua empresa" : "Do impacto ao plano de transição"}</h2>
-    <p class="lead">Um projeto com começo, meio e fim: ${PROJECT_MONTHS} meses de trabalho, um investimento fixo sem mensalidade recorrente e uma parte variável que só existe se houver resultado.</p>
+    <p class="lead">Um projeto com começo, meio e fim: ${PROJECT_MONTHS} meses de trabalho${withSuccessFee ? ", um investimento fixo sem mensalidade recorrente e uma parte variável que só existe se houver resultado" : " e um investimento fechado, sem mensalidade recorrente"}.</p>
     ${projectCard}
-    <p class="inv-foot">Proposta válida por <strong>${c.validityDays} dias</strong> a partir da emissão.${saving} ${TRIBUTARIO_SUCCESS_FEE_TEXT}, apurada à medida que o benefício se realiza.</p>
+    <p class="inv-foot">Proposta válida por <strong>${c.validityDays} dias</strong> a partir da emissão.${saving}${withSuccessFee ? ` ${TRIBUTARIO_SUCCESS_FEE_TEXT}, apurada à medida que o benefício se realiza.` : ""}</p>
   </section>`;
 }
 
