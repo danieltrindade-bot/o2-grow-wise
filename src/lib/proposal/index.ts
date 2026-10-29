@@ -5,6 +5,7 @@ import { deriveProposal, shortServiceName, type ProposalModel } from "./model";
 export * from "./model";
 export { renderProposalHTML, type RenderOptions } from "./html";
 export { renderCFOProposalHTML } from "./cfo-html";
+export { renderTributarioProposalHTML, TRIBUTARIO_DIAGNOSTICO_KEY } from "./tributario-html";
 export { fileToDataUrl, loadO2Logo, urlToDataUrl } from "./assets";
 export { toCalcPDFInput } from "./to-pdf";
 export { proposalService, PROPOSAL_ROLES, PROPOSAL_SCOPES } from "./scopes";

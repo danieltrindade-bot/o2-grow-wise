@@ -10,7 +10,7 @@ import { SERVICE_DETAILS } from "@/lib/service-scopes";
 import { deriveProposal, type ProposalComputed, type ProposalModel } from "./model";
 import type { RenderOptions } from "./html";
 
-function esc(value: string): string {
+export function esc(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -18,12 +18,12 @@ function esc(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function brl(value: number): string {
+export function brl(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 /** Faturamento em ordem de grandeza: "R$ 600 mil", "R$ 1,2 mi". */
-function compact(value: number): string {
+export function compact(value: number): string {
   if (value >= 1e6) {
     const mi = value / 1e6;
     return `R$ ${mi.toLocaleString("pt-BR", { maximumFractionDigits: mi >= 10 ? 0 : 1 })} mi`;
@@ -46,12 +46,12 @@ const MESES = [
   "Dezembro",
 ];
 
-function monthYear(iso: string): string {
+export function monthYear(iso: string): string {
   const [y, m] = iso.split("-");
   return `${MESES[Number(m) - 1]} de ${y}`;
 }
 
-const STYLES = `
+export const STYLES = `
   :root {
     --bg: #0d0d0d; --card: #151515; --card-2: #191919; --border: #272727;
     --fg: #ffffff; --muted: #a6a6a6; --muted-2: #7a7a7a;
@@ -208,7 +208,7 @@ const STYLES = `
   }
 `;
 
-const REVEAL_SCRIPT = `
+export const REVEAL_SCRIPT = `
   const rows = document.querySelectorAll('.rv');
   if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const io = new IntersectionObserver((entries) => {
@@ -396,8 +396,8 @@ function scopeSection(m: ProposalModel, c: ProposalComputed): string {
   </section>`;
 }
 
-function nextStepsSection(): string {
-  const detail = SERVICE_DETAILS.cfo;
+export function nextStepsSection(serviceKey = "cfo"): string {
+  const detail = SERVICE_DETAILS[serviceKey];
   const steps = (detail.nextSteps ?? [])
     .map(
       (s, i) => `<div class="nx">

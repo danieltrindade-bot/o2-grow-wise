@@ -16,6 +16,13 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
 import { ProductPresentation } from "@/components/ProductPresentation";
 import { DiscountOptions } from "@/components/DiscountOptions";
+import { ProposalActions } from "@/components/ProposalActions";
+import {
+  renderTributarioProposalHTML,
+  TRIBUTARIO_DIAGNOSTICO_KEY,
+  type ClosingOffer,
+  type ProposalModel,
+} from "@/lib/proposal";
 
 export const Route = createFileRoute("/calculadora/tributario")({
   component: TributarioPage,
@@ -98,13 +105,39 @@ function TributarioPage() {
   const animatedParcela = useCountUp(parcela12x);
   const includes = modalidade === "completo" ? INCLUDES_COMPLETO : INCLUDES_DIAGNOSTICO;
 
+  // Projeto fechado: o valor vai como setup parcelado, sem mensalidade.
+  const buildProposalModel = (closing?: ClosingOffer): ProposalModel => ({
+    client: { name: state.companyName || "Cliente", monthlyRevenue, cnpjCount },
+    services: [
+      {
+        key: modalidade === "completo" ? "tributario" : TRIBUTARIO_DIAGNOSTICO_KEY,
+        name: MODALIDADE_LABELS[modalidade],
+        role: "",
+        monthly: 0,
+        scope: includes,
+      },
+    ],
+    setup: { label: "Projeto", total: total6m, installments: 12, deliverables: includes },
+    closing,
+  });
+
+  const suggestedClosing: ClosingOffer | undefined =
+    discount.percent > 0
+      ? { monthly: 0, setupTotal: total6mComDesconto, installments: 12 }
+      : undefined;
+
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
       <div className="mx-auto max-w-5xl">
-        <Link to="/servicos" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-2">
+        <Link
+          to="/servicos"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-2"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar aos Serviços
         </Link>
-        <Breadcrumbs items={[{ label: "Serviços", to: "/servicos" }, { label: "Diagnóstico Tributário" }]} />
+        <Breadcrumbs
+          items={[{ label: "Serviços", to: "/servicos" }, { label: "Diagnóstico Tributário" }]}
+        />
 
         <ProductPresentation serviceKey="tributario" title="Diagnóstico e Organização Tributária" />
 
@@ -125,16 +158,24 @@ function TributarioPage() {
                   min={1}
                   max={10}
                   value={cnpjCount}
-                  onChange={(e) => setCnpjCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
+                  onChange={(e) =>
+                    setCnpjCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))
+                  }
                 />
                 {cnpjCount > 1 && (
                   <p className="text-xs text-muted-foreground">+R$ 500/mês por CNPJ adicional</p>
                 )}
               </div>
               <div className="rounded-xl border border-border bg-background/50 p-4">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Faixa identificada</p>
-                <p className="text-lg font-semibold text-primary">{getFaixaLabel(monthlyRevenue)}</p>
-                <p className="text-xs text-muted-foreground mt-1">Contrato de 6 meses | 12x no cartão</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                  Faixa identificada
+                </p>
+                <p className="text-lg font-semibold text-primary">
+                  {getFaixaLabel(monthlyRevenue)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Contrato de 6 meses | 12x no cartão
+                </p>
               </div>
             </section>
 
@@ -160,7 +201,9 @@ function TributarioPage() {
                       />
                       <span className="text-sm">{MODALIDADE_LABELS[m]}</span>
                     </div>
-                    <span className="text-sm font-semibold text-primary">{m === "completo" ? "100%" : "70%"}</span>
+                    <span className="text-sm font-semibold text-primary">
+                      {m === "completo" ? "100%" : "70%"}
+                    </span>
                   </label>
                 );
               })}
@@ -171,8 +214,10 @@ function TributarioPage() {
             </section>
           </div>
 
-          <aside className="rounded-2xl border-2 border-primary bg-card p-6"
-                 style={{ backgroundColor: "color-mix(in oklab, var(--color-primary) 6%, var(--card))" }}>
+          <aside
+            className="rounded-2xl border-2 border-primary bg-card p-6"
+            style={{ backgroundColor: "color-mix(in oklab, var(--color-primary) 6%, var(--card))" }}
+          >
             <p className="text-xs uppercase tracking-wider text-primary">Investimento</p>
             {showPrices ? (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -180,7 +225,10 @@ function TributarioPage() {
                 <Row label="Faixa" value={getFaixaLabel(monthlyRevenue)} />
                 <Row label="Valor mensal base" value={formatBRL(baseMensal)} />
                 {adicionalCnpj > 0 && (
-                  <Row label={`Adicional ${cnpjCount - 1} CNPJ(s)`} value={formatBRL(adicionalCnpj)} />
+                  <Row
+                    label={`Adicional ${cnpjCount - 1} CNPJ(s)`}
+                    value={formatBRL(adicionalCnpj)}
+                  />
                 )}
                 {modalidade === "diagnostico" && (
                   <Row label="Fator diagnóstico (70%)" value={`-${formatBRL(mensalBruto * 0.3)}`} />
@@ -188,7 +236,10 @@ function TributarioPage() {
                 <Row label="Mensal" value={formatBRL(mensal)} bold />
                 <Row label="Total (6 meses)" value={formatBRL(total6m)} />
                 {discount.percent > 0 && (
-                  <Row label={`Desconto (${discount.percent}%)`} value={`-${formatBRL(total6m - total6mComDesconto)}`} />
+                  <Row
+                    label={`Desconto (${discount.percent}%)`}
+                    value={`-${formatBRL(total6m - total6mComDesconto)}`}
+                  />
                 )}
 
                 <div className="mt-5 rounded-xl bg-primary/15 border border-primary p-5">
@@ -196,16 +247,23 @@ function TributarioPage() {
                     <CreditCard className="h-4 w-4" /> 12x no cartão de crédito
                   </div>
                   <p className="text-3xl md:text-4xl font-bold text-primary mt-1 tabular-nums">
-                    {formatBRL(animatedParcela)}<span className="text-sm font-normal text-primary/70">/mês</span>
+                    {formatBRL(animatedParcela)}
+                    <span className="text-sm font-normal text-primary/70">/mês</span>
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Total: {formatBRL(total6mComDesconto)} em 12x
                   </p>
                 </div>
-                <LucroRealPanel items={[{ label: "Parcela 12x", value: parcela12x }]} suffix="/mês" projectTotal={total6mComDesconto} />
+                <LucroRealPanel
+                  items={[{ label: "Parcela 12x", value: parcela12x }]}
+                  suffix="/mês"
+                  projectTotal={total6mComDesconto}
+                />
 
                 <div className="mt-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Inclui</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                    Inclui
+                  </p>
                   <ul className="space-y-1.5">
                     {includes.map((i) => (
                       <li key={i} className="flex items-start gap-2 text-sm">
@@ -228,7 +286,14 @@ function TributarioPage() {
                         ["CNPJs", String(cnpjCount)],
                         ["Mensal", formatBRL(mensal)],
                         ["Total (6 meses)", formatBRL(total6mComDesconto)],
-                        ...(discount.percent > 0 ? [["Desconto", `${discount.percent}% (${discount.label})`] as [string, string]] : []),
+                        ...(discount.percent > 0
+                          ? [
+                              ["Desconto", `${discount.percent}% (${discount.label})`] as [
+                                string,
+                                string,
+                              ],
+                            ]
+                          : []),
                       ],
                       finalLabel: "12x no cartão",
                       finalValue: formatBRL(parcela12x),
@@ -239,13 +304,23 @@ function TributarioPage() {
                 >
                   <Download className="mr-2 h-4 w-4" /> Exportar PDF
                 </Button>
+                <ProposalActions
+                  buildModel={buildProposalModel}
+                  suggestedClosing={suggestedClosing}
+                  suggestionLabel={discount.label}
+                  renderer={renderTributarioProposalHTML}
+                  projectOnly
+                  description="Documento em HTML com o design da O2, escopo do projeto e investimento em 12x, para enviar direto ao cliente."
+                />
               </div>
             ) : (
               <div className="mt-4">
                 <Row label="Modalidade" value={MODALIDADE_LABELS[modalidade]} />
                 <Row label="Faixa" value={getFaixaLabel(monthlyRevenue)} />
                 <div className="mt-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Inclui</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                    Inclui
+                  </p>
                   <ul className="space-y-1.5">
                     {includes.map((i) => (
                       <li key={i} className="flex items-start gap-2 text-sm">
@@ -267,7 +342,12 @@ function TributarioPage() {
         </div>
       </div>
 
-      <MobilePriceSummary label="12x de" value={formatBRL(parcela12x)} visible={showPrices} onReveal={() => setShowPrices(true)} />
+      <MobilePriceSummary
+        label="12x de"
+        value={formatBRL(parcela12x)}
+        visible={showPrices}
+        onReveal={() => setShowPrices(true)}
+      />
     </div>
   );
 }

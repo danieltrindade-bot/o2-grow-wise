@@ -33,6 +33,8 @@ interface Props {
   renderer?: ProposalRenderer;
   /** Texto de apoio sob o título do bloco. */
   description?: string;
+  /** Projeto sem mensalidade: a condição de fechamento edita só o valor parcelado. */
+  projectOnly?: boolean;
 }
 
 /**
@@ -46,6 +48,7 @@ export function ProposalActions({
   defaultInstallments = 12,
   renderer,
   description = "Documento em HTML com o design da O2, comparativo com a folha CLT e escopo — para enviar direto ao cliente.",
+  projectOnly = false,
 }: Props) {
   const [clientName, setClientName] = useState("");
   const [logoDataUrl, setLogoDataUrl] = useState<string>();
@@ -64,7 +67,7 @@ export function ProposalActions({
   const installments = manualInstallments ?? suggestedClosing?.installments ?? defaultInstallments;
 
   const closing: ClosingOffer | undefined =
-    useClosing && closingMonthly > 0
+    useClosing && (closingMonthly > 0 || closingSetup > 0)
       ? {
           monthly: closingMonthly,
           setupTotal: closingSetup,
@@ -162,24 +165,26 @@ export function ProposalActions({
 
       {useClosing && (
         <div className="space-y-3 rounded-md border border-border/70 bg-background/40 p-3">
-          <div className="space-y-1">
-            <Label htmlFor="closing-monthly" className="text-xs">
-              Mensalidade fechada (todos os serviços)
-            </Label>
-            <Input
-              id="closing-monthly"
-              type="number"
-              min={0}
-              step={100}
-              value={closingMonthly || ""}
-              onChange={(e) => setManualMonthly(Number(e.target.value))}
-              placeholder="15000"
-            />
-          </div>
+          {!projectOnly && (
+            <div className="space-y-1">
+              <Label htmlFor="closing-monthly" className="text-xs">
+                Mensalidade fechada (todos os serviços)
+              </Label>
+              <Input
+                id="closing-monthly"
+                type="number"
+                min={0}
+                step={100}
+                value={closingMonthly || ""}
+                onChange={(e) => setManualMonthly(Number(e.target.value))}
+                placeholder="15000"
+              />
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="closing-setup" className="text-xs">
-                Setup total
+                {projectOnly ? "Valor do projeto" : "Setup total"}
               </Label>
               <Input
                 id="closing-setup"
@@ -207,8 +212,9 @@ export function ProposalActions({
           </div>
           {closingSetup > 0 && installments > 0 && (
             <p className="text-xs text-muted-foreground">
-              {installments}× de {formatBRL(closingSetup / installments)} · desembolso mensal de{" "}
-              {formatBRL(closingMonthly + closingSetup / installments)}
+              {installments}× de {formatBRL(closingSetup / installments)}
+              {!projectOnly &&
+                ` · desembolso mensal de ${formatBRL(closingMonthly + closingSetup / installments)}`}
             </p>
           )}
         </div>
