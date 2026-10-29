@@ -20,6 +20,8 @@ import { ProposalActions } from "@/components/ProposalActions";
 import {
   renderTributarioProposalHTML,
   TRIBUTARIO_DIAGNOSTICO_KEY,
+  TRIBUTARIO_SUCCESS_FEE_PCT,
+  TRIBUTARIO_SUCCESS_FEE_TEXT,
   type ClosingOffer,
   type ProposalModel,
 } from "@/lib/proposal";
@@ -253,6 +255,9 @@ function TributarioPage() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Total: {formatBRL(total6mComDesconto)} em 12x
                   </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    + {TRIBUTARIO_SUCCESS_FEE_PCT}% de êxito sobre o benefício tributário obtido
+                  </p>
                 </div>
                 <LucroRealPanel
                   items={[{ label: "Parcela 12x", value: parcela12x }]}
@@ -286,6 +291,10 @@ function TributarioPage() {
                         ["CNPJs", String(cnpjCount)],
                         ["Mensal", formatBRL(mensal)],
                         ["Total (6 meses)", formatBRL(total6mComDesconto)],
+                        [
+                          "Remuneração variável de sucesso",
+                          `${TRIBUTARIO_SUCCESS_FEE_PCT}% do benefício tributário obtido`,
+                        ],
                         ...(discount.percent > 0
                           ? [
                               ["Desconto", `${discount.percent}% (${discount.label})`] as [

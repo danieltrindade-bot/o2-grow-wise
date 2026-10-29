@@ -13,6 +13,10 @@ export const TRIBUTARIO_DIAGNOSTICO_KEY = "tributario-diagnostico";
 
 const PROJECT_MONTHS = 6;
 
+/** Remuneração variável de sucesso sobre o benefício tributário obtido. */
+export const TRIBUTARIO_SUCCESS_FEE_PCT = 20;
+export const TRIBUTARIO_SUCCESS_FEE_TEXT = `Remuneração variável de sucesso de ${TRIBUTARIO_SUCCESS_FEE_PCT}% sobre o benefício tributário efetivamente obtido (créditos recuperados ou compensados e redução de tributos)`;
+
 function isDiagnosticOnly(m: ProposalModel): boolean {
   return m.services[0]?.key === TRIBUTARIO_DIAGNOSTICO_KEY;
 }
@@ -145,6 +149,7 @@ function scopeSection(m: ProposalModel, c: ProposalComputed): string {
           ${closing && closing.setupDiscount > 0 ? `<span class="was money">${installments}× ${brl(c.table.setupTotal / installments)}</span>` : ""}
           <span class="val money">${installments}× ${brl(current.setupInstallment)}</span><span class="per">no cartão</span>
           <span class="cond">Total de <strong>${brl(current.setupTotal)}</strong> pelo projeto completo, parcelado em ${installments} vezes no cartão de crédito.</span>
+          <span class="cond"><strong>+ ${TRIBUTARIO_SUCCESS_FEE_PCT}% de êxito</strong> sobre o benefício tributário efetivamente obtido, cobrado só se houver resultado.</span>
         </div>
       </div>
       <div class="pillars">${pillars}</div>
@@ -158,9 +163,9 @@ function scopeSection(m: ProposalModel, c: ProposalComputed): string {
   return `<section class="rv">
     <div class="eyebrow">O escopo e o investimento</div>
     <h2>${isDiagnosticOnly(m) ? "O raio-x da reforma na sua empresa" : "Do impacto ao plano de transição"}</h2>
-    <p class="lead">Um projeto com começo, meio e fim: ${PROJECT_MONTHS} meses de trabalho e um investimento fechado, sem mensalidade recorrente.</p>
+    <p class="lead">Um projeto com começo, meio e fim: ${PROJECT_MONTHS} meses de trabalho, um investimento fixo sem mensalidade recorrente e uma parte variável que só existe se houver resultado.</p>
     ${projectCard}
-    <p class="inv-foot">Proposta válida por <strong>${c.validityDays} dias</strong> a partir da emissão.${saving}</p>
+    <p class="inv-foot">Proposta válida por <strong>${c.validityDays} dias</strong> a partir da emissão.${saving} ${TRIBUTARIO_SUCCESS_FEE_TEXT}, apurada à medida que o benefício se realiza.</p>
   </section>`;
 }
 
