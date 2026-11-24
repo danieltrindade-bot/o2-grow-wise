@@ -57,8 +57,14 @@ export const PROPOSAL_SCOPES: Record<string, ScopeItem[]> = {
       text: "cronograma financeiro, padronização de documentos e atualização da Oxy",
     },
   ],
-  // Assessoria Estratégica entrega o mesmo escopo do CFO.
-  assessoria: CFO_SCOPE,
+  // Assessoria Estratégica entrega o escopo do CFO com cadência quinzenal.
+  assessoria: [
+    {
+      label: "Rituais",
+      text: "resposta em até 24h úteis, reunião quinzenal, comitê estratégico mensal",
+    },
+    ...CFO_SCOPE.slice(1),
+  ],
   turnaround: [
     { label: "Estratégia", text: "plano de recuperação do negócio com prioridades claras" },
     { label: "Equilíbrio", text: "ponto de equilíbrio operacional e financeiro" },

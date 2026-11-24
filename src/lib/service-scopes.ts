@@ -175,6 +175,21 @@ const CFO_PILLARS: ScopePillar[] = [
   },
 ];
 
+// Assessoria entrega o escopo do CFO com cadência própria: reunião quinzenal
+// e resposta em até 24h úteis.
+const ASSESSORIA_PILLARS: ScopePillar[] = CFO_PILLARS.map((pillar, idx) =>
+  idx === 0
+    ? {
+        ...pillar,
+        items: [
+          { label: "Canal direto com o assessor", detail: "Resposta em até 24h úteis" },
+          { label: "Reunião fixa quinzenal", detail: "Decisão a cada 15 dias" },
+          ...pillar.items.slice(2),
+        ],
+      }
+    : pillar,
+);
+
 const OXY_PILLARS: ScopePillar[] = [
   {
     title: "Plataforma Oxy",
@@ -442,9 +457,9 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
   assessoria: {
     what: "Inteligência financeira executiva para empresas que precisam de visão estratégica sem contratar um diretor financeiro em tempo integral. Define direção, prioridades, metas e indicadores de performance.",
     pillarsIntro: "Três frentes que rodam juntas desde o primeiro mês.",
-    pillars: CFO_PILLARS,
-    deliverables: pillarLabels(CFO_PILLARS),
-    stages: pillarsToStages(CFO_PILLARS),
+    pillars: ASSESSORIA_PILLARS,
+    deliverables: pillarLabels(ASSESSORIA_PILLARS),
+    stages: pillarsToStages(ASSESSORIA_PILLARS),
     phases: {
       title: "Fundação: sem dado confiável, toda decisão vira palpite",
       intro: "É por isso que a O2 começa pela origem, e não pelo relatório.",
