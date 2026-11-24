@@ -181,6 +181,7 @@ const ASSESSORIA_PILLARS: ScopePillar[] = CFO_PILLARS.map((pillar, idx) =>
   idx === 0
     ? {
         ...pillar,
+        subtitle: "Um assessor financeiro sênior no ritmo da sua gestão.",
         items: [
           { label: "Canal direto com o assessor", detail: "Resposta em até 24h úteis" },
           { label: "Reunião fixa quinzenal", detail: "Decisão a cada 15 dias" },

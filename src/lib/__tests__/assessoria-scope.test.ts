@@ -9,6 +9,12 @@ describe("cadência da Assessoria", () => {
     expect(labels).toContain("Reunião fixa quinzenal | Decisão a cada 15 dias");
     expect(labels).toContain("Canal direto com o assessor | Resposta em até 24h úteis");
     expect(SERVICE_DETAILS.assessoria.deliverables).not.toContain("Reunião fixa semanal");
+    expect(SERVICE_DETAILS.assessoria.pillars?.[0].subtitle).toBe(
+      "Um assessor financeiro sênior no ritmo da sua gestão.",
+    );
+    expect(SERVICE_DETAILS.cfo.pillars?.[0].subtitle).toBe(
+      "Um diretor financeiro sênior dentro da sua rotina.",
+    );
   });
 
   it("não altera a cadência do CFO", () => {
