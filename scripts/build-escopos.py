@@ -7,7 +7,8 @@ Apresentação/Closer, os blocos internos (.only-closer), a assinatura (.sig),
 o script do seletor e os campos editáveis.
 
 A Assessoria Estratégica tem o mesmo escopo do CFO: o HTML dela sai do
-"Escopo CFO.html", trocando só o nome do serviço.
+"Escopo CFO.html", trocando o nome do serviço e a cadência (reunião
+quinzenal, resposta em até 24h úteis).
 """
 
 import re
@@ -58,6 +59,19 @@ ASSESSORIA_RENAMES = [
     ('<span class="g">CFO</span> as a Service', '<span class="g">Assessoria</span> Estratégica'),
     ("O seu CFO entra em contato", "O seu assessor entra em contato"),
     ("CFO as a Service", "Assessoria Estratégica"),
+    # Cadência própria da Assessoria (espelha ASSESSORIA_PILLARS em service-scopes.ts).
+    (
+        'Um diretor financeiro sênior dentro da sua rotina.',
+        'Um assessor financeiro sênior no ritmo da sua gestão.',
+    ),
+    (
+        '<span class="t">Disponibilidade diária</span><span class="s">Resposta no mesmo dia</span>',
+        '<span class="t">Canal direto com o assessor</span><span class="s">Resposta em até 24h úteis</span>',
+    ),
+    (
+        '<span class="t">Reunião fixa semanal</span><span class="s">Decisão toda semana</span>',
+        '<span class="t">Reunião fixa quinzenal</span><span class="s">Decisão a cada 15 dias</span>',
+    ),
 ]
 
 
