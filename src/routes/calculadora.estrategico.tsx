@@ -17,7 +17,14 @@ import { MobilePriceSummary } from "@/components/MobilePriceSummary";
 import { ProductPresentation, SERVICE_DETAILS } from "@/components/ProductPresentation";
 import { DiretoContractGenerator } from "@/components/DiretoContractGenerator";
 import { DiscountOptions } from "@/components/DiscountOptions";
+import { ProposalActions } from "@/components/ProposalActions";
 import { exportCalculatorPDF } from "@/lib/pdf-export";
+import {
+  ESTRATEGICO_BOLETO_PARCELAS,
+  renderEstrategicoProposalHTML,
+  type ClosingOffer,
+  type ProposalModel,
+} from "@/lib/proposal";
 
 export const Route = createFileRoute("/calculadora/estrategico")({
   component: EstrategicoPage,
@@ -37,7 +44,7 @@ const INCLUDES = [
 
 // Formas de pagamento — cobrança única.
 const CARTAO_PARCELAS = 12; // 12x no cartão
-const BOLETO_PARCELAS = 4; // 1 + 3 no boleto/pix (entrada + 3)
+const BOLETO_PARCELAS = ESTRATEGICO_BOLETO_PARCELAS; // 1 + 3 no boleto/pix (entrada + 3)
 
 function lookupTier(rules: EstrategicoRule[], monthlyRevenue: number): EstrategicoRule | null {
   if (!rules.length) return null;
@@ -76,6 +83,32 @@ function EstrategicoPage() {
   const parcelaCartao = valorFinal / CARTAO_PARCELAS;
   const parcelaBoleto = valorFinal / BOLETO_PARCELAS;
   const atPiso = baseP > 0 && valorFinal === floor;
+  const valorTabela = baseP > 0 ? Math.max(floor, baseP) : 0;
+
+  const buildProposalModel = (closing?: ClosingOffer): ProposalModel => ({
+    client: { name: state.companyName || "Cliente", monthlyRevenue },
+    services: [
+      {
+        key: "estrategico",
+        name: "Diagnóstico Estratégico",
+        role: "",
+        monthly: 0,
+        scope: SERVICE_DETAILS.estrategico.deliverables,
+      },
+    ],
+    setup: {
+      label: "Projeto",
+      total: valorTabela,
+      installments: CARTAO_PARCELAS,
+      deliverables: SERVICE_DETAILS.estrategico.deliverables,
+    },
+    closing,
+  });
+
+  const suggestedClosing: ClosingOffer | undefined =
+    discount.percent > 0 && valorFinal < valorTabela
+      ? { monthly: 0, setupTotal: valorFinal, installments: CARTAO_PARCELAS }
+      : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-8 pb-20 lg:pb-8">
@@ -194,6 +227,14 @@ function EstrategicoPage() {
                   >
                     <FileText className="mr-2 h-4 w-4" /> Gerar Contrato
                   </Button>
+                  <ProposalActions
+                    buildModel={buildProposalModel}
+                    suggestedClosing={suggestedClosing}
+                    suggestionLabel={discount.label}
+                    renderer={renderEstrategicoProposalHTML}
+                    projectOnly
+                    description="Documento em HTML com o design da O2, escopo do projeto e investimento em 12x no cartão ou 4x no boleto, para enviar direto ao cliente."
+                  />
                 </div>
               ) : (
                 <div className="mt-4">

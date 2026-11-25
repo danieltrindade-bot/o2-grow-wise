@@ -5,6 +5,7 @@ import { deriveProposal, shortServiceName, type ProposalModel } from "./model";
 export * from "./model";
 export { renderProposalHTML, type RenderOptions } from "./html";
 export { renderCFOProposalHTML } from "./cfo-html";
+export { renderEstrategicoProposalHTML, ESTRATEGICO_BOLETO_PARCELAS } from "./estrategico-html";
 export {
   renderTributarioProposalHTML,
   TRIBUTARIO_DIAGNOSTICO_KEY,
